@@ -5,12 +5,30 @@
       nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
       rust-overlay.url = "github:oxalica/rust-overlay";
       wezterm.url = "github:wez/wezterm?dir=nix";
+      home-manager = {
+        url = "github:nix-community/home-manager/release-24.11";
+        inputs.nixpkgs.follows = "nixpkgs";
+      }; 
   };
 
-  outputs = { nixpkgs, ... } @ inputs:
+  outputs = { nixpkgs, self, ... } @ inputs:
+  let
+    username = "dev";
+    system = "x86_64-linux";
+    channel = "24.11";
+    pkgs = import nixpkgs {
+      inherit system;
+      config.allowUnfree = true;
+    };
+    lib = nixpkgs.lib;
+  in
   {
     nixosConfigurations.dev = nixpkgs.lib.nixosSystem {
-      specialArgs = { inherit inputs; };
+      inherit system;
+      specialArgs = { 
+        host = "nixos";
+        inherit self inputs username channel; 
+      };
       modules = [
         ./configuration.nix
         ./hardware-configuration.nix
