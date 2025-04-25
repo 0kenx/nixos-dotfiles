@@ -2,7 +2,7 @@
 
 {
   services.xserver = {
-    xkb.layout = "us,ua,ru";
+    xkb.layout = "us";
     xkb.options = "grp:alt_shift_toggle";
   };
 

@@ -23,6 +23,7 @@
     inputs.wezterm.packages.${pkgs.system}.default
     kitty
     cool-retro-term
+    ghostty
 
     starship
     helix

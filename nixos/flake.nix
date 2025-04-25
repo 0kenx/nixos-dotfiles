@@ -1,20 +1,21 @@
 {
-  description = "XNM's NixOS Configuration";
+  description = "NixOS Configuration";
 
   inputs = {
-      nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+      nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
       rust-overlay.url = "github:oxalica/rust-overlay";
       wezterm.url = "github:wez/wezterm?dir=nix";
   };
 
   outputs = { nixpkgs, ... } @ inputs:
   {
-    nixosConfigurations.isitreal-laptop = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.dev = nixpkgs.lib.nixosSystem {
       specialArgs = { inherit inputs; };
       modules = [
         ./configuration.nix
         ./hardware-configuration.nix
-        ./nvidia.nix
+        # ./core-pkgs.nix
+        # ./nvidia.nix
         # ./disable-nvidia.nix
         ./opengl.nix
         # ./fingerprint-scanner.nix
@@ -46,21 +47,19 @@
         ./bluetooth.nix
         ./networking.nix
         # ./mac-randomize.nix
-        # ./open-ssh.nix
-        ./mosh.nix
-        ./firewall.nix
+        ./openssh.nix
+	./firewall.nix
         ./dns.nix
         ./vpn.nix
         ./users.nix
         ./virtualisation.nix
         ./programming-languages.nix
         ./lsp.nix
-        ./rust.nix
         ./wasm.nix
         ./info-fetchers.nix
         ./utils.nix
         ./terminal-utils.nix
-        ./llm.nix
+        # ./llm.nix
         ./work.nix
       ];
     };

@@ -11,9 +11,6 @@
 	excludesfile = ~/.gitignore
 	pager = delta
 
-[gpg]
-	format = ssh
-
 [commit]
 	gpgsign = true
 

@@ -19,7 +19,7 @@
   #     daemon.settings.features.cdi = true;
   #   };
   # };
-  # users.extraGroups.docker.members = [ "xnm" ];
+  # users.extraGroups.docker.members = [ "dev" ];
 
 
   # Enable Podman
@@ -34,10 +34,10 @@
     defaultNetwork.settings.dns_enabled = true;
   };
   environment.variables.DBX_CONTAINER_MANAGER = "podman";
-  users.extraGroups.podman.members = [ "xnm" ];
+  users.extraGroups.podman.members = [ "dev" ];
 
   environment.systemPackages = with pkgs; [
-    nvidia-docker
+    # nvidia-docker
     nerdctl
 
     # firecracker
