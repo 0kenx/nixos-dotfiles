@@ -1,6 +1,6 @@
 * Setting up NixOs with LUKS encrypted root
 
-Here are my working notes on getting a system up and running.
+Here are my working notes on getting a system up and running. It creates an unencrypted boot partition and a LUKS system partition with encrypted swap.
 
 WARNING: You can run into a hidden problem that will prevent a correct partition setup and =/etc/nixos/configuration.nix= from working: if you are setting up a UEFI system, then you need to make sure you boot into the NixOS installation from the UEFI partition of the bootable media. You may have to enter your BIOS boot selection menu to verify this. For example, if you setup a NixOS installer image on a flash drive, your BIOS menu may display several boot options from that flash drive: choose the one explicitly labeled with "UEFI".
 
@@ -197,3 +197,20 @@ Login to root, and add add user:
 useradd -c 'Me' -m me
 passwd me
 #+end_src
+
+** Perf test
+```
+# compare
+nix-shell -p hdparm --run "hdparm -Tt /dev/mapper/cryptroot"
+# with
+nix-shell -p hdparm --run "hdparm -Tt /dev/sda1"
+```
+I had to add a few modules to initrd to make it fast. Since cryptroot is opened really early on, all the AES descryption modules should already be made available. This obviously depends on the platform that you are on.
+```
+{
+   boot.initrd.availableKernelModules = [
+    "aesni_intel"
+    "cryptd"
+  ];
+}
+```
