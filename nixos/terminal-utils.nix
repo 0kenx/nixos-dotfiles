@@ -2,10 +2,26 @@
 
 {
   environment.systemPackages = with pkgs; [
+    # core
+    curl
+    wget
     vim
     file
-    upx
+    jq
+    tree
+    progress
+    ripgrep
+    fd # find
+    sd # replace
+    fzf
+    skim # fzf alternative
+    # prettier tools
+    lsd # ls
+    gping # ping
+    procs # ps
+    # git
     git
+    gh
     lazygit
     delta
     license-generator
@@ -13,46 +29,40 @@
     gitleaks
     git-secrets
     pass-git-helper
-    just
-    xh
-    process-compose
-    # mcfly # terminal history
+    # tools
+    just # run scripts
+    xh # request
+    process-compose # uncontainerized docker
+    monolith # save webpage locally
+    # compression
+    zip
+    unzip
+    upx
+    # sysmon
+    btop
+    hdparm
+    lsof
+    duf
+
+
     zellij
-    progress
     noti
     topgrade
-    ripgrep
     rewrk
     wrk2
-    procs
     tealdeer
-    # skim #fzf better alternative in rust
-    monolith
     aria
-    # macchina #neofetch alternative in rust
-    sd
-    ouch
-    duf
     du-dust
-    fd
-    jq
-    gh
     trash-cli
     zoxide
     tokei
-    fzf
     bat
     hexyl
-    mdcat
     pandoc
-    lsd
-    lsof
-    gping
     viu
     tre-command
     yazi
     chafa
-
     cmatrix
     pipes-rs
     rsclock

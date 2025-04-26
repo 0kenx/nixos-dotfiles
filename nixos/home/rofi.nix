@@ -5,6 +5,7 @@
   xdg.configFile."rofi/theme.rasi".text = ''
     * {
       bg-col:  #24273a;
+      bg-col-transp: #24273aaa;
       bg-col-light: #24273a;
       border-col: #24273a;
       selected-col: #24273a;
@@ -21,7 +22,7 @@
 
   xdg.configFile."rofi/config.rasi".text = ''
     configuration{
-      modi: "run,drun,window";
+      modi: "drun";
       icon-theme: "Numix-Circle";
       font: "JetBrains Mono Regular 13";
       show-icons: true;
@@ -30,43 +31,38 @@
       location: 0;
       disable-history: false;
       hide-scrollbar: true;
-      display-drun: "   Apps ";
-      display-run: " Run ";
-      display-window: " Window ";
-      sidebar-mode: true;
+      display-drun: "";
+      display-run: " 🚀 ";
+      display-window: " 🪟 ";
+      display-keys:" ⌨️ ";
+      sidebar-mode: false;
       border-radius: 10;
     }
 
     @theme "theme"
 
-    
-    element-text, element-icon , mode-switcher {
-      background-color: inherit;
-      text-color:       inherit;
-    }
-
     window {
       height: 360px;
       border: 2px;
       border-color: @teal;
-      background-color: @bg-col;
+      background-color: @bg-col-transp;
     }
 
     mainbox {
-      background-color: @bg-col;
+      background-color: transparent;
     }
 
     inputbar {
       children: [prompt,entry];
-      background-color: @bg-col;
+      background-color: @bg-col-transp;
       border-radius: 5px;
       padding: 2px;
     }
 
     prompt {
-      background-color: @blue;
+      background-color: transparent;
       padding: 6px;
-      text-color: @bg-col;
+      text-color: @grey;
       border-radius: 3px;
       margin: 20px 0px 0px 20px;
     }
@@ -80,7 +76,7 @@
       padding: 6px;
       margin: 20px 0px 0px 10px;
       text-color: @fg-col;
-      background-color: @bg-col;
+      background-color: transparent;
     }
 
     listview {
@@ -89,17 +85,24 @@
       margin: 10px 0px 0px 20px;
       columns: 2;
       lines: 5;
-      background-color: @bg-col;
+      background-color: transparent;
     }
 
     element {
       padding: 5px;
-      background-color: @bg-col;
+      background-color: transparent;
       text-color: @fg-col  ;
     }
 
     element-icon {
       size: 25px;
+      background-color: transparent;
+      text-color: inherit;
+    }
+
+    element-text {
+      background-color: transparent;
+      text-color: inherit;
     }
 
     element selected {
@@ -108,7 +111,9 @@
     }
 
     mode-switcher {
-      spacing: 0;
+      spacing: 1.5em;
+      background-color: transparent;
+      text-color: inherit;
     }
 
     button {
