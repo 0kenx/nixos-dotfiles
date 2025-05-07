@@ -38,13 +38,7 @@
     zip
     unzip
     upx
-    # sysmon
-    btop
-    hdparm
-    lsof
-    duf
-    powertop
-    tlp
+
 
 
     zellij

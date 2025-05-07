@@ -3,6 +3,7 @@
 
   inputs = {
       nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+      nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
       rust-overlay.url = "github:oxalica/rust-overlay";
       wezterm.url = "github:wez/wezterm?dir=nix";
       home-manager = {
@@ -11,29 +12,39 @@
       }; 
   };
 
-  outputs = { nixpkgs, self, ... } @ inputs:
+  outputs = { nixpkgs, nixpkgs-unstable, self, ... } @ inputs:
   let
     username = "dev";
     system = "x86_64-linux";
     channel = "24.11";
+    # Define a common nixpkgs configuration
+    commonNixpkgsConfig = {
+      allowUnfree = true;
+      # You can add other shared configurations like overlays here if needed
+    };
     pkgs = import nixpkgs {
       inherit system;
-      config.allowUnfree = true;
+      config = commonNixpkgsConfig; # Apply the common config
     };
-    lib = nixpkgs.lib;
+    pkgsUnstable = import nixpkgs-unstable {
+      inherit system;
+      config = commonNixpkgsConfig; # Apply the common config here too
+    };
+    lib = pkgs.lib;
   in
   {
     nixosConfigurations.dev = nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = { 
         host = "nixos";
-        inherit self inputs username channel; 
+        pkgs-unstable = pkgsUnstable;
+        inherit self inputs username channel pkgs; 
       };
       modules = [
         ./configuration.nix
         ./hardware-configuration.nix
         # ./core-pkgs.nix
-        # ./nvidia.nix
+        ./nvidia.nix
         # ./disable-nvidia.nix
         ./opengl.nix
         # ./fingerprint-scanner.nix
@@ -77,7 +88,7 @@
         ./info-fetchers.nix
         ./utils.nix
         ./terminal-utils.nix
-        # ./llm.nix
+        ./llm.nix
         ./work.nix
       ];
     };

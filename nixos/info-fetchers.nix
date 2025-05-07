@@ -11,9 +11,14 @@
     octofetch
     htop
     bottom
-    btop
     zfxtop
     kmon
+    btop
+    hdparm
+    lsof
+    duf
+    powertop
+    tlp
 
     # vulkan-tools
     # opencl-info
