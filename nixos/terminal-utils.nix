@@ -43,6 +43,8 @@
     hdparm
     lsof
     duf
+    powertop
+    tlp
 
 
     zellij
