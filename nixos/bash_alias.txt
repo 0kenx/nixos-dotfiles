@@ -1,0 +1,343 @@
+############################
+# benji's bash/zsh aliases
+############################
+# ls related
+alias ll='colorls --sd -Al'
+alias la='colorls --sd -A'
+alias l.='ls -d .* --color=auto'
+#alias lt='ls --human-readable --size -1 -S --classify'
+alias count='find . -type f | wc -l'
+# apt related
+alias sapti='sudo apt install -y'
+alias saptd='sudo apt install'
+alias saptg='sudo apt update && sudo apt upgrade'
+alias saptr='sudo apt remove'
+# sys related
+alias sudo='sudo '
+alias rm='rmtrash'
+alias rmdir='rmdirtrash'
+alias ch+x='sudo chmod +x'
+alias cha+x='sudo chmod +x'
+alias hs='history | grep'
+alias mkcd='foo(){ mkdir -p "$1"; cd "$1" }; foo '
+alias mnt="mount | awk -F' ' '{ printf \"%s\t%s\n\",\$1,\$3; }' | column -t | egrep ^/dev/ | sort"
+alias cpv='rsync -ah --info=progress2'
+alias untar='tar -zxvf '
+alias wget='wget -c '
+alias cd..='cd ..'
+alias ..='cd ./..'
+alias ...='cd ../../'
+alias ..2='cd ../../'
+alias ....='cd ../../../'
+alias ..3='cd ../../../'
+alias .....='cd ../../../../'
+alias ..4='cd ../../../../'
+alias ..5='cd ../../../../..'
+alias ..6='cd ../../../../../..'
+alias ..7='cd ../../../../../../..'
+alias ..8='cd ../../../../../../../..'
+alias ..9='cd ../../../../../../../../..'
+alias h='history'
+alias path='echo -e ${PATH//:/\\n}'
+alias now='date +"%T"'
+alias nowtime=now
+alias nowdate='date +"%d-%m-%Y"'
+alias ping='ping -c 5'
+alias gfw='proxychains4 !!'
+alias ports='netstat -tulanp'
+alias meminfo='free -m -l -t'
+alias proc='ps aux|head -n 1 && ps aux | grep'
+alias psmem='ps auxf|head -n 1 && ps auxf | sort -nr -k 4'
+alias psmem10='ps auxf|head -n 1 && ps auxf | sort -nr -k 4 | head -10'
+alias pscpu='ps auxf|head -n 1 && ps auxf | sort -nr -k 3'
+alias pscpu10='ps auxf|head -n 1 && ps auxf | sort -nr -k 3 | head -10'
+alias batt='upower -i /org/freedesktop/UPower/devices/battery_BAT0'
+alias sr='sudo systemctl restart'
+mcd() { mkdir "$@" 2> >(sed s/mkdir/mcd/ 1>&2) && cd "$_"; }
+# tools
+alias diff='colordiff'
+alias p='parallel'
+alias pp='parallel --pipe -k'  
+alias vifm='vifmrun'
+
+# temp fixes
+#alias cursor='/home/benji/soft/Cursor-latest.AppImage --no-sandbox'
+alias cursor='/home/benji/soft/squashfs-root/AppRun'
+
+# source mirrors
+alias pip3tsu='python3 -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple'
+alias piptsu='python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple'
+alias pip3db='python3 -m pip install -i https://pypi.douban.com/simple'
+alias pipdb='python -m pip install -i https://pypi.douban.com/simple/'
+
+# git
+#
+# Will return the current branch name
+# Usage example: git pull origin $(current_branch)
+#
+
+function current_branch() {
+  ref=$(git symbolic-ref HEAD 2> /dev/null) || return
+  echo ${ref#refs/heads/}
+}
+
+function current_repository() {
+
+  ref=$(git symbolic-ref HEAD 2> /dev/null) || return
+  echo $(git remote -v | cut -d':' -f 2)
+}
+
+function gitclean() {
+  git fetch -p && for branch in $(git for-each-ref --format '%(refname) %(upstream:track)' refs/heads | awk '$2 == "[gone]" {sub("refs/heads/", "", $1); print $1}'); do git branch -D $branch; done
+}
+
+alias ga='git add'
+alias gaa='git add -A'
+alias gap='git apply'
+alias gapt='git apply --3way'
+alias gb='git branch'
+alias gba='git branch -a'
+alias gc='git commit -s'
+alias gca='git commit -s -a -m'
+alias gcaa='git commit -s -a --amend --no-edit'
+alias gcb='git checkout -b'
+alias gcount='git shortlog -sn'
+alias gcm='git checkout main'
+alias gco='git checkout'
+alias gcp='git cherry-pick'
+alias gcl='git clone'
+alias gd='git diff'
+alias gl='git pull'
+alias glr='git pull --rebase'
+alias glg='git log --stat --max-count=5'
+alias glgg='git log --graph --max-count=5'
+alias gm='git merge'
+alias gmm='git merge main'
+alias gp='git pull --rebase && git push'
+alias gpp='git push'
+alias grh='git reset HEAD'
+alias grhh='git reset HEAD --hard'
+alias gss='git status -s'
+alias gst='git status'
+alias gsw='git switch'
+alias gup='git fetch && git rebase'
+alias gclean='echo "Cleaning merged branches..." && git remote prune origin && gitclean'
+
+alias ggl='git pull origin $(current_branch)'
+alias ggp='git push -u origin $(current_branch)'
+alias ggpp='git pull origin $(current_branch) && git push -u origin $(current_branch)'
+
+alias hg='history | grep'
+# Repeats a command from history by line number
+alias hr='function _rh() { cmd=$(history | grep "^\s*$1\s" | sed "s/^\s*$1\s*//"); echo "Executing: $cmd"; echo -n "Confirm? (y/N) "; read confirm; if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then eval "$cmd"; else echo "Command not executed"; fi; }; _rh'
+
+function gdv() { 
+  git diff -w "$@" | view - 
+}
+
+
+# docker
+alias dcl='docker container ls'
+
+# Add an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
+# functions
+function extract () {
+  if [ -f $1 ] ; then
+    fnl=`echo $1 | tr '[:upper:]' '[:lower:]'`
+    case $fnl in
+      *.tar.bz2)   tar xvjf $1    ;;
+      *.tar.gz)    tar xvzf $1    ;;
+      *.tar.xz)    tar Jxvf $1    ;;
+      *.bz2)       bunzip2 $1     ;;
+      *.rar)       rar x $1       ;;
+      *.gz)        gunzip $1      ;;
+      *.tar)       tar xvf $1     ;;
+      *.tbz2)      tar xvjf $1    ;;
+      *.tgz)       tar xvzf $1    ;;
+      *.zip)       unzip -d `echo $1 | sed 's/\(.*\)\.zip/\1/'` $1;;
+      *.z)         uncompress $1  ;;
+      *.7z)        7z x $1        ;;
+      *)           echo "don't know how to extract '$1'" ;;
+    esac
+  else
+    echo "'$1' is not a valid file!"
+  fi
+}
+
+
+function weather () { 
+  curl -s "wttr.in/$1?m1" | grep -vw "Follow"
+}
+
+
+function activate () { 
+  source ~/.venv/$1/bin/activate
+}
+
+
+function mark {
+    export $1="`pwd`";
+}
+
+function sloc() {
+  local filter_exts="c|cpp|h|hpp|cmake|mk|bzl|py|ipynb|js|jsx|ts|css|htm|html|htmx|xhtml|go|java|hs|fut|sol|move|mo|rs|zig|sh|nix|tf|lua|yml|json|proto|gql|sql"
+  local add_exts=""
+  local excl_exts=""
+  local only_exts=""
+  local sort_by_count=false
+  local summary_only=false
+  
+  # Print help and exit
+  show_help() {
+    echo "Usage: sloc [-a ext1,ext2] [-e ext1,ext2] [-o ext1,ext2] [-d] [-s] [-h]"
+    echo "Count lines of code, excluding blank lines, bracket-only lines, and comments"
+    echo ""
+    echo "Options:"
+    echo "  -a ext1,ext2  Include additional file extensions"
+    echo "  -e ext1,ext2  Exclude specified file extensions"
+    echo "  -o ext1,ext2  Include ONLY the specified extensions (overrides -a and -e)"
+    echo "  -d            Display results in descending order by line count"
+    echo "  -s            Summary mode - only show totals by file type"
+    echo "  -h            Display this help message"
+    echo ""
+    echo "Default extensions: c cpp h hpp cmake mk bzl py ipynb js jsx ts css htm html htmx xhtml go java hs fut sol move mo rs zig sh nix tf lua yml json proto gql sql"
+    return 0
+  }
+  
+  # Parse arguments
+  while getopts "a:e:o:dsh" opt; do
+    case $opt in
+      a) add_exts="${OPTARG}" ;;
+      e) excl_exts="${OPTARG}" ;;
+      o) only_exts="${OPTARG}" ;;
+      d) sort_by_count=true ;;
+      s) summary_only=true ;;
+      h) show_help; return 0 ;;
+      *) show_help; return 1 ;;
+    esac
+  done
+  
+  # Process only_exts (overrides other extension options)
+  if [ -n "$only_exts" ]; then
+    filter_exts="${only_exts//,/|}"
+  else
+    # Process additional extensions
+    if [ -n "$add_exts" ]; then
+      filter_exts="${filter_exts}|${add_exts//,/|}"
+    fi
+    
+    # Process excluded extensions
+    if [ -n "$excl_exts" ]; then
+      local old_IFS="$IFS"
+      IFS=','
+      for ext in $excl_exts; do
+        filter_exts=$(echo "$filter_exts" | sed "s/|$ext\$//;s/^$ext|//;s/|$ext|/|/")
+      done
+      IFS="$old_IFS"
+    fi
+  fi
+  
+  # Select file listing command based on git repo presence
+  local file_cmd
+  if git rev-parse --is-inside-work-tree &>/dev/null; then
+    file_cmd="git ls-files | grep -E \"\.(${filter_exts})$\""
+  else
+    file_cmd="find . -type f | grep -E \"\.(${filter_exts})$\""
+  fi
+  
+  # Count lines function
+  count_lines() {
+    cat "$1" 2>/dev/null | \
+      grep -v "^[[:space:]]*$" | \
+      grep -v "^[[:space:]]*[{}\\[\\]()]*[[:space:]]*$" | \
+      grep -v "^[[:space:]]*//" | \
+      grep -v "^[[:space:]]*--" | \
+      grep -v "^[[:space:]]*#" | \
+      grep -v "^[[:space:]]*'" | \
+      wc -l
+  }
+  
+  # Display included extensions
+  local display_exts=$(echo "$filter_exts" | sed 's/|/, /g')
+  echo "Included extensions: $display_exts"
+  
+  # Count total lines
+  echo "Total SLOC:"
+  eval "$file_cmd" | xargs cat 2>/dev/null | \
+    grep -v "^[[:space:]]*$" | \
+    grep -v "^[[:space:]]*[{}\\[\\]()]*[[:space:]]*$" | \
+    grep -v "^[[:space:]]*//" | \
+    grep -v "^[[:space:]]*--" | \
+    grep -v "^[[:space:]]*#" | \
+    grep -v "^[[:space:]]*'" | \
+    wc -l
+  
+  # Show detailed file listing if not in summary mode
+  if ! $summary_only; then
+    local file_data=()
+    local max_count=0
+    
+    # Get max count length for proper alignment
+    while read -r file; do
+      local count=$(count_lines "$file")
+      if [[ ${#count} -gt $max_count ]]; then
+        max_count=${#count}
+      fi
+      file_data+=("$count:$file")
+    done < <(eval "$file_cmd")
+    
+    # Sort and display results
+    if $sort_by_count; then
+      # Sort by line count (descending)
+      for item in "${file_data[@]}"; do
+        count="${item%%:*}"
+        file="${item#*:}"
+        printf "%${max_count}d  %s\n" "$count" "$file"
+      done | sort -nr
+    else
+      # Sort by filename (default)
+      for item in "${file_data[@]}"; do
+        count="${item%%:*}"
+        file="${item#*:}"
+        printf "%${max_count}d  %s\n" "$count" "$file"
+      done | sort -k2
+    fi
+  fi
+  
+  # Always show the summary by file type
+  echo -e "\nSummary by file type:"
+  for ext in $(eval "$file_cmd" | sed -E 's/.*\.([^.]+)$/\1/' | sort | uniq); do
+    local ext_cmd="$file_cmd | grep \"\\.${ext}$\""
+    local count=$(eval "$ext_cmd" | xargs cat 2>/dev/null | \
+      grep -v "^[[:space:]]*$" | \
+      grep -v "^[[:space:]]*[{}\\[\\]()]*[[:space:]]*$" | \
+      grep -v "^[[:space:]]*//" | \
+      grep -v "^[[:space:]]*--" | \
+      grep -v "^[[:space:]]*#" | \
+      grep -v "^[[:space:]]*'" | \
+      wc -l)
+    printf "%6d  .%s\n" "$count" "$ext"
+  done | if $sort_by_count; then sort -nr; else sort -k2; fi
+}
+
+if [ -n "$ZSH_VERSION" ]; then
+   # assume Zsh
+   compdef _git gdv=git-diff
+
+elif [ -n "$BASH_VERSION" ]; then
+   # assume Bash
+   export -f extract
+   export -f weather
+   export -f activate
+   export -f mark
+   export -f sloc
+   export -f gdv
+   export -f current_branch
+   export -f current_repository
+else
+   # assume something else
+   :
+fi

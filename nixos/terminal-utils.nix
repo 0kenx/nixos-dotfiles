@@ -15,6 +15,7 @@
     sd # replace
     fzf
     skim # fzf alternative
+    rmtrash
     # prettier tools
     lsd # ls
     gping # ping
