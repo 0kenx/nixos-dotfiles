@@ -30,6 +30,7 @@
       tdesktop
       vscodium
       brave
+      chromium
     ];
   };
 

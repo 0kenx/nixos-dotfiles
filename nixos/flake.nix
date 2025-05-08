@@ -20,17 +20,32 @@
     # Define a common nixpkgs configuration
     commonNixpkgsConfig = {
       allowUnfree = true;
+      #cudaSupport = true;
       # You can add other shared configurations like overlays here if needed
     };
     pkgs = import nixpkgs {
       inherit system;
       config = commonNixpkgsConfig; # Apply the common config
+      #overlays = [
+      #  framepackOverlay
+      #];
     };
     pkgsUnstable = import nixpkgs-unstable {
       inherit system;
       config = commonNixpkgsConfig; # Apply the common config here too
     };
     lib = pkgs.lib;
+    # Define the overlay for FramePack
+    #framepackOverlay = final: prev: {
+      # Add framepack to the package set
+    #  framepack = final.python310Packages.callPackage ./pkgs/framepack.nix {
+        # Pass pkgs for system-level dependencies like ffmpeg, opencv4 itself
+    #    pkgs = final;
+        # torchWithCuda is expected to be resolved from final.python310Packages
+        # If framepack.nix was defined to take python310Packages.torchWithCuda explicitly:
+        # torchWithCuda = final.python310Packages.torchWithCuda;
+    #  };
+    #};
   in
   {
     nixosConfigurations.dev = nixpkgs.lib.nixosSystem {
@@ -90,6 +105,7 @@
         ./terminal-utils.nix
         ./llm.nix
         ./work.nix
+        ./cad.nix
       ];
     };
   };

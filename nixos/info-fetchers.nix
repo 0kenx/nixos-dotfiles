@@ -19,6 +19,7 @@
     duf
     powertop
     tlp
+    powercap
 
     # vulkan-tools
     # opencl-info

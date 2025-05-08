@@ -5,7 +5,7 @@
   services.ollama = {
     enable = true;
     package = pkgs-unstable.ollama;
-    loadModels = [ "llama3.2:3b" "llama3.2-vision:11b" "phi4:14b" "deepseek-r1:7b" "dolphin3:8b" "smallthinker:3b" "nomic-embed-text" "gemma3:12b" "gemma3:27b" "deepcoder:14b" ];
+    loadModels = [ "llama3.2-vision:11b" "deepseek-r1:14b" "gemma3:12b" "deepcoder:14b" "qwen3:14b" ];
     acceleration = "cuda";
   };
 
@@ -16,15 +16,19 @@
     host = "127.0.0.1";
   };
   
-  environment.systemPackages = with pkgs; [
-    oterm
-    alpaca
-    aichat
-    aider-chat
+  environment.systemPackages = [
+    pkgs.oterm
+    pkgs.alpaca
+    pkgs.aichat
+    pkgs.aider-chat
+    #framepack
+
+    pkgs-unstable.claude-code
 
     # tgpt
     # smartcat
     # nextjs-ollama-llm-ui
     # open-webui
   ];
+
 }
