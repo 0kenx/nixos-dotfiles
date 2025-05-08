@@ -486,6 +486,21 @@
             set -l modified_count (echo $git_status | grep -c -E '^ M|^MM')
             set -l untracked_count (echo $git_status | grep -c -E '^\?\?')
             
+            # Count unpushed commits
+            set -l unpushed_count 0
+            set -l current_remote (git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+            if test $status -eq 0
+              # Successfully got upstream branch, count unpushed commits
+              set unpushed_count (git log --oneline $current_remote..HEAD 2>/dev/null | wc -l)
+            else
+              # No upstream branch found, count all commits
+              set -l has_commits (git log -1 --oneline 2>/dev/null)
+              if test -n "$has_commits"
+                # Repository has commits but no upstream
+                set unpushed_count (git log --oneline 2>/dev/null | wc -l)
+              end
+            end
+            
             # Display statistics if there are any changes
             if test $added_count -gt 0
               set_color green
@@ -502,6 +517,12 @@
             if test $untracked_count -gt 0
               set_color red
               echo -n "?$untracked_count"
+              set_color normal
+            end
+            
+            if test $unpushed_count -gt 0
+              set_color cyan
+              echo -n "↑$unpushed_count"
               set_color normal
             end
           end
