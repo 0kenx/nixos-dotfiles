@@ -450,7 +450,7 @@
         
         # Username and hostname
         set_color brblue
-        echo -n (whoami)
+        echo -n " "(whoami)
         set_color normal
         echo -n '@'
         set_color brgreen
@@ -458,9 +458,9 @@
         set_color normal
         echo -n ' '
         
-        # Current directory
+        # Current directory with folder icon
         set_color blue
-        echo -n (prompt_pwd)
+        echo -n " "(prompt_pwd)
         set_color normal
         
         # Git status if in a git repo
@@ -473,18 +473,18 @@
             
             if __git_is_dirty
               set_color yellow
+              echo -n " 󰊢 $branch "  # Dirty branch icon
             else
               set_color green
+              echo -n " 󰊣 $branch "  # Clean branch icon
             end
-            
-            echo -n " $branch "
           end
         end
         
         # Show status of last command if it failed
         if test $last_status -ne 0
           set_color red
-          echo -n " $last_status"
+          echo -n " ✘ $last_status"
         end
         
         # Add a newline and prompt symbol
@@ -506,7 +506,7 @@
       function fish_right_prompt
         # Clock on the right
         set_color brblack
-        echo (date "+%H:%M:%S")
+        echo " "(date "+%H:%M:%S")
       end
       
       # Vi mode indicator
