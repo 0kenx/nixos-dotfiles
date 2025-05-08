@@ -448,19 +448,20 @@
         # Save the status
         set -l last_status $status
         
-        # Username and hostname
-        set_color brblue
-        echo -n " "(whoami)
-        set_color normal
-        echo -n '@'
-        set_color brgreen
-        echo -n (hostname)
+        # Vi mode indicator
+        echo -n "["
+        __vi_mode_prompt
+        echo -n "]"
+        
+        # Username (no hostname)
+        set_color blue
+        echo -n (whoami)
         set_color normal
         echo -n ' '
         
-        # Current directory with folder icon
+        # Current directory
         set_color blue
-        echo -n " "(prompt_pwd)
+        echo -n (prompt_pwd)
         set_color normal
         
         # Git status if in a git repo
@@ -469,61 +470,139 @@
           
           if test -n "$branch"
             set_color normal
-            echo -n ' on '
+            echo -n ' ('
             
-            if __git_is_dirty
-              set_color yellow
-              echo -n " 󰊢 $branch "  # Dirty branch icon
-            else
+            # Branch name
+            set_color yellow
+            echo -n "$branch"
+            set_color normal
+            echo -n ')'
+            
+            # Number of untracked, staged and changed files
+            set -l git_status (git status --porcelain 2>/dev/null)
+            
+            # Count added, modified and untracked files
+            set -l added_count (echo $git_status | grep -c -E '^A|^M')
+            set -l modified_count (echo $git_status | grep -c -E '^ M|^MM')
+            set -l untracked_count (echo $git_status | grep -c -E '^\?\?')
+            
+            # Display statistics if there are any changes
+            if test $added_count -gt 0
               set_color green
-              echo -n " 󰊣 $branch "  # Clean branch icon
+              echo -n "+$added_count"
+              set_color normal
+            end
+            
+            if test $modified_count -gt 0
+              set_color yellow
+              echo -n "!$modified_count"
+              set_color normal
+            end
+            
+            if test $untracked_count -gt 0
+              set_color red
+              echo -n "?$untracked_count"
+              set_color normal
             end
           end
         end
         
-        # Show status of last command if it failed
-        if test $last_status -ne 0
-          set_color red
-          echo -n " ✘ $last_status"
-        end
-        
-        # Add a newline and prompt symbol
-        echo
+        # Prompt character
         set_color normal
-        
-        # Prompt character based on user type
-        if fish_is_root_user
-          set_color red
-          echo -n '# '
-        else
-          set_color cyan
-          echo -n '❯ '
-        end
+        echo -n ' > '
         
         set_color normal
+      end
+      
+      function __format_time
+        set -l milliseconds $argv[1]
+        
+        if test $milliseconds -lt 1000
+          # Less than a second
+          echo -n "$milliseconds"ms
+          return
+        end
+        
+        set -l seconds (math "round($milliseconds / 1000)")
+        set -l minutes (math "floor($seconds / 60)")
+        set -l hours (math "floor($minutes / 60)")
+        set -l days (math "floor($hours / 24)")
+        
+        # Extract parts
+        set -l d_seconds (math "$seconds % 60")
+        set -l d_minutes (math "$minutes % 60")
+        set -l d_hours (math "$hours % 24")
+        
+        # Create output
+        set -l output ""
+        
+        if test $days -gt 0
+          set output "$output$days"d
+        end
+        
+        if test $d_hours -gt 0
+          set output "$output$d_hours"h
+        end
+        
+        if test $d_minutes -gt 0
+          set output "$output$d_minutes"m
+        end
+        
+        if test $d_seconds -gt 0
+          set output "$output$d_seconds"s
+        end
+        
+        echo -n $output
       end
       
       function fish_right_prompt
-        # Clock on the right
+        set -l last_status $status
+        
+        # Command status indicator
+        if test $last_status -eq 0
+          set_color green
+          echo -n "✓ "
+        else
+          set_color red
+          echo -n "✗ $last_status"
+        end
+        
+        # Command execution time
+        if set -q CMD_DURATION
+          set -l duration (__format_time $CMD_DURATION)
+          if test -n "$duration"
+            set_color brblack
+            echo -n "|$duration"
+          end
+        end
+        
+        # Clock 
         set_color brblack
-        echo " "(date "+%H:%M:%S")
+        echo -n "|"(date "+%H:%M:%S")
+        
+        set_color normal
       end
       
       # Vi mode indicator
+      # Empty mode prompt - we'll handle this in fish_prompt instead
       function fish_mode_prompt
+      end
+      
+      # Helper function to get vi mode indicator
+      function __vi_mode_prompt
         switch $fish_bind_mode
           case default
             set_color red
-            echo -n '[N] '
+            echo -n 'N'
           case insert
             set_color green
-            echo -n '[I] '
+            echo -n 'I'
           case replace_one
             set_color yellow
-            echo -n '[R] '
+            echo -n 'R'
           case visual
             set_color magenta
-            echo -n '[V] '
+            echo -n 'V'
         end
         set_color normal
       end
