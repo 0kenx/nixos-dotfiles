@@ -4,6 +4,9 @@
     
     # Fish shell abbreviations (expanded when you press space)
     shellAbbrs = {
+      # sudo bang-bang
+      "sudo!!" = "sudo !!";
+      
       # ls related
       ll = "lsd -Al";
       la = "lsd -A";
@@ -418,6 +421,9 @@
       set -g fish_cursor_default block
       set -g fish_cursor_insert line
       set -g fish_cursor_visual underscore
+      
+      # Add Alt+S keyboard shortcut for sudo !!
+      bind \es 'echo "sudo !!"; commandline "sudo !!"'
 
       # Set fish colors (can be customized)
       set -U fish_color_normal normal
@@ -432,6 +438,19 @@
       set -U fish_color_quote green
       set -U fish_color_autosuggestion 555
       set -U fish_color_valid_path --underline
+      
+      # Setup sudo !! functionality like in Zsh
+      function sudo --description "Replacement for sudo with bang-bang (!!) expansion"
+        if test (count $argv) -gt 0 && test "$argv[1]" = "!!"
+          # Execute the last command with sudo
+          set -l last_cmd (history | head -n1)
+          echo "sudo $last_cmd"
+          eval "command sudo $last_cmd"
+        else
+          # Regular sudo behavior
+          command sudo $argv
+        end
+      end
       
       # Define a robust Git branch helper function
       function __git_branch_name
