@@ -17,12 +17,19 @@ in
     # Default age key locations
     age = {
       keyFile = "/home/${username}/.config/sops/age/keys.txt";
-      # Add the Yubikey SSH key for age encryption
+      # Add SSH keys for age encryption - the ed25519 key is used as a fallback
       sshKeyPaths = [
         "/home/${username}/.ssh/id_ed25519"
-        "/home/${username}/.ssh/id_yubikey"
       ];
     };
+    
+    # Add the security key to the .sops.yaml file in your nixos-secrets directory
+    # In nixos-secrets/.sops.yaml add something like:
+    # creation_rules:
+    #   - path_regex: .*
+    #     key_groups:
+    #       - age:
+    #           - age1y3ysrwdnhvxtavfsxarr4l7qnweqcc0ttkhkfk3qpcavkzs73fnqlfwfp7
     
     # Host-specific secrets file from the private submodule
     # Use "desktop" as fallback since we know it exists

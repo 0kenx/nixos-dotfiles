@@ -13,10 +13,12 @@ in
   # PAM U2F configuration for Yubikey authentication
   security.pam.u2f = {
     enable = true;
-    settings.cue = true;
+    settings = {
+      cue = true;
+      # Create authorization mapping in the user's home directory
+      authfile = "/home/${username}/.config/Yubico/u2f_keys";
+    };
     control = "sufficient";
-    # Create authorization mapping in the user's home directory
-    authFile = "/home/${username}/.config/Yubico/u2f_keys";
   };
 
   security.pam.services = {

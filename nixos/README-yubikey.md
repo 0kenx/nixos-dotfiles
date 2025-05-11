@@ -65,23 +65,58 @@ pamu2fcfg -n >> ~/.config/Yubico/u2f_keys
 
 The Yubikey is automatically integrated with SOPS for secrets management:
 
-1. Run the setup script to configure your Yubikey with age:
+1. Make sure you have the ssh-to-age tool installed:
 
 ```bash
-# Install the ssh-to-age tool first
+# Install the ssh-to-age tool
 nix-shell -p ssh-to-age
+```
 
+2. Convert your Yubikey's SSH public key to age format:
+
+```bash
+# Convert SSH public key to age format
+cat nixos/hosts/common/keys/id_yubidef.pub | ssh-to-age
+# The output will look like: age1y3ysrwdnhvxtavfsxarr4l7qnweqcc0ttkhkfk3qpcavkzs73fnqlfwfp7
+```
+
+3. Add this age public key to your `.sops.yaml` file in the nixos-secrets directory:
+
+```yaml
+creation_rules:
+  - path_regex: common/.*\.yaml$
+    key_groups:
+      - age:
+        - age1gkw5d3xdnvapspq7tg6z3n47rmz0j6frke9ew77vqrqrmakv7qes3fxws2
+        - age1y3ysrwdnhvxtavfsxarr4l7qnweqcc0ttkhkfk3qpcavkzs73fnqlfwfp7
+```
+
+And in your `modules/secrets.nix` file, keep only regular SSH keys:
+
+```nix
+sops.age = {
+  keyFile = "/home/${username}/.config/sops/age/keys.txt";
+  # Regular SSH key as fallback (only include real key files here)
+  sshKeyPaths = [
+    "/home/${username}/.ssh/id_ed25519"  
+  ];
+};
+```
+
+4. Or you can run the setup script which will perform these steps automatically:
+
+```bash
 # Run the provided setup script
 ./nixos-secrets/setup-age-key.sh
 ```
 
-2. This script:
-   - Detects if a Yubikey is present
-   - Copies or generates the SSH public key
-   - Uses ssh-to-age to convert the SSH key to age format
-   - Updates the SOPS configuration with the correct key
+The script:
+- Detects if a Yubikey is present
+- Copies or generates the SSH public key
+- Uses ssh-to-age to convert the SSH key to age format
+- Provides the age public key for your configuration
 
-3. The `sops.age.sshKeyPaths` setting in `secrets.nix` ensures SOPS uses your Yubikey-derived key. SOPS automatically converts the SSH key to age format during encryption/decryption.
+**Important:** When using a security key like Yubikey with SOPS, there's no actual private key file on disk (it stays in the hardware). That's why we use `publicKeys` instead of `sshKeyPaths` for the Yubikey.
 
 ## Usage
 
@@ -190,14 +225,32 @@ If PAM authentication is not working:
 
 ### SOPS Decryption Issues
 
-If SOPS fails to decrypt with your Yubikey:
+If you see an error like this during `nixos-rebuild`:
 
-1. Make sure your Yubikey is plugged in during boot
-2. Check if the SSH key is available:
-   ```bash
-   ls -la ~/.ssh/id_yubikey*
+```
+Cannot read ssh key '/home/dev/.ssh/id_yubikey': open /home/dev/.ssh/id_yubikey: no such file or directory
+```
+
+This occurs because the configuration is trying to use a non-existent private key file. Security keys like Yubikeys don't have private key files on disk. To fix this:
+
+1. Remove the Yubikey path from `sshKeyPaths` in `modules/secrets.nix`:
+   ```nix
+   sops.age = {
+     # Keep only real files here
+     sshKeyPaths = [
+       "/home/${username}/.ssh/id_ed25519"
+       # Remove the line with /home/${username}/.ssh/id_yubikey
+     ];
+     # Add the Yubikey's public key in age format here instead
+     publicKeys = [
+       "age1y3ysrwdnhvxtavfsxarr4l7qnweqcc0ttkhkfk3qpcavkzs73fnqlfwfp7"
+     ];
+   };
    ```
-3. Verify the age key generation:
+
+2. Make sure your Yubikey is plugged in during boot
+
+3. If needed, verify the age key generation:
    ```bash
    cat ~/.config/sops/age/yubikey.txt
    ```
