@@ -38,6 +38,9 @@
       description = "${username}";
       extraGroups = [ "networkmanager" "input" "wheel" "video" "audio" "tss" ];
       shell = pkgs.fish;
+      openssh.authorizedKeys.keyFiles = [
+        ./hosts/common/keys/id_yubidef.pub
+      ];
       packages = with pkgs; [
         youtube-music
         discord

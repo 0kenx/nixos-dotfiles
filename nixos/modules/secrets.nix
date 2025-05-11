@@ -3,17 +3,26 @@
 let
   # Get the hostname to determine which host-specific secrets to use
   hostname = config.networking.hostName;
+  username = config.users.defaultUserName;
 in
 {
-  # Ensure sops and age are installed
+  # Ensure sops, age, and related tools are installed
   environment.systemPackages = with pkgs; [
     sops
     age
+    ssh-to-age
   ];
   # Configure SOPS (Secrets OPerationS)
   sops = {
     # Default age key locations
-    age.keyFile = "/home/dev/.config/sops/age/keys.txt";
+    age = {
+      keyFile = "/home/${username}/.config/sops/age/keys.txt";
+      # Add the Yubikey SSH key for age encryption
+      sshKeyPaths = [
+        "/home/${username}/.ssh/id_ed25519"
+        "/home/${username}/.ssh/id_yubikey"
+      ];
+    };
     
     # Host-specific secrets file from the private submodule
     # Use "desktop" as fallback since we know it exists
@@ -23,34 +32,34 @@ in
     secrets = {
       # Git configuration secrets from host-specific file
       "git/default_name" = {
-        owner = "dev";  # Hardcoded for now, matches username in flake.nix
+        owner = username;
       };
       "git/default_email" = {
-        owner = "dev";
+        owner = username;
       };
       "git/signing_key" = {
-        owner = "dev";
+        owner = username;
       };
       "git/work_name" = {
-        owner = "dev";
+        owner = username;
       };
       "git/work_email" = {
-        owner = "dev";
+        owner = username;
       };
       "git/personal_name" = {
-        owner = "dev";
+        owner = username;
       };
       "git/personal_email" = {
-        owner = "dev";
+        owner = username;
       };
       
       # API keys from common secrets file (shared across all hosts)
       "api_keys/github" = {
-        owner = "dev";
+        owner = username;
         sopsFile = ../nixos-secrets/common/secrets.yaml;
       };
       "api_keys/openai" = {
-        owner = "dev";
+        owner = username;
         sopsFile = ../nixos-secrets/common/secrets.yaml;
       };
     };

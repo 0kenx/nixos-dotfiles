@@ -6,6 +6,8 @@
     gnupg
     pinentry-tty
     veracrypt
+    opensc
+    pcsc-tools
   ];
 
   # Enable the OpenSSH daemon.
