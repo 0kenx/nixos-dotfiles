@@ -42,9 +42,11 @@ in
       # API keys from common secrets file (shared across all hosts)
       "api_keys/github" = {
         owner = "dev";
+        sopsFile = ../nixos-secrets/common/secrets.yaml;
       };
       "api_keys/openai" = {
         owner = "dev";
+        sopsFile = ../nixos-secrets/common/secrets.yaml;
       };
     };
   };
