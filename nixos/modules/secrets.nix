@@ -5,6 +5,11 @@ let
   hostname = config.networking.hostName;
 in
 {
+  # Ensure sops and age are installed
+  environment.systemPackages = with pkgs; [
+    sops
+    age
+  ];
   # Configure SOPS (Secrets OPerationS)
   sops = {
     # Default age key locations
