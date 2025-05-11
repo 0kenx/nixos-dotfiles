@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   environment.systemPackages = with pkgs; [
@@ -19,6 +19,14 @@
       PermitRootLogin = "no";
       AllowUsers = [ "dev" ];
     };
+  };
+
+  # Configure SSH client for PKCS11
+  programs.ssh = {
+    # Set up OpenSC PKCS11 provider for SSH
+    extraConfig = ''
+      PKCS11Provider ${pkgs.opensc}/lib/opensc-pkcs11.so
+    '';
   };
 
   # Enable GPG
