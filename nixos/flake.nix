@@ -105,7 +105,8 @@
         ./terminal-utils.nix
         ./llm.nix
         ./work.nix
-        ./cad.nix
+	./cad.nix
+        ./multimedia.nix
       ];
     };
   };

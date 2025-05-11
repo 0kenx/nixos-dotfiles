@@ -20,6 +20,9 @@
     powertop
     tlp
     powercap
+    # benchmark/stress
+    stress-ng
+    sysbench
 
     # vulkan-tools
     # opencl-info

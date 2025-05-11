@@ -31,6 +31,8 @@
       disable-history: false;
       hide-scrollbar: true;
       hover-select: true;
+      ma-select-entry: "MousePrimary";
+      ma-accept-entry: "!MousePrimary";
       display-drun: " ";
       display-run: " ";
       display-filebrowser: "  ";
