@@ -313,13 +313,11 @@
           'lua_ls',
           'rust_analyzer',
           'pyright',
-          'tsserver',
           'html',
           'cssls',
           'jsonls',
           'bashls',
           'marksman',
-          'nil_ls',   -- Nix language server
         },
         handlers = {
           lsp_zero.default_setup,
@@ -331,6 +329,9 @@
           end,
         }
       })
+      
+      -- Setup Nix language server separately
+      require('lspconfig').nil_ls.setup({})
       
       -- Configure completion
       local cmp = require('cmp')
@@ -583,7 +584,7 @@
             enabled = true,
           },
         },
-        window = {
+        win = {
           border = "single",
         },
       }
@@ -686,9 +687,6 @@
         },
         diff_opts = {
           internal = true,
-        },
-        yadm = {
-          enable = false,
         },
       }
     '';
