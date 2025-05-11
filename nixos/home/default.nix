@@ -9,6 +9,7 @@
     ./waybar.nix
     ./git.nix
     ./gtk.nix
+    ./ssh.nix
   ];
 }
 
