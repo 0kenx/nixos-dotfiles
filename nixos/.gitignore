@@ -1,0 +1,25 @@
+# Ignore the secrets submodule (users will add it themselves)
+/nixos-secrets/
+
+# Ignore old secrets directory (if present)
+/secrets/secrets.yaml
+
+# Don't ignore example files
+!/secrets/secrets.yaml.example
+!/hosts/*/secrets.yaml.example
+
+# Ignore age and GPG keys
+*.age
+*.gpg
+*.key
+
+# Ignore Nix build outputs
+result
+result-*
+
+# Ignore editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

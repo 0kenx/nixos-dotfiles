@@ -10,9 +10,24 @@
         url = "github:nix-community/home-manager/release-24.11";
         inputs.nixpkgs.follows = "nixpkgs";
       }; 
+      
+      # Secret management with sops-nix
+      sops-nix = {
+        url = "github:Mic92/sops-nix";
+        inputs.nixpkgs.follows = "nixpkgs";
+      };
+      
+      # Private secrets repository (submodule)
+      # This references the Git submodule at ../nixos-secrets
+      # To use this, run:
+      # git submodule add git@github.com:0kenx/nixos-secrets.git nixos-secrets
+      secrets = {
+        url = "git+file:../nixos-secrets";
+        flake = false;
+      };
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, self, ... } @ inputs:
+  outputs = { nixpkgs, nixpkgs-unstable, self, sops-nix, ... } @ inputs:
   let
     username = "dev";
     system = "x86_64-linux";
@@ -48,16 +63,27 @@
     #};
   in
   {
-    nixosConfigurations.dev = nixpkgs.lib.nixosSystem {
-      inherit system;
-      specialArgs = { 
-        host = "nixos";
-        pkgs-unstable = pkgsUnstable;
-        inherit self inputs username channel pkgs; 
-      };
+    # Host-specific configurations
+    nixosConfigurations = {
+      # Main development machine configuration
+      dev = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = { 
+          host = "nixos";
+          pkgs-unstable = pkgsUnstable;
+          inherit self inputs username channel pkgs; 
+        };
       modules = [
         ./configuration.nix
         ./hardware-configuration.nix
+        
+        # Include host-specific configuration and secrets management
+        ./hosts/example-laptop.nix  # This is a placeholder, replace with actual host config
+        ./modules/per-host.nix      # Host configuration module
+        ./modules/secrets.nix       # SOPS secrets configuration
+        sops-nix.nixosModules.sops  # Secret management module
+        
+        # System modules
         # ./core-pkgs.nix
         ./nvidia.nix
         # ./disable-nvidia.nix
@@ -107,6 +133,20 @@
         ./work.nix
 	./cad.nix
         ./multimedia.nix
+        
+        # Home Manager integration
+        inputs.home-manager.nixosModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.${username} = import ./home;
+          
+          # Pass flake inputs and system config to home-manager modules
+          home-manager.extraSpecialArgs = { 
+            inherit inputs username; 
+            host = "nixos";
+          };
+        }
       ];
     };
   };

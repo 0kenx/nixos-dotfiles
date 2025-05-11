@@ -8,10 +8,9 @@
     package = pkgs.hyprland;
 
     settings = {
-      # Monitor configuration
-      monitor = [
+      # Monitor configuration from host-specific settings
+      monitor = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or [
         "eDP-1,preferred,auto,1.6"
-        "HDMI-A-1,preferred,auto-up,1.6"
       ];
 
       # Workspace assignment
