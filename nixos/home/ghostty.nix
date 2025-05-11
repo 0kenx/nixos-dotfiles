@@ -50,45 +50,14 @@
     macos-non-native-fullscreen = true
     
     # Shell integration
-    shell-integration = enabled
-    shell-integration-features = sudo,command-status
+    shell-integration = detect
     
     # Cursor configuration
     cursor-style = block
     cursor-style-blink = true
     
-    # Keybindings
-    keybind = alt+c=copy_to_clipboard
-    keybind = alt+v=paste_from_clipboard
-    keybind = alt+shift+t=new_tab
-    keybind = alt+shift+q=quit
-    keybind = alt+shift+w=close_surface
-    keybind = alt+shift+n=new_window
-    keybind = alt+shift+f=toggle_fullscreen
-    keybind = alt+shift+plus=increase_font_size
-    keybind = alt+shift+minus=decrease_font_size
-    keybind = alt+shift+0=reset_font_size
-    keybind = alt+shift+r=reload_config
-    
-    # Tab navigation (consistent with Neovim)
-    keybind = alt+h=previous_tab
-    keybind = alt+l=next_tab
-    keybind = alt+1=goto_tab:0
-    keybind = alt+2=goto_tab:1
-    keybind = alt+3=goto_tab:2
-    keybind = alt+4=goto_tab:3
-    keybind = alt+5=goto_tab:4
-    keybind = alt+6=goto_tab:5
-    keybind = alt+7=goto_tab:6
-    keybind = alt+8=goto_tab:7
-    keybind = alt+9=goto_tab:8
-    
-    # Spawn a new neovim terminal with Alt+n (consistent with our system)
-    keybind = alt+n=spawn:/usr/bin/env nvim
-    
-    # Tab and window appearance
+    # Window settings
     window-inherit-working-directory = true
-    tab-bar-show-when-one = true
     adjust-cell-width = 0
     adjust-cell-height = 0
     
