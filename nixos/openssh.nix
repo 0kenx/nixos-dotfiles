@@ -5,6 +5,7 @@
     openssl
     gnupg
     pinentry-tty
+    veracrypt
   ];
 
   # Enable the OpenSSH daemon.

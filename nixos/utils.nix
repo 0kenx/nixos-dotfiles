@@ -15,5 +15,9 @@
     # surrealist
     trunk
     sqlx-cli
+
+    # system
+    parted
+    gparted
   ];
 }

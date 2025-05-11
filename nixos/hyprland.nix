@@ -20,7 +20,7 @@
     hypridle
     hyprpaper
 
-    inputs.wezterm.packages.${pkgs.system}.default
+    # inputs.wezterm.packages.${pkgs.system}.default
     kitty
     cool-retro-term
     ghostty
