@@ -91,8 +91,8 @@
     # Link the Catppuccin-Macchiato-Teal theme for Kvantum
     "Kvantum/Catppuccin-Macchiato-Teal" = {
       source = "${pkgs.catppuccin-kvantum.override {
-        accent = "Teal";
-        variant = "Macchiato";
+        accent = "teal";
+        variant = "macchiato";
       }}/share/Kvantum/Catppuccin-Macchiato-Teal";
       recursive = true;
     };

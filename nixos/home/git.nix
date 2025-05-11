@@ -1,15 +1,14 @@
-{pkgs, username, host, config, ...}: {
+{pkgs, username, host, config, lib, ...}: {
   programs.git = {
     enable = true;
     
-    # User information from SOPS secrets
-    # These are read from environment variables that point to the secret files
-    userName = "$(cat $GIT_DEFAULT_NAME)";
-    userEmail = "$(cat $GIT_DEFAULT_EMAIL)";
+    # Use shell expansion to read from the secret files
+    userName = "$(cat $GIT_DEFAULT_NAME 2>/dev/null || echo 'Default User')";
+    userEmail = "$(cat $GIT_DEFAULT_EMAIL 2>/dev/null || echo 'default@example.com')";
     
-    # Signing configuration from SOPS secrets
+    # Signing configuration (uses secret files)
     signing = {
-      key = "$(cat $GIT_SIGNING_KEY)";
+      key = "$(cat $GIT_SIGNING_KEY 2>/dev/null || echo '0000000000000000')";
       signByDefault = true;
     };
     
@@ -23,22 +22,17 @@
       interactive = {
         diffFilter = "delta --color-only";
       };
-      
-      # Delta configuration
-      delta = {
-        features = "catppuccin-macchiato";
-      };
     };
     
     # Conditional includes for different directories
-    # Uses SOPS secrets to avoid hardcoding identities in git config
+    # Uses shell commands to read from the secret files
     includes = [
       {
         condition = "gitdir:~/projects/";
         contents = {
           user = {
-            name = "$(cat $GIT_PERSONAL_NAME)";
-            email = "$(cat $GIT_PERSONAL_EMAIL)";
+            name = "$(cat $GIT_PERSONAL_NAME 2>/dev/null || echo 'Personal')";
+            email = "$(cat $GIT_PERSONAL_EMAIL 2>/dev/null || echo 'personal@example.com')";
           };
         };
       }
@@ -46,8 +40,8 @@
         condition = "gitdir:~/work/";
         contents = {
           user = {
-            name = "$(cat $GIT_WORK_NAME)";
-            email = "$(cat $GIT_WORK_EMAIL)";
+            name = "$(cat $GIT_WORK_NAME 2>/dev/null || echo 'Work')";
+            email = "$(cat $GIT_WORK_EMAIL 2>/dev/null || echo 'work@example.com')";
           };
         };
       }
@@ -119,10 +113,14 @@
     ];
   };
   
-  # Delta - A better diff viewer
-  programs.delta = {
-    enable = true;
-    options = {
+  # Add delta package
+  home.packages = with pkgs; [
+    delta
+  ];
+  
+  # Configure delta through git config
+  programs.git.extraConfig = {
+    delta = {
       features = "catppuccin-macchiato";
       
       # Catppuccin Macchiato theme settings for Delta

@@ -11,51 +11,47 @@ in
     age.keyFile = "/home/dev/.config/sops/age/keys.txt";
     
     # Host-specific secrets file from the private submodule
-    defaultSopsFile = ../../nixos-secrets/hosts/${hostname}/secrets.yaml;
-    
-    # Common secrets file shared across all hosts
-    sopsFiles = [
-      ../../nixos-secrets/common/secrets.yaml
-    ];
+    # Use "desktop" as fallback since we know it exists
+    defaultSopsFile = ../nixos-secrets/hosts/desktop/secrets.yaml;
     
     # Secrets for Git configuration
     secrets = {
       # Git configuration secrets from host-specific file
       "git/default_name" = {
-        owner = config.users.users.${config.users.defaultUserName}.name;
+        owner = "dev";  # Hardcoded for now, matches username in flake.nix
       };
       "git/default_email" = {
-        owner = config.users.users.${config.users.defaultUserName}.name;
+        owner = "dev";
       };
       "git/signing_key" = {
-        owner = config.users.users.${config.users.defaultUserName}.name;
+        owner = "dev";
       };
       "git/work_name" = {
-        owner = config.users.users.${config.users.defaultUserName}.name;
+        owner = "dev";
       };
       "git/work_email" = {
-        owner = config.users.users.${config.users.defaultUserName}.name;
+        owner = "dev";
       };
       "git/personal_name" = {
-        owner = config.users.users.${config.users.defaultUserName}.name;
+        owner = "dev";
       };
       "git/personal_email" = {
-        owner = config.users.users.${config.users.defaultUserName}.name;
+        owner = "dev";
       };
       
       # API keys from common secrets file (shared across all hosts)
       "api_keys/github" = {
-        owner = config.users.users.${config.users.defaultUserName}.name;
+        owner = "dev";
       };
       "api_keys/openai" = {
-        owner = config.users.users.${config.users.defaultUserName}.name;
+        owner = "dev";
       };
     };
   };
   
   # Make secrets available to home-manager by aliasing them to environment variables
   # This allows the config to be generic while the secrets are host-specific
-  environment.sessionVariables = {
+  environment.sessionVariables = lib.mkIf (config.sops.secrets ? "git/default_name") {
     # Git configuration
     GIT_DEFAULT_NAME = config.sops.secrets."git/default_name".path;
     GIT_DEFAULT_EMAIL = config.sops.secrets."git/default_email".path;

@@ -3,9 +3,18 @@
 with lib;
 
 {
-  options.nixosConfig.system.nixos-dotfiles = {
+  options.system.nixos-dotfiles = {
     # Note: Git configuration now uses SOPS for secure secrets
     # See README-secrets.md for details
+
+    # Host-specific information
+    host = {
+      name = mkOption {
+        type = types.str;
+        default = "default";
+        description = "Name of this host configuration";
+      };
+    };
     
     # Hyprland configuration options
     hyprland = {

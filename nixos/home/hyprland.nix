@@ -1,4 +1,4 @@
-{inputs, pkgs, ...}: {
+{inputs, pkgs, config, lib, ...}: {
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = true;
@@ -9,8 +9,8 @@
 
     settings = {
       # Monitor configuration from host-specific settings
-      monitor = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or [
-        "eDP-1,preferred,auto,1.6"
+      monitor = [
+        "eDP-1,preferred,auto,1.6"  # Default fallback configuration
       ];
 
       # Workspace assignment

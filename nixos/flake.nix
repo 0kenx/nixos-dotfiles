@@ -17,14 +17,8 @@
         inputs.nixpkgs.follows = "nixpkgs";
       };
       
-      # Private secrets repository (submodule)
-      # This references the Git submodule at ../nixos-secrets
-      # To use this, run:
-      # git submodule add git@github.com:0kenx/nixos-secrets.git nixos-secrets
-      secrets = {
-        url = "git+file:../nixos-secrets";
-        flake = false;
-      };
+      # No need to reference nixos-secrets as git repo
+      # We assume that /etc/nixos/nixos-secrets exists
   };
 
   outputs = { nixpkgs, nixpkgs-unstable, self, sops-nix, ... } @ inputs:
@@ -73,81 +67,82 @@
           pkgs-unstable = pkgsUnstable;
           inherit self inputs username channel pkgs; 
         };
-      modules = [
-        ./configuration.nix
-        ./hardware-configuration.nix
-        
-        # Include host-specific configuration and secrets management
-        ./hosts/example-laptop.nix  # This is a placeholder, replace with actual host config
-        ./modules/per-host.nix      # Host configuration module
-        ./modules/secrets.nix       # SOPS secrets configuration
-        sops-nix.nixosModules.sops  # Secret management module
-        
-        # System modules
-        # ./core-pkgs.nix
-        ./nvidia.nix
-        # ./disable-nvidia.nix
-        ./opengl.nix
-        # ./fingerprint-scanner.nix
-        # ./clamav-scanner.nix
-        ./yubikey.nix
-        ./sound.nix
-        ./usb.nix
-        ./keyboard.nix
-        ./time.nix
-        ./swap.nix
-        ./bootloader.nix
-        ./nix-settings.nix
-        ./nixpkgs.nix
-        ./gc.nix
-        # ./auto-upgrade.nix
-        ./linux-kernel.nix
-        ./screen.nix
-        # ./location.nix
-        ./display-manager.nix
-        ./theme.nix
-        ./internationalisation.nix
-        ./fonts.nix
-        ./security-services.nix
-        ./services.nix
-        # ./printing.nix
-        # ./gnome.nix
-        ./hyprland.nix
-        ./environment-variables.nix
-        ./bluetooth.nix
-        ./networking.nix
-        # ./mac-randomize.nix
-        ./openssh.nix
-	./firewall.nix
-        ./dns.nix
-        ./vpn.nix
-        ./users.nix
-        ./virtualisation.nix
-        ./programming-languages.nix
-        ./lsp.nix
-        ./wasm.nix
-        ./info-fetchers.nix
-        ./utils.nix
-        ./terminal-utils.nix
-        ./llm.nix
-        ./work.nix
-	./cad.nix
-        ./multimedia.nix
-        
-        # Home Manager integration
-        inputs.home-manager.nixosModules.home-manager
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.users.${username} = import ./home;
+        modules = [
+          ./configuration.nix
+          ./hardware-configuration.nix
           
-          # Pass flake inputs and system config to home-manager modules
-          home-manager.extraSpecialArgs = { 
-            inherit inputs username; 
-            host = "nixos";
-          };
-        }
-      ];
+          # Include host-specific configuration and secrets management
+          ./hosts/example-laptop.nix  # This is a placeholder, replace with actual host config
+          ./modules/per-host.nix      # Host configuration module
+          ./modules/secrets.nix       # SOPS secrets configuration
+          sops-nix.nixosModules.sops  # Secret management module
+          
+          # System modules
+          # ./core-pkgs.nix
+          ./nvidia.nix
+          # ./disable-nvidia.nix
+          ./opengl.nix
+          # ./fingerprint-scanner.nix
+          # ./clamav-scanner.nix
+          ./yubikey.nix
+          ./sound.nix
+          ./usb.nix
+          ./keyboard.nix
+          ./time.nix
+          ./swap.nix
+          ./bootloader.nix
+          ./nix-settings.nix
+          ./nixpkgs.nix
+          ./gc.nix
+          # ./auto-upgrade.nix
+          ./linux-kernel.nix
+          ./screen.nix
+          # ./location.nix
+          ./display-manager.nix
+          ./theme.nix
+          ./internationalisation.nix
+          ./fonts.nix
+          ./security-services.nix
+          ./services.nix
+          # ./printing.nix
+          # ./gnome.nix
+          ./hyprland.nix
+          ./environment-variables.nix
+          ./bluetooth.nix
+          ./networking.nix
+          # ./mac-randomize.nix
+          ./openssh.nix
+          ./firewall.nix
+          ./dns.nix
+          ./vpn.nix
+          ./users.nix
+          ./virtualisation.nix
+          ./programming-languages.nix
+          ./lsp.nix
+          ./wasm.nix
+          ./info-fetchers.nix
+          ./utils.nix
+          ./terminal-utils.nix
+          ./llm.nix
+          ./work.nix
+          ./cad.nix
+          ./multimedia.nix
+          
+          # Home Manager integration
+          inputs.home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.${username} = import ./home;
+            
+            # Pass flake inputs and system config to home-manager modules
+            home-manager.extraSpecialArgs = { 
+              inherit inputs username; 
+              host = "nixos";
+            };
+          }
+        ];
+      };
     };
   };
 }
