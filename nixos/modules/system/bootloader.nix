@@ -10,8 +10,7 @@
     enable = true;
     efiSupport = true;
     enableCryptodisk = true;
-    device = "nodev"; # Use this for EFI systems
-    devices = [ ]; # Set empty array to avoid boot error
+    device = "nodev";
   };
 
   # boot.kernelParams = [ "processor.max_cstate=4" "amd_iomu=soft" "idle=nomwait" ];

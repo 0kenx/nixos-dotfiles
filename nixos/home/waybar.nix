@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, lib, config, ...}: {
   programs.waybar = {
     enable = true;
     
@@ -14,11 +14,18 @@
         position = "top";
         height = 36;
         spacing = 4;
-        
+
+        # Dynamic output based on host configuration - use primary monitor
+        output = let
+          monitors = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1.6"];
+        in
+          lib.lists.optional (lib.length monitors > 0)
+            (builtins.elemAt (lib.strings.splitString "," (lib.lists.elemAt monitors 0)) 0);
+
         modules-left = ["hyprland/workspaces" "hyprland/submap"];
         modules-center = ["clock#time" "custom/separator" "clock#week" "custom/separator_dot" "clock#month" "custom/separator" "clock#calendar"];
         modules-right = ["bluetooth" "network" "group/misc" "custom/logout_menu"];
-        
+
         "hyprland/workspaces" = {
           on-click = "activate";
           format = "{icon}";
@@ -214,7 +221,14 @@
         position = "bottom";
         height = 36;
         spacing = 4;
-        
+
+        # Dynamic output based on host configuration - use primary monitor
+        output = let
+          monitors = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1.6"];
+        in
+          lib.lists.optional (lib.length monitors > 0)
+            (builtins.elemAt (lib.strings.splitString "," (lib.lists.elemAt monitors 0)) 0);
+
         modules-left = ["user"];
         modules-center = ["hyprland/window"];
         modules-right = ["keyboard-state" "hyprland/language"];
@@ -256,7 +270,14 @@
         width = 75;
         margin-top = 10;
         margin-bottom = 10;
-        
+
+        # Dynamic output based on host configuration - use primary monitor
+        output = let
+          monitors = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1.6"];
+        in
+          lib.lists.optional (lib.length monitors > 0)
+            (builtins.elemAt (lib.strings.splitString "," (lib.lists.elemAt monitors 0)) 0);
+
         modules-left = ["wlr/taskbar"];
         modules-center = ["cpu" "memory" "disk" "temperature" "battery" "backlight" "pulseaudio" "systemd-failed-units"];
         modules-right = ["tray"];

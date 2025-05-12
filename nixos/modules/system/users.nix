@@ -20,7 +20,7 @@
       backupFileExtension = "backup";
       extraSpecialArgs = { inherit inputs username host; };
       users.${username} = {
-        imports = [ ./home ];
+        imports = [ ../../home ];
         home.username = "${username}";
         home.homeDirectory = "/home/${username}";
         home.stateVersion = "${channel}";
@@ -29,18 +29,18 @@
     };
     
     # Define a user account. Don't forget to set a password with 'passwd'.
-    # Define user group first
+    # First create a group for the user
     users.groups.${username} = {};
-    
-    # Define user with proper group setup
+
+    # Then create the user with the group assigned
     users.users.${username} = {
       isNormalUser = true;
       description = "${username}";
+      group = "${username}"; # Set the primary group
       extraGroups = [ "networkmanager" "input" "wheel" "video" "audio" "tss" ];
-      group = "${username}";
       shell = pkgs.fish;
       openssh.authorizedKeys.keyFiles = [
-        ./hosts/common/keys/id_yubidef.pub
+        ../../hosts/common/keys/id_yubidef.pub
       ];
       packages = with pkgs; [
         youtube-music

@@ -1,4 +1,5 @@
-{inputs, pkgs, config, lib, ...}: {
+{inputs, pkgs, config, lib, host, ...}:
+{
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = true;
@@ -8,20 +9,15 @@
     package = pkgs.hyprland;
 
     settings = {
-      # Monitor configuration from host-specific settings
-      # Use exec-once to set up monitors programmatically with bottom alignment
+      # Use exec-once to set up autostart script
       exec-once = [
         "fish -c autostart"
-        # Calculate position for bottom alignment: y = -(main_height - secondary_width)
-        # and apply monitor configuration dynamically
-        # "bash -c 'main_res=$(hyprctl monitors -j | jq -r \".[] | select(.name==\\\"HDMI-A-1\\\") | .height\"); sec_width=$(hyprctl monitors -j | jq -r \".[] | select(.name==\\\"DP-5\\\") | .width\"); y_pos=$(($main_res - $sec_width)); hyprctl keyword monitor \"HDMI-A-1,preferred,auto,1.6\"; hyprctl keyword monitor \"DP-5,preferred,0x-$y_pos,1.6,transform,1\"'"
+        "waybar"
+        "hyprpaper"
       ];
 
-      # Fallback static configuration in case the script fails
-      monitor = [
-        "HDMI-A-1,preferred,auto,1.6"  # Main monitor
-        "DP-5,preferred,0x-1080,1.6,transform,1" # Secondary monitor (vertical, left of main, bottom aligned @4k)
-      ];
+      # Dynamic monitor configuration from host-specific settings
+      monitor = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1.6"];
 
       # Workspace assignment
       workspace = [
@@ -574,14 +570,39 @@
     };
   };
 
-  # Configure Hyprpaper
+  # Configure Hyprpaper with dynamic monitor settings
   xdg.configFile."hypr/hyprpaper.conf" = {
-    text = ''
-      preload = /etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg
-      preload = /etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg
+    text = let
+      # Base wallpaper path
+      wallpaperBase = "/etc/nixos/assets/wallpaper";
+      # Default landscape and portrait wallpapers
+      landscapeWallpaper = "${wallpaperBase}/wallpaper_3840x2160.jpg";
+      portraitWallpaper = "${wallpaperBase}/wallpaper_2160x3840.jpg";
 
-      wallpaper = HDMI-A-1,/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg
-      wallpaper = DP-5,/etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg
+      # Function to generate wallpaper configs for monitors
+      monitorWallpaper = monitor:
+        let
+          monitorParts = lib.strings.splitString "," monitor;
+          monitorName = lib.lists.elemAt monitorParts 0;
+          # Check if monitor has transform=1 (portrait) in its config
+          isPortrait = lib.strings.hasInfix "transform,1" monitor;
+          wallpaper = if isPortrait then portraitWallpaper else landscapeWallpaper;
+        in
+        "wallpaper = ${monitorName},${wallpaper}";
+
+      # Generate wallpaper preloads and assignments
+      preloads = ''
+        preload = ${landscapeWallpaper}
+        preload = ${portraitWallpaper}
+      '';
+
+      wallpaperAssignments = lib.strings.concatStringsSep "\n"
+        (map monitorWallpaper (config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1.6"]));
+    in
+    ''
+      ${preloads}
+
+      ${wallpaperAssignments}
 
       ipc = off
       splash = false
