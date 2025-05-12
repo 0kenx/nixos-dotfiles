@@ -21,8 +21,20 @@
         "systemctl --user start hyprland-session.target"
       ];
 
-      # Dynamic monitor configuration from host-specific settings via the bridge module
-      monitor = config.systemConfig.hyprland.monitors;
+      # Host-specific monitor configuration
+      monitor =
+        if host == "workstation" then
+          # Workstation monitor config
+          [
+            "HDMI-A-1,3840x2160@60,0x0,1.6"
+            "DP-5,3840x2160@60,0x-1080,1.6,transform,1"
+          ]
+        else if host == "laptop" then
+          # Laptop monitor config
+          ["eDP-1,preferred,auto,1.6"]
+        else
+          # Default fallback
+          ["eDP-1,preferred,auto,1.6"];
 
       # Workspace assignment
       workspace = [
@@ -610,11 +622,17 @@
 
       wallpaperAssignments = lib.strings.concatStringsSep "\n"
         (map monitorWallpaper (
-          if config.systemConfig.hyprland.monitors != null then
-            # Use monitors from system configuration via bridge module
-            config.systemConfig.hyprland.monitors
+          if host == "workstation" then
+            # Workstation monitor config
+            [
+              "HDMI-A-1,3840x2160@60,0x0,1.6"
+              "DP-5,3840x2160@60,0x-1080,1.6,transform,1"
+            ]
+          else if host == "laptop" then
+            # Laptop monitor config
+            ["eDP-1,preferred,auto,1.6"]
           else
-            # Fallback if system config is not available
+            # Default fallback
             fallbackMonitors
         ));
     in
