@@ -21,6 +21,8 @@
         
         # Show on primary monitor
         output = ["HDMI-A-1"];
+        # Make the bar transparent
+        opacity = 0.0;
 
         modules-left = ["hyprland/workspaces"];
         modules-center = [
@@ -133,6 +135,7 @@
             "custom/airplane_mode"
             "idle_inhibitor"
             "bluetooth"
+            # Removed network module to fix the "not connected" message
           ];
         };
         
@@ -226,6 +229,8 @@
 
         # Only show on second monitor
         output = ["DP-5"];
+        # Make the bar transparent
+        opacity = 0.0;
         
         modules-left = ["hyprland/workspaces"];
         modules-center = [];
@@ -262,6 +267,8 @@
         
         # Only on primary monitor
         output = ["HDMI-A-1"];
+        # Make the bar transparent
+        opacity = 0.0;
         
         modules-left = ["wlr/taskbar" "tray"];
         modules-center = ["hyprland/window"];
@@ -319,6 +326,8 @@
         
         # Only on secondary monitor
         output = ["DP-5"];
+        # Make the bar transparent
+        opacity = 0.0;
         
         modules-left = ["wlr/taskbar"]; 
         modules-center = ["hyprland/window"];

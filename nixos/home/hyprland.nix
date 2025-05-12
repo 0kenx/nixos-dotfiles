@@ -465,7 +465,7 @@
       };
       background = {
         monitor = "";
-        path = "$HOME/background";
+        path = "/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg";
         blur_passes = 2;
         color = "$base";
       };
@@ -532,15 +532,17 @@
         inner_color = "$surface0";
         font_color = "$text";
         fade_on_empty = false;
-        placeholder_text = "<span foreground=\"##$textAlpha\"><i>󰌾 Logged in as </i><span foreground=\"##8bd5ca\">$USER</span></span>";
+        placeholder_text = "󰌾 Logged in as $USER";
         hide_input = false;
+        font_size = 20;
+        font_family = "JetBrains Mono Regular";
         check_color = "$sky";
         fail_color = "$red";
-        fail_text = "<i>$FAIL <b>($ATTEMPTS)</b></i>";
+        fail_text = "<i>$FAIL <b>($ATTEMPTS)</b><i>";
         capslock_color = "$yellow";
-        position = "0, -185";
+        position = "0, 500";
         halign = "center";
-        valign = "center";
+        valign = "bottom";
         shadow_passes = 2;
       };
     };
