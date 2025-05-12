@@ -21,47 +21,43 @@
         "systemctl --user start hyprland-session.target"
       ];
 
-      # Host-specific monitor configuration
-      monitor =
-        if host == "workstation" then
-          # Workstation monitor config
-          [
-            "HDMI-A-1,3840x2160@60,0x0,1.6"
-            "DP-5,3840x2160@60,-1350x-1080,1.6,transform,1"
-          ]
-        else if host == "laptop" then
-          # Laptop monitor config
-          ["eDP-1,preferred,auto,1.6"]
-        else
-          # Default fallback
-          ["eDP-1,preferred,auto,1.6"];
+      # Use the host-specific monitor configuration from NixOS system config
+      monitor = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1"];
 
-      # Workspace assignment
-      workspace = [
-        # Main monitor workspaces
-        "1,monitor:HDMI-A-1"
-        "2,monitor:HDMI-A-1"
-        "3,monitor:HDMI-A-1"
-        "4,monitor:HDMI-A-1"
-        "5,monitor:HDMI-A-1"
-        "6,monitor:HDMI-A-1"
-        "7,monitor:HDMI-A-1"
-        "8,monitor:HDMI-A-1"
-        "9,monitor:HDMI-A-1"
-        "10,monitor:HDMI-A-1"
+      # Dynamically generate workspace assignments based on the monitors
+      workspace = let
+        # Extract monitor names from config strings
+        getMonitorName = monitorConfig:
+          lib.elemAt (lib.strings.splitString "," monitorConfig) 0;
 
-        # Secondary monitor workspaces
-        "11,monitor:DP-5"
-        "12,monitor:DP-5"
-        "13,monitor:DP-5"
-        "14,monitor:DP-5"
-        "15,monitor:DP-5"
-        "16,monitor:DP-5"
-        "17,monitor:DP-5"
-        "18,monitor:DP-5"
-        "19,monitor:DP-5"
-        "20,monitor:DP-5"
-      ];
+        # Get list of monitor names from NixOS system config
+        monitors = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1"];
+
+        # Get list of monitor names
+        monitorNames = map getMonitorName monitors;
+
+        # Get the primary monitor (first in the list) or default to eDP-1
+        primaryMonitor = if (builtins.length monitorNames) > 0
+                         then builtins.elemAt monitorNames 0
+                         else "eDP-1";
+
+        # Get the secondary monitor (second in the list) if available
+        secondaryMonitor = if (builtins.length monitorNames) > 1
+                           then builtins.elemAt monitorNames 1
+                           else null;
+
+        # Generate workspace assignments for primary monitor (1-10)
+        primaryWorkspaces = map (num: "${toString num},monitor:${primaryMonitor}")
+                               (lib.range 1 10);
+
+        # Generate workspace assignments for secondary monitor if available (11-20)
+        secondaryWorkspaces = if secondaryMonitor != null
+                             then map (num: "${toString num},monitor:${secondaryMonitor}")
+                                  (lib.range 11 20)
+                             else [];
+      in
+        # Combine primary and (optional) secondary workspaces
+        primaryWorkspaces ++ secondaryWorkspaces;
 
       # Execute apps at launch
       # Moved to the monitor configuration section above
@@ -607,34 +603,17 @@
         in
         "wallpaper = ${monitorName},${wallpaper}";
 
-      # Hardcoded monitor names to ensure they match actual outputs
-      # These will be used as a fallback if no monitors are specified in system config
-      fallbackMonitors = [
-        "HDMI-A-1,preferred,auto,1"
-        "DP-5,preferred,auto,1"
-      ];
-
       # Generate wallpaper preloads and assignments
       preloads = ''
         preload = ${landscapeWallpaper}
         preload = ${portraitWallpaper}
       '';
 
+      # Use the host-specific monitor configuration from NixOS system config
+      monitors = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1"];
+
       wallpaperAssignments = lib.strings.concatStringsSep "\n"
-        (map monitorWallpaper (
-          if host == "workstation" then
-            # Workstation monitor config
-            [
-              "HDMI-A-1,3840x2160@60,0x0,1.6"
-              "DP-5,3840x2160@60,-1350x-1080,1.6,transform,1"
-            ]
-          else if host == "laptop" then
-            # Laptop monitor config
-            ["eDP-1,preferred,auto,1.6"]
-          else
-            # Default fallback
-            fallbackMonitors
-        ));
+        (map monitorWallpaper monitors);
     in
     ''
       ${preloads}
