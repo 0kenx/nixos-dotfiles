@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   # Enable Hyprland system-wide
@@ -31,5 +31,8 @@
     zathura
     mpv
     imv
+    
+    # Add hyprpaper explicitly
+    hyprpaper
   ];
 }

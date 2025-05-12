@@ -85,9 +85,41 @@
     # Host-specific configurations
     nixosConfigurations = {
       # Default configuration
-      dev = mkNixosConfig {
-        hostName = "nixos";
-        hostConfig = ./hosts/laptop.nix; # Use laptop config for dev
+      dev = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          host = "nixos";
+          pkgs-unstable = pkgsUnstable;
+          inherit self inputs username channel pkgs;
+        };
+        modules = [
+          ./configuration.nix
+          ./hardware-configuration.nix
+
+          # Include host-specific configuration and secrets management
+          ./hosts/laptop.nix
+          ./modules/per-host.nix
+          ./modules/secrets.nix
+          sops-nix.nixosModules.sops
+
+          # Include common modules needed for all configurations
+          ./modules/common/base.nix
+          ./modules/services.nix # Include services module for waybar
+
+          # Home Manager integration
+          inputs.home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.${username} = import ./home;
+
+            # Pass flake inputs and system config to home-manager modules
+            home-manager.extraSpecialArgs = {
+              inherit inputs username;
+              host = "nixos";
+            };
+          }
+        ];
       };
     
       # Laptop configuration
