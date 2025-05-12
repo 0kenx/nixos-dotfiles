@@ -27,7 +27,7 @@
           # Workstation monitor config
           [
             "HDMI-A-1,3840x2160@60,0x0,1.6"
-            "DP-5,3840x2160@60,0x-1080,1.6,transform,1"
+            "DP-5,3840x2160@60,-1350x-1080,1.6,transform,1"
           ]
         else if host == "laptop" then
           # Laptop monitor config
@@ -626,7 +626,7 @@
             # Workstation monitor config
             [
               "HDMI-A-1,3840x2160@60,0x0,1.6"
-              "DP-5,3840x2160@60,0x-1080,1.6,transform,1"
+              "DP-5,3840x2160@60,-1350x-1080,1.6,transform,1"
             ]
           else if host == "laptop" then
             # Laptop monitor config
