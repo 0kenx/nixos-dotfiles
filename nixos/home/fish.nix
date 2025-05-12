@@ -101,7 +101,8 @@
       autostart_no_waybar = ''
         # Start essential services but NOT waybar (handled by systemd)
         # Assuming this is similar to the autostart function, but without waybar
-        pypr & hyprpaper & poweralertd -s & wl-paste --type text --watch cliphist store & wl-paste --type image --watch cliphist store & wl-clip-persist --clipboard regular & avizo-service & systemctl --user start psi-notify
+        # hyprpaper is handled by systemd user service
+        pypr & poweralertd -s & wl-paste --type text --watch cliphist store & wl-paste --type image --watch cliphist store & wl-clip-persist --clipboard regular & avizo-service & systemctl --user start psi-notify
       '';
 
       # Git functions

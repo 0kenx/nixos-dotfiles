@@ -595,6 +595,13 @@
         in
         "wallpaper = ${monitorName},${wallpaper}";
 
+      # Hardcoded monitor names to ensure they match actual outputs
+      # These will be used as a fallback if no monitors are specified in system config
+      fallbackMonitors = [
+        "HDMI-A-1,preferred,auto,1"
+        "DP-5,preferred,auto,1"
+      ];
+
       # Generate wallpaper preloads and assignments
       preloads = ''
         preload = ${landscapeWallpaper}
@@ -602,7 +609,7 @@
       '';
 
       wallpaperAssignments = lib.strings.concatStringsSep "\n"
-        (map monitorWallpaper (config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1.6"]));
+        (map monitorWallpaper (config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or fallbackMonitors));
     in
     ''
       ${preloads}
