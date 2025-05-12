@@ -1,7 +1,8 @@
 {config, lib, pkgs, ...}: {
   imports = [
-    ../modules/per-host.nix
-    
+    # Host options module
+    ../modules/host-options.nix
+
     # System modules
     ../modules/system/time.nix
     ../modules/system/gc.nix
@@ -70,6 +71,34 @@
   system.nixos-dotfiles = {
     host = {
       name = "workstation";
+    };
+
+    git = {
+      user = {
+        name = "0kenx";
+        email = "km@nxfi.app";
+        signingKey = "73834AA6FB6DD8B0";
+      };
+      includes = [
+        {
+          condition = "gitdir:~/projects/";
+          contents = {
+            user = {
+              name = "0kenx";
+              email = "km@nxfi.app";
+            };
+          };
+        }
+        {
+          condition = "gitdir:~/work/";
+          contents = {
+            user = {
+              name = "Ken Miller";
+              email = "ken.miller@work.com";
+            };
+          };
+        }
+      ];
     };
 
     hyprland = {

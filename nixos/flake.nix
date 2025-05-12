@@ -55,7 +55,6 @@
 
         # Include host-specific configuration and secrets management
         hostConfig                  # Host-specific config (from hosts/)
-        ./modules/per-host.nix      # Host configuration module
         ./modules/secrets.nix       # SOPS secrets configuration
         sops-nix.nixosModules.sops  # Secret management module
 
@@ -94,7 +93,6 @@
 
           # Include host-specific configuration and secrets management
           ./hosts/laptop.nix
-          ./modules/per-host.nix
           ./modules/secrets.nix
           sops-nix.nixosModules.sops
 
