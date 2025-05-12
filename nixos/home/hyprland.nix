@@ -21,8 +21,8 @@
         "systemctl --user start hyprland-session.target"
       ];
 
-      # Dynamic monitor configuration from host-specific settings
-      monitor = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1.6"];
+      # Dynamic monitor configuration from host-specific settings via the bridge module
+      monitor = config.systemConfig.hyprland.monitors;
 
       # Workspace assignment
       workspace = [
@@ -609,7 +609,14 @@
       '';
 
       wallpaperAssignments = lib.strings.concatStringsSep "\n"
-        (map monitorWallpaper (config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or fallbackMonitors));
+        (map monitorWallpaper (
+          if config.systemConfig.hyprland.monitors != null then
+            # Use monitors from system configuration via bridge module
+            config.systemConfig.hyprland.monitors
+          else
+            # Fallback if system config is not available
+            fallbackMonitors
+        ));
     in
     ''
       ${preloads}

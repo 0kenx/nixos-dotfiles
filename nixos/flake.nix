@@ -62,6 +62,10 @@
 
         # Home Manager integration
         inputs.home-manager.nixosModules.home-manager
+
+        # Bridge module to expose system config to home-manager
+        ./modules/home-bridge.nix
+
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
@@ -102,6 +106,10 @@
 
           # Home Manager integration
           inputs.home-manager.nixosModules.home-manager
+
+          # Bridge module to expose system config to home-manager
+          ./modules/home-bridge.nix
+
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
