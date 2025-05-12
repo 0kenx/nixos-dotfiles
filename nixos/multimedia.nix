@@ -5,5 +5,6 @@
     feh
     nsxiv
     mpv
+    gimp
   ];
 }
