@@ -1,0 +1,61 @@
+{ pkgs, lib, config, ... }:
+
+let
+  username = config.users.defaultUserName;
+in
+{
+  services.udev.packages = [ pkgs.yubikey-personalization ];
+
+  # programs.ssh.startAgent = true;
+
+  services.yubikey-agent.enable = true;
+
+  # PAM U2F configuration for Yubikey authentication
+  security.pam.u2f = {
+    enable = true;
+    settings = {
+      cue = true;
+      # Create authorization mapping in the user's home directory
+      authfile = "/home/${username}/.config/Yubico/u2f_keys";
+    };
+    control = "sufficient";
+  };
+
+  security.pam.services = {
+    login.u2fAuth = true;
+    greetd.u2fAuth = true;
+    sudo.u2fAuth = true;
+    sudo.sshAgentAuth = true;
+    hyprlock.u2fAuth = true;
+
+    # Adding explicit configuration for tuigreet
+    tuigreet.u2fAuth = true;
+  };
+
+  # Add yubikey-related packages
+  environment.systemPackages = with pkgs; [
+    yubikey-manager
+    yubioath-flutter
+    pam_u2f
+    opensc
+    pcsc-tools
+  ];
+  
+  # Enable the PCSCD daemon for Yubikey
+  services.pcscd.enable = true;
+  
+  # We configure the SOPS age SSH key paths in modules/secrets.nix
+  
+  # Add script to initialize the u2f_keys file
+  system.activationScripts.yubikey-setup = lib.stringAfter [ "users" ] ''
+    mkdir -p /home/${username}/.config/Yubico
+    if [ ! -f /home/${username}/.config/Yubico/u2f_keys ]; then
+      echo "Creating u2f_keys file for ${username}"
+      touch /home/${username}/.config/Yubico/u2f_keys
+    fi
+    # Always ensure proper permissions on Yubico directory and files
+    chown -R ${username}:${username} /home/${username}/.config/Yubico
+    chmod 700 /home/${username}/.config/Yubico
+    chmod 600 /home/${username}/.config/Yubico/u2f_keys
+  '';
+}

@@ -97,6 +97,13 @@
 
     # Fish shell functions
     functions = {
+      # Autostart function that doesn't launch waybar (to prevent duplicate instances)
+      autostart_no_waybar = ''
+        # Start essential services but NOT waybar (handled by systemd)
+        # Assuming this is similar to the autostart function, but without waybar
+        pypr & hyprpaper & poweralertd -s & wl-paste --type text --watch cliphist store & wl-paste --type image --watch cliphist store & wl-clip-persist --clipboard regular & avizo-service & systemctl --user start psi-notify
+      '';
+
       # Git functions
       current_branch = ''
         git symbolic-ref HEAD 2> /dev/null | sed -e 's|^refs/heads/||'

@@ -1,31 +1,45 @@
 {pkgs, lib, config, ...}: {
   programs.waybar = {
     enable = true;
-    
+
     # Use the system-installed Waybar
     package = pkgs.waybar;
+
+    # Ensure waybar starts with systemd
+    systemd = {
+      enable = true;
+      target = "hyprland-session.target";
+    };
     
     # Configuration
-    settings = [
-      # Top Bar Config
-      {
-        name = "top_bar";
+    settings = let 
+      # Get the list of monitors from the system configuration
+      monitorConfigs = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1"];
+      
+      # Function to extract monitor names from the Hyprland monitor config strings
+      getMonitorName = monitorConfig: 
+        lib.lists.elemAt (lib.strings.splitString "," monitorConfig) 0;
+      
+      # Get the list of monitor names as strings
+      monitorNames = map getMonitorName monitorConfigs;
+      
+      # Primary monitor is the first in the list
+      primaryMonitor = lib.lists.elemAt monitorNames 0;
+    in {
+      # Top bar for all monitors
+      "top_bar" = {
         layer = "top";
         position = "top";
         height = 36;
         spacing = 4;
 
-        # Dynamic output based on host configuration - use primary monitor
-        output = let
-          monitors = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1.6"];
-        in
-          lib.lists.optional (lib.length monitors > 0)
-            (builtins.elemAt (lib.strings.splitString "," (lib.lists.elemAt monitors 0)) 0);
-
+        # List monitors explicitly
+        output = ["HDMI-A-1" "DP-5"];
+        
         modules-left = ["hyprland/workspaces" "hyprland/submap"];
         modules-center = ["clock#time" "custom/separator" "clock#week" "custom/separator_dot" "clock#month" "custom/separator" "clock#calendar"];
         modules-right = ["bluetooth" "network" "group/misc" "custom/logout_menu"];
-
+        
         "hyprland/workspaces" = {
           on-click = "activate";
           format = "{icon}";
@@ -212,23 +226,18 @@
           interval = "once";
           on-click = "fish -c wlogout_uniqe";
         };
-      }
+      };
       
-      # Bottom Bar Config
-      {
-        name = "bottom_bar";
+      # Bottom bar for all monitors
+      "bottom_bar" = {
         layer = "top";
         position = "bottom";
         height = 36;
         spacing = 4;
 
-        # Dynamic output based on host configuration - use primary monitor
-        output = let
-          monitors = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1.6"];
-        in
-          lib.lists.optional (lib.length monitors > 0)
-            (builtins.elemAt (lib.strings.splitString "," (lib.lists.elemAt monitors 0)) 0);
-
+        # List monitors explicitly
+        output = ["HDMI-A-1" "DP-5"];
+        
         modules-left = ["user"];
         modules-center = ["hyprland/window"];
         modules-right = ["keyboard-state" "hyprland/language"];
@@ -259,25 +268,20 @@
           format = " <span color='#8bd5ca'>{user}</span> (up <span color='#f5bde6'>{work_d} d</span> <span color='#8aadf4'>{work_H} h</span> <span color='#eed49f'>{work_M} min</span> <span color='#a6da95'>↑</span>)";
           icon = true;
         };
-      }
+      };
       
-      # Left Bar Config
-      {
-        name = "left_bar";
+      # Left bar only for primary monitor
+      "left_bar" = {
         layer = "top";
         position = "left";
         spacing = 4;
         width = 75;
         margin-top = 10;
         margin-bottom = 10;
-
-        # Dynamic output based on host configuration - use primary monitor
-        output = let
-          monitors = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1.6"];
-        in
-          lib.lists.optional (lib.length monitors > 0)
-            (builtins.elemAt (lib.strings.splitString "," (lib.lists.elemAt monitors 0)) 0);
-
+        
+        # Target primary monitor explicitly
+        output = ["HDMI-A-1"];
+        
         modules-left = ["wlr/taskbar"];
         modules-center = ["cpu" "memory" "disk" "temperature" "battery" "backlight" "pulseaudio" "systemd-failed-units"];
         modules-right = ["tray"];
@@ -425,11 +429,18 @@
         "systemd-failed-units" = {
           format = "✗ {nr_failed}";
         };
-      }
-    ];
+      };
+    };
     
     # CSS Styles
     style = ''
+      * {
+          border: none;
+          border-radius: 0;
+          min-height: 0;
+          font-family: JetBrainsMono Nerd Font;
+      }
+
       @define-color base   #24273a;
       @define-color mantle #1e2030;
       @define-color crust  #181926;
@@ -461,21 +472,19 @@
       @define-color flamingo  #f0c6c6;
       @define-color rosewater #f4dbd6;
 
-      * {
-        border: none;
-      }
+      /* Override earlier * selector */
       
-      window.bottom_bar#waybar {
+      #bottom_bar {
         background-color: alpha(@base, 0.7);
         border-top: solid alpha(@surface1, 0.7) 2;
       }
       
-      window.top_bar#waybar {
+      #top_bar {
         background-color: alpha(@base, 0.7);
         border-bottom: solid alpha(@surface1, 0.7) 2;
       }
       
-      window.left_bar#waybar {
+      #left_bar {
         background-color: alpha(@base, 0.7);
         border-top: solid alpha(@surface1, 0.7) 2;
         border-right: solid alpha(@surface1, 0.7) 2;
@@ -483,7 +492,7 @@
         border-radius: 0 15 15 0;
       }
       
-      window.bottom_bar .modules-center {
+      #bottom_bar .modules-center {
         background-color: alpha(@surface1, 0.7);
         color: @green;
         border-radius: 15;
@@ -493,7 +502,7 @@
         margin-bottom: 5;
       }
       
-      window.bottom_bar .modules-left {
+      #bottom_bar .modules-left {
         background-color: alpha(@surface1, 0.7);
         border-radius: 0 15 15 0;
         padding-left: 20;
@@ -502,7 +511,7 @@
         margin-bottom: 5;
       }
       
-      window.bottom_bar .modules-right {
+      #bottom_bar .modules-right {
         background-color: alpha(@surface1, 0.7);
         border-radius: 15 0 0 15;
         padding-left: 20;
@@ -555,7 +564,7 @@
         margin-bottom: 5;
       }
       
-      window.top_bar .modules-center {
+      #top_bar .modules-center {
         font-weight: bold;
         background-color: alpha(@surface1, 0.7);
         color: @peach;
@@ -707,7 +716,7 @@
         margin-bottom: 5;
       }
       
-      window.left_bar .modules-center {
+      #left_bar .modules-center {
         background-color: alpha(@surface1, 0.7);
         border-radius: 0 15 15 0;
         margin-right: 5;

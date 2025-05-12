@@ -5,8 +5,9 @@
   programs.hyprland = {
     enable = true;
     withUWSM = true;
+    # The systemd integration is handled in home-manager, not here
   };
-  
+
   # Set environment variables for Wayland compatibility
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
   environment.sessionVariables.WLR_NO_HARDWARE_CURSORS = "1";
@@ -31,5 +32,6 @@
     zathura
     mpv
     imv
+
   ];
 }

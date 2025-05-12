@@ -21,6 +21,7 @@
     ./hardware/usb.nix
     ./hardware/keyboard.nix
     ./hardware/screen.nix
+    ./hardware/yubikey.nix
     
     # Network-related modules
     ./network/vpn.nix

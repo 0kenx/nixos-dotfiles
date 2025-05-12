@@ -2,7 +2,11 @@
 {
   wayland.windowManager.hyprland = {
     enable = true;
-    systemd.enable = true;
+    systemd = {
+      enable = true;
+      # Ensure systemd user services start properly
+      variables = ["--all"];
+    };
     xwayland.enable = true;
 
     # Use the same settings as the system configuration
@@ -11,9 +15,10 @@
     settings = {
       # Use exec-once to set up autostart script
       exec-once = [
-        "fish -c autostart"
-        "waybar"
-        "hyprpaper"
+        "fish -c autostart_no_waybar" # Using modified autostart that doesn't launch waybar
+        "systemctl --user import-environment DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
+        "systemctl --user start graphical-session.target"
+        "systemctl --user start hyprland-session.target"
       ];
 
       # Dynamic monitor configuration from host-specific settings
@@ -607,5 +612,23 @@
       ipc = off
       splash = false
     '';
+  };
+
+  # Configure hyprpaper to start automatically with systemd
+  systemd.user.services.hyprpaper = {
+    Unit = {
+      Description = "Wallpaper daemon for Hyprland";
+      PartOf = ["graphical-session.target"];
+      After = ["graphical-session.target"];
+    };
+
+    Service = {
+      ExecStart = "${pkgs.hyprpaper}/bin/hyprpaper";
+      Restart = "on-failure";
+    };
+
+    Install = {
+      WantedBy = ["graphical-session.target"];
+    };
   };
 }

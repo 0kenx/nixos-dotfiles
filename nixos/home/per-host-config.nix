@@ -1,9 +1,9 @@
-{inputs, username, host, pkgs, ...}: {
+{inputs, username, host, pkgs, lib, ...}: {
   # This file defines configurations that may differ between hosts
   # Import this file in your host-specific NixOS configuration
-  
+
   # Define a module that can be imported in host-specific configurations
-  options.nixosConfig.system.nixos-dotfiles = {
+  options.nixosConfig.system.nixos-dotfiles = with lib; {
     # Git configuration options
     git = {
       # User information
@@ -24,7 +24,7 @@
           description = "GPG key ID for signing commits";
         };
       };
-      
+
       # Git includes for different directories
       includes = mkOption {
         type = types.listOf types.attrs;
@@ -43,7 +43,7 @@
         ];
       };
     };
-    
+
     # Hyprland configuration options
     hyprland = {
       monitors = mkOption {
@@ -52,7 +52,7 @@
         description = "Monitor configurations for this host";
       };
     };
-    
+
     # Other host-specific configurations...
   };
   
@@ -90,8 +90,8 @@
       
       hyprland = {
         monitors = [
-          "eDP-1,preferred,auto,1.6"
-          "HDMI-A-1,preferred,auto-up,1.6"
+          "HDMI-A-1,3840x2160@60,0x0,1.5"
+          "DP-5,3840x2160@60,2560x0,1.5"
         ];
       };
     };

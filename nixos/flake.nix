@@ -5,20 +5,16 @@
       nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
       nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
       rust-overlay.url = "github:oxalica/rust-overlay";
-      # Remove wezterm input - we use the one from nixpkgs
       home-manager = {
         url = "github:nix-community/home-manager/release-24.11";
         inputs.nixpkgs.follows = "nixpkgs";
-      }; 
-      
+      };
+
       # Secret management with sops-nix
       sops-nix = {
         url = "github:Mic92/sops-nix";
         inputs.nixpkgs.follows = "nixpkgs";
       };
-      
-      # No need to reference nixos-secrets as git repo
-      # We assume that /etc/nixos/nixos-secrets exists
   };
 
   outputs = { nixpkgs, nixpkgs-unstable, self, sops-nix, ... } @ inputs:
@@ -44,7 +40,7 @@
       config = commonNixpkgsConfig; # Apply the common config here too
     };
     lib = pkgs.lib;
-    
+
     # Helper function to create NixOS configurations with common modules
     mkNixosConfig = { hostName, hostConfig }: nixpkgs.lib.nixosSystem {
       inherit system;
@@ -64,17 +60,17 @@
         sops-nix.nixosModules.sops  # Secret management module
 
         # Modules will be imported by each host configuration
-        
+
         # Home Manager integration
         inputs.home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.users.${username} = import ./home;
-          
+
           # Pass flake inputs and system config to home-manager modules
-          home-manager.extraSpecialArgs = { 
-            inherit inputs username; 
+          home-manager.extraSpecialArgs = {
+            inherit inputs username;
             host = hostName;
           };
         }
@@ -121,7 +117,7 @@
           }
         ];
       };
-    
+
       # Laptop configuration
       laptop = mkNixosConfig {
         hostName = "laptop";

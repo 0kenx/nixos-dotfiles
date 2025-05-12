@@ -47,7 +47,7 @@
     xdg-utils
     wtype
     wlrctl
-    waybar
+    # waybar removed to prevent duplicate instances - now only managed by home-manager
     rofi-wayland
     dunst
     avizo
