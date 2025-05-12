@@ -9,9 +9,18 @@
 
     settings = {
       # Monitor configuration from host-specific settings
+      # Use exec-once to set up monitors programmatically with bottom alignment
+      exec-once = [
+        "fish -c autostart"
+        # Calculate position for bottom alignment: y = -(main_height - secondary_width)
+        # and apply monitor configuration dynamically
+        # "bash -c 'main_res=$(hyprctl monitors -j | jq -r \".[] | select(.name==\\\"HDMI-A-1\\\") | .height\"); sec_width=$(hyprctl monitors -j | jq -r \".[] | select(.name==\\\"DP-5\\\") | .width\"); y_pos=$(($main_res - $sec_width)); hyprctl keyword monitor \"HDMI-A-1,preferred,auto,1.6\"; hyprctl keyword monitor \"DP-5,preferred,0x-$y_pos,1.6,transform,1\"'"
+      ];
+
+      # Fallback static configuration in case the script fails
       monitor = [
         "HDMI-A-1,preferred,auto,1.6"  # Main monitor
-        "DP-5,preferred,0x0,1.6,transform,1" # Secondary monitor (vertical, left of main, bottom aligned)
+        "DP-5,preferred,0x-1080,1.6,transform,1" # Secondary monitor (vertical, left of main, bottom aligned @4k)
       ];
 
       # Workspace assignment
@@ -42,7 +51,7 @@
       ];
 
       # Execute apps at launch
-      exec-once = ["fish -c autostart"];
+      # Moved to the monitor configuration section above
 
       # Define variables for Catppuccin Macchiato colors
       "$rosewater" = "rgb(f4dbd6)";
@@ -149,9 +158,9 @@
           color = "$teal";
           color_inactive = "0xff$baseAlpha";
         };
-        active_opacity = 0.7;
-        inactive_opacity = 0.7;
-        fullscreen_opacity = 0.7;
+        active_opacity = 0.8;
+        inactive_opacity = 0.8;
+        fullscreen_opacity = 0.8;
       };
 
       # Animation settings
