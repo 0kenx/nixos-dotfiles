@@ -228,6 +228,14 @@
         "opaque, title:^TelegramDesktop$"
         "float, $dropterm"
         "float, $volume_sidemenu"
+        "opaque, title:^GNU Image Manipulation Program"
+        "opaque, class:^gimp$"
+        "opaque, class:^Gimp"
+        "opaque, title:.*GIMP$"
+        "opacity 1.0 override 1.0 override, title:^GNU Image Manipulation Program"
+        "opacity 1.0 override 1.0 override, class:^gimp$"
+        "opacity 1.0 override 1.0 override, class:^Gimp"
+        "opacity 1.0 override 1.0 override, title:.*GIMP$"
       ];
 
       # Variable for mod key
@@ -560,11 +568,11 @@
   # Configure Hyprpaper
   xdg.configFile."hypr/hyprpaper.conf" = {
     text = ''
-      preload = /etc/nixos/assets/wallpaper/wallpaper_2560x1600.jpg
-      preload = /etc/nixos/assets/wallpaper/wallpaper_1600x2560.jpg
+      preload = /etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg
+      preload = /etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg
 
-      wallpaper = HDMI-A-1,/etc/nixos/assets/wallpaper/wallpaper_2560x1600.jpg
-      wallpaper = DP-5,/etc/nixos/assets/wallpaper/wallpaper_1600x2560.jpg
+      wallpaper = HDMI-A-1,/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg
+      wallpaper = DP-5,/etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg
 
       ipc = off
       splash = false
