@@ -10,34 +10,35 @@
     settings = {
       # Monitor configuration from host-specific settings
       monitor = [
-        "eDP-1,preferred,auto,1.6"  # Default fallback configuration
+        "HDMI-A-1,preferred,auto,1.6"  # Main monitor
+        "DP-5,preferred,0x0,1.6,transform,1" # Secondary monitor (vertical, left of main, bottom aligned)
       ];
 
       # Workspace assignment
       workspace = [
-        # Internal monitor workspaces
-        "1,monitor:eDP-1"
-        "2,monitor:eDP-1"
-        "3,monitor:eDP-1"
-        "4,monitor:eDP-1"
-        "5,monitor:eDP-1"
-        "6,monitor:eDP-1"
-        "7,monitor:eDP-1"
-        "8,monitor:eDP-1"
-        "9,monitor:eDP-1"
-        "10,monitor:eDP-1"
-        
-        # External monitor workspaces
-        "11,monitor:HDMI-A-1"
-        "12,monitor:HDMI-A-1"
-        "13,monitor:HDMI-A-1"
-        "14,monitor:HDMI-A-1"
-        "15,monitor:HDMI-A-1"
-        "16,monitor:HDMI-A-1"
-        "17,monitor:HDMI-A-1"
-        "18,monitor:HDMI-A-1"
-        "19,monitor:HDMI-A-1"
-        "20,monitor:HDMI-A-1"
+        # Main monitor workspaces
+        "1,monitor:HDMI-A-1"
+        "2,monitor:HDMI-A-1"
+        "3,monitor:HDMI-A-1"
+        "4,monitor:HDMI-A-1"
+        "5,monitor:HDMI-A-1"
+        "6,monitor:HDMI-A-1"
+        "7,monitor:HDMI-A-1"
+        "8,monitor:HDMI-A-1"
+        "9,monitor:HDMI-A-1"
+        "10,monitor:HDMI-A-1"
+
+        # Secondary monitor workspaces
+        "11,monitor:DP-5"
+        "12,monitor:DP-5"
+        "13,monitor:DP-5"
+        "14,monitor:DP-5"
+        "15,monitor:DP-5"
+        "16,monitor:DP-5"
+        "17,monitor:DP-5"
+        "18,monitor:DP-5"
+        "19,monitor:DP-5"
+        "20,monitor:DP-5"
       ];
 
       # Execute apps at launch
@@ -275,13 +276,13 @@
         # Scratchpads
         "$mainMod CTRL, T, exec, pypr toggle term"
         "$mainMod CTRL, V, exec, pypr toggle volume"
-        
+
         # Pyprland features
         "$mainMod CTRL, M, togglespecialworkspace, minimized"
         "$mainMod, M, exec, pypr toggle_special minimized"
         "$mainMod CTRL, E, exec, pypr expose"
         "$mainMod, Z, exec, pypr zoom"
-        
+
         # Application launchers
         "$mainMod, T, exec, ghostty"
         "$mainMod SHIFT, T, exec, telegram-desktop"
@@ -294,28 +295,28 @@
         "$mainMod SHIFT, D, exec, firejail --apparmor discord"
         "$mainMod, ESCAPE, exec, fish -c wlogout_uniqe"
         "$mainMod SHIFT, L, exec, hyprlock"
-        
+
         # Screenshot and recording
         "$mainMod SHIFT, S, exec, fish -c screenshot_to_clipboard"
         "$mainMod, E, exec, fish -c screenshot_edit"
         "$mainMod SHIFT, R, exec, fish -c record_screen_gif"
         "$mainMod, R, exec, fish -c record_screen_mp4"
-        
+
         # Clipboard management
         "$mainMod, V, exec, fish -c clipboard_to_type"
         "$mainMod SHIFT, V, exec, fish -c clipboard_to_wlcopy"
         "$mainMod, X, exec, fish -c clipboard_delete_item"
         "$mainMod SHIFT, X, exec, fish -c clipboard_clear"
-        
+
         # Bookmark management
         "$mainMod, U, exec, fish -c bookmark_to_type"
         "$mainMod SHIFT, U, exec, fish -c bookmark_add"
         "$mainMod CTRL, U, exec, fish -c bookmark_delete"
-        
+
         # Color picker
         "$mainMod, C, exec, hyprpicker -a"
         "$mainMod SHIFT, C, exec, pypr menu \"Color picker\""
-        
+
         # Window management
         "$mainMod SHIFT, Q, killactive"
         "$mainMod SHIFT, F, togglefloating"
@@ -323,28 +324,28 @@
         "$mainMod SHIFT, P, pseudo" # dwindle
         "$mainMod SHIFT, O, togglesplit" # dwindle
         "$mainMod ALT, M, exit"
-        
+
         # System toggles
         "$mainMod SHIFT, A, exec, fish -c airplane_mode_toggle"
         "$mainMod SHIFT, N, exec, dunstctl set-paused toggle"
         "$mainMod SHIFT, Y, exec, fish -c bluetooth_toggle"
         "$mainMod SHIFT, W, exec, fish -c wifi_toggle"
-        
+
         # Media controls
         "$mainMod, p, exec, playerctl play-pause"
         "$mainMod, bracketright, exec, playerctl next"
         "$mainMod, bracketleft, exec, playerctl previous"
-        
+
         # Volume controls
         ", XF86AudioRaiseVolume, exec, volumectl -u up"
         ", XF86AudioLowerVolume, exec, volumectl -u down"
         ", XF86AudioMute, exec, volumectl toggle-mute"
         ", XF86AudioMicMute, exec, volumectl -m toggle-mute"
-        
+
         # Brightness controls
         ", XF86MonBrightnessUp, exec, lightctl -D intel_backlight up"
         ", XF86MonBrightnessDown, exec, lightctl -D intel_backlight down"
-        
+
         # Focus movement
         "$mainMod, left, movefocus, l"
         "$mainMod, right, movefocus, r"
@@ -356,7 +357,7 @@
         "$mainMod, j, movefocus, d"
         "$mainMod, Tab, cyclenext,"
         "$mainMod, Tab, bringactivetotop,"
-        
+
         # Workspace switching (internal monitor)
         "$mainMod, 1, workspace, 1"
         "$mainMod, 2, workspace, 2"
@@ -368,7 +369,7 @@
         "$mainMod, 8, workspace, 8"
         "$mainMod, 9, workspace, 9"
         "$mainMod, 0, workspace, 10"
-        
+
         # Workspace switching (external monitor)
         "$mainMod ALT, 1, workspace, 11"
         "$mainMod ALT, 2, workspace, 12"
@@ -380,7 +381,7 @@
         "$mainMod ALT, 8, workspace, 18"
         "$mainMod ALT, 9, workspace, 19"
         "$mainMod ALT, 0, workspace, 20"
-        
+
         # Move windows to workspaces (internal monitor)
         "$mainMod SHIFT, 1, movetoworkspace, 1"
         "$mainMod SHIFT, 2, movetoworkspace, 2"
@@ -392,7 +393,7 @@
         "$mainMod SHIFT, 8, movetoworkspace, 8"
         "$mainMod SHIFT, 9, movetoworkspace, 9"
         "$mainMod SHIFT, 0, movetoworkspace, 10"
-        
+
         # Move windows to workspaces (external monitor)
         "$mainMod ALT SHIFT, 1, movetoworkspace, 11"
         "$mainMod ALT SHIFT, 2, movetoworkspace, 12"
@@ -404,7 +405,7 @@
         "$mainMod ALT SHIFT, 8, movetoworkspace, 18"
         "$mainMod ALT SHIFT, 9, movetoworkspace, 19"
         "$mainMod ALT SHIFT, 0, movetoworkspace, 20"
-        
+
         # Workspace scrolling
         "$mainMod, mouse_down, workspace, e+1"
         "$mainMod, mouse_up, workspace, e-1"
@@ -559,9 +560,12 @@
   # Configure Hyprpaper
   xdg.configFile."hypr/hyprpaper.conf" = {
     text = ''
-      preload = ~/red_and_blue-wallpaper-2560x1440.jpg
-      wallpaper = ,~/red_and_blue-wallpaper-2560x1440.jpg
-      
+      preload = /etc/nixos/assets/wallpaper/wallpaper_2560x1600.jpg
+      preload = /etc/nixos/assets/wallpaper/wallpaper_1600x2560.jpg
+
+      wallpaper = HDMI-A-1,/etc/nixos/assets/wallpaper/wallpaper_2560x1600.jpg
+      wallpaper = DP-5,/etc/nixos/assets/wallpaper/wallpaper_1600x2560.jpg
+
       ipc = off
       splash = false
     '';
