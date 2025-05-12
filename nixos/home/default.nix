@@ -1,5 +1,4 @@
-{inputs, username, host, lib, ...}: {
-  # Import modules
+{inputs, username, host, ...}: {
   imports = [
     ./rofi.nix
     ./fish.nix
@@ -12,13 +11,5 @@
     ./gtk.nix
     ./ssh.nix
   ];
-
-  # Required for home-manager
-  home.username = lib.mkForce username;
-  home.homeDirectory = lib.mkForce "/home/${username}";
-
-  # This value determines the Home Manager release that your configuration is compatible with
-  # Update this value when you update your home-manager or nixpkgs inputs
-  home.stateVersion = "24.11";
 }
 

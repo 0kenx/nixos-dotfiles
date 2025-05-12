@@ -1,9 +1,9 @@
-{config, lib, pkgs, username, ...}:
+{config, lib, pkgs, ...}:
 
 let
   # Get the hostname to determine which host-specific secrets to use
   hostname = config.networking.hostName;
-  # Username is passed from flake.nix via specialArgs
+  username = config.users.defaultUserName;
 in
 {
   # Ensure sops, age, and related tools are installed

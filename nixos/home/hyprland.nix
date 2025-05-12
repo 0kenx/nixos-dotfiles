@@ -1,63 +1,54 @@
-{inputs, pkgs, config, lib, host, ...}:
-{
+{inputs, pkgs, config, lib, ...}: {
   wayland.windowManager.hyprland = {
     enable = true;
-    systemd = {
-      enable = true;
-      # Ensure systemd user services start properly
-      variables = ["--all"];
-    };
+    systemd.enable = true;
     xwayland.enable = true;
 
     # Use the same settings as the system configuration
     package = pkgs.hyprland;
 
     settings = {
-      # Use exec-once to set up autostart script
+      # Monitor configuration from host-specific settings
+      # Use exec-once to set up monitors programmatically with bottom alignment
       exec-once = [
-        "fish -c autostart_no_waybar" # Using modified autostart that doesn't launch waybar
-        "systemctl --user import-environment DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
-        "systemctl --user start graphical-session.target"
-        "systemctl --user start hyprland-session.target"
+        "fish -c autostart"
+        # Calculate position for bottom alignment: y = -(main_height - secondary_width)
+        # and apply monitor configuration dynamically
+        # "bash -c 'main_res=$(hyprctl monitors -j | jq -r \".[] | select(.name==\\\"HDMI-A-1\\\") | .height\"); sec_width=$(hyprctl monitors -j | jq -r \".[] | select(.name==\\\"DP-5\\\") | .width\"); y_pos=$(($main_res - $sec_width)); hyprctl keyword monitor \"HDMI-A-1,preferred,auto,1.6\"; hyprctl keyword monitor \"DP-5,preferred,0x-$y_pos,1.6,transform,1\"'"
       ];
 
-      # Use the host-specific monitor configuration from NixOS system config
-      monitor = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1"];
+      # Fallback static configuration in case the script fails
+      monitor = [
+        "HDMI-A-1,preferred,auto,1.6"  # Main monitor
+        "DP-5,preferred,0x-1080,1.6,transform,1" # Secondary monitor (vertical, left of main, bottom aligned @4k)
+      ];
 
-      # Dynamically generate workspace assignments based on the monitors
-      workspace = let
-        # Extract monitor names from config strings
-        getMonitorName = monitorConfig:
-          lib.elemAt (lib.strings.splitString "," monitorConfig) 0;
+      # Workspace assignment
+      workspace = [
+        # Main monitor workspaces
+        "1,monitor:HDMI-A-1"
+        "2,monitor:HDMI-A-1"
+        "3,monitor:HDMI-A-1"
+        "4,monitor:HDMI-A-1"
+        "5,monitor:HDMI-A-1"
+        "6,monitor:HDMI-A-1"
+        "7,monitor:HDMI-A-1"
+        "8,monitor:HDMI-A-1"
+        "9,monitor:HDMI-A-1"
+        "10,monitor:HDMI-A-1"
 
-        # Get list of monitor names from NixOS system config
-        monitors = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1"];
-
-        # Get list of monitor names
-        monitorNames = map getMonitorName monitors;
-
-        # Get the primary monitor (first in the list) or default to eDP-1
-        primaryMonitor = if (builtins.length monitorNames) > 0
-                         then builtins.elemAt monitorNames 0
-                         else "eDP-1";
-
-        # Get the secondary monitor (second in the list) if available
-        secondaryMonitor = if (builtins.length monitorNames) > 1
-                           then builtins.elemAt monitorNames 1
-                           else null;
-
-        # Generate workspace assignments for primary monitor (1-10)
-        primaryWorkspaces = map (num: "${toString num},monitor:${primaryMonitor}")
-                               (lib.range 1 10);
-
-        # Generate workspace assignments for secondary monitor if available (11-20)
-        secondaryWorkspaces = if secondaryMonitor != null
-                             then map (num: "${toString num},monitor:${secondaryMonitor}")
-                                  (lib.range 11 20)
-                             else [];
-      in
-        # Combine primary and (optional) secondary workspaces
-        primaryWorkspaces ++ secondaryWorkspaces;
+        # Secondary monitor workspaces
+        "11,monitor:DP-5"
+        "12,monitor:DP-5"
+        "13,monitor:DP-5"
+        "14,monitor:DP-5"
+        "15,monitor:DP-5"
+        "16,monitor:DP-5"
+        "17,monitor:DP-5"
+        "18,monitor:DP-5"
+        "19,monitor:DP-5"
+        "20,monitor:DP-5"
+      ];
 
       # Execute apps at launch
       # Moved to the monitor configuration section above
@@ -465,7 +456,7 @@
       };
       background = {
         monitor = "";
-        path = "/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg";
+        path = "$HOME/background";
         blur_passes = 2;
         color = "$base";
       };
@@ -532,17 +523,15 @@
         inner_color = "$surface0";
         font_color = "$text";
         fade_on_empty = false;
-        placeholder_text = "󰌾 Logged in as $USER";
+        placeholder_text = "<span foreground=\"##$textAlpha\"><i>󰌾 Logged in as </i><span foreground=\"##8bd5ca\">$USER</span></span>";
         hide_input = false;
-        font_size = 20;
-        font_family = "JetBrains Mono Regular";
         check_color = "$sky";
         fail_color = "$red";
-        fail_text = "<i>$FAIL <b>($ATTEMPTS)</b><i>";
+        fail_text = "<i>$FAIL <b>($ATTEMPTS)</b></i>";
         capslock_color = "$yellow";
-        position = "0, 500";
+        position = "0, -185";
         halign = "center";
-        valign = "bottom";
+        valign = "center";
         shadow_passes = 2;
       };
     };
@@ -585,63 +574,17 @@
     };
   };
 
-  # Configure Hyprpaper with dynamic monitor settings
+  # Configure Hyprpaper
   xdg.configFile."hypr/hyprpaper.conf" = {
-    text = let
-      # Base wallpaper path
-      wallpaperBase = "/etc/nixos/assets/wallpaper";
-      # Default landscape and portrait wallpapers
-      landscapeWallpaper = "${wallpaperBase}/wallpaper_3840x2160.jpg";
-      portraitWallpaper = "${wallpaperBase}/wallpaper_2160x3840.jpg";
+    text = ''
+      preload = /etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg
+      preload = /etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg
 
-      # Function to generate wallpaper configs for monitors
-      monitorWallpaper = monitor:
-        let
-          monitorParts = lib.strings.splitString "," monitor;
-          monitorName = lib.lists.elemAt monitorParts 0;
-          # Check if monitor has transform=1 (portrait) in its config
-          isPortrait = lib.strings.hasInfix "transform,1" monitor;
-          wallpaper = if isPortrait then portraitWallpaper else landscapeWallpaper;
-        in
-        "wallpaper = ${monitorName},${wallpaper}";
-
-      # Generate wallpaper preloads and assignments
-      preloads = ''
-        preload = ${landscapeWallpaper}
-        preload = ${portraitWallpaper}
-      '';
-
-      # Use the host-specific monitor configuration from NixOS system config
-      monitors = config.nixosConfig.system.nixos-dotfiles.hyprland.monitors or ["eDP-1,preferred,auto,1"];
-
-      wallpaperAssignments = lib.strings.concatStringsSep "\n"
-        (map monitorWallpaper monitors);
-    in
-    ''
-      ${preloads}
-
-      ${wallpaperAssignments}
+      wallpaper = HDMI-A-1,/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg
+      wallpaper = DP-5,/etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg
 
       ipc = off
       splash = false
     '';
-  };
-
-  # Configure hyprpaper to start automatically with systemd
-  systemd.user.services.hyprpaper = {
-    Unit = {
-      Description = "Wallpaper daemon for Hyprland";
-      PartOf = ["graphical-session.target"];
-      After = ["graphical-session.target"];
-    };
-
-    Service = {
-      ExecStart = "${pkgs.hyprpaper}/bin/hyprpaper";
-      Restart = "on-failure";
-    };
-
-    Install = {
-      WantedBy = ["graphical-session.target"];
-    };
   };
 }
