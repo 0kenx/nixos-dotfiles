@@ -22,9 +22,9 @@
       users.${username} = {
         imports =
           if (host == "nixos") then
-            [ ./home/default.nix ]
+            [ ../../home/default.nix ]
           else
-            [ ./home ];
+            [ ../../home ];
         home.username = "${username}";
         home.homeDirectory = "/home/${username}";
         home.stateVersion = "${channel}";
@@ -39,7 +39,7 @@
       extraGroups = [ "networkmanager" "input" "wheel" "video" "audio" "tss" ];
       shell = pkgs.fish;
       openssh.authorizedKeys.keyFiles = [
-        ./hosts/common/keys/id_yubidef.pub
+        ../../hosts/common/keys/id_yubidef.pub
       ];
       packages = with pkgs; [
         youtube-music
