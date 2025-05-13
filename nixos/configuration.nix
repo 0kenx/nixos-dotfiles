@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running 'nixos-help').
 
-{ channel, ... }:
+{ pkgs, channel, ... }:
 
 {
   # Import essential modules in the correct order:
@@ -19,6 +19,10 @@
     # Module manager for conditional imports based on host configuration
     ./modules/module-manager.nix
   ];
+
+  # Run unpatched dynamic binaries on NixOS.
+  programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [ glibc gcc.cc.lib ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

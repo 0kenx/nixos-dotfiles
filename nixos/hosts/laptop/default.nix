@@ -8,11 +8,11 @@
 
   # Host-specific configuration
   networking.hostName = "laptop";
-  
+
   # Enable specific features for laptop
   system.nixos-dotfiles.host = {
     name = "laptop";
-    
+
     # Hardware capabilities
     hardware = {
       hasBluetooth = true;
@@ -22,7 +22,7 @@
       hasWebcam = true;
       isBattery = true;
     };
-    
+
     # Display setup
     displays = {
       primary = "eDP-1"; # Built-in laptop screen
@@ -36,7 +36,7 @@
       secondaryPosition = "auto-right"; # Position HDMI display to the right of the built-in display
       tertiaryPosition = null;
     };
-    
+
     # Module enablement
     modules = {
       enable = {
@@ -50,7 +50,7 @@
         autoUpgrade = true; # Keep laptop updated
       };
     };
-    
+
     # Git configuration using secrets from sops-nix
     git = {
       user = {
@@ -80,7 +80,7 @@
       ];
     };
   };
-  
+
   # Additional laptop-specific packages
   environment.systemPackages = with pkgs; [
     powertop
