@@ -12,6 +12,9 @@
     ./ssh.nix
   ];
 
+  # We're now explicitly starting components with exec-once in Hyprland
+  # No need for custom systemd targets
+
   # Basic Home Manager configuration
   home.username = "${username}";
   home.homeDirectory = "/home/${username}";
