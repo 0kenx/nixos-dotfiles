@@ -1,4 +1,21 @@
-{inputs, username, host, ...}: {
+{inputs, username, host, pkgs, ...}: {
+  # Install packages required by fish functions
+  home.packages = with pkgs; [
+    # For fish_greeting
+    figlet
+
+    # For file and dir previews
+    fd
+    fzf
+    bat
+    lsd
+    chafa
+    ouch
+
+    # For terminal utilities
+    playerctl
+  ];
+
   programs.fish = {
     enable = true;
 
@@ -407,6 +424,156 @@
       # Migrated functions from ~/.config/fish/functions
 
       # NOTE: autostart function is removed since we're using systemd instead
+
+      aichat_fish = ''
+        set -l _old (commandline)
+        if test -n $_old
+            echo -n "⌛"
+            commandline -f repaint
+            commandline (aichat -e $_old)
+        end
+      '';
+
+      archive-preview = ''
+        set archive "$argv[1]"
+        set supported_archive_formats tar.gz tar.bz2 tar.xz zip rar 7z
+
+        for format in $supported_archive_formats
+            if string match -q "application/$format" (file -b --mime-type "$archive")
+                ouch list --tree --no "$archive"
+                exit 0
+            end
+        end
+      '';
+
+      back-op = ''
+        cd ..
+        commandline -f repaint
+      '';
+
+      backtrack-op = ''
+        cd -
+        commandline -f repaint
+      '';
+
+      dir-preview = ''
+        set dir "$argv[1]"
+        lsd --tree --depth=1 --color=always --icon=always --icon-theme=fancy "$dir"
+      '';
+
+      fetch_music_player_data = ''
+        playerctl -a metadata --format "{\"text\": \"{{artist}} - {{markup_escape(title)}}\", \"tooltip\": \"<i><span color='#a6da95'>{{playerName}}</span></i>: <b><span color='#f5a97f'>{{artist}}</span> - <span color='#c6a0f6'>{{markup_escape(title)}}</span></b>\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}" -F
+      '';
+
+      file-preview = ''
+        set file "$argv[1]"
+        bat --color=always --style=numbers,header-filesize,grid --line-range=:15 --wrap=auto "$file"
+      '';
+
+      clear-op = ''
+        clear
+        commandline -f repaint
+      '';
+
+      list-op = ''
+        ls
+        commandline -f repaint
+      '';
+
+      fish_greeting = ''
+        set_color blue
+        echo " Distro:  NixOS"
+        set_color white
+        echo "󰅱 Langs:   Rust  Zig  Go  JS 󰛦 TS  Python  Lua  Wasm"
+        set_color green
+        echo " Shell:  󰈺 Fish"
+        set_color yellow
+        echo "󰟶 Mood:   👨‍💻"
+        set_color cyan
+        figlet random -f binary
+        # clear
+      '';
+
+      fish_user_key_bindings = ''
+        # Execute this once per mode that emacs bindings should be used in
+        fish_default_key_bindings -M insert
+
+        # Then execute the vi-bindings so they take precedence when there's a conflict.
+        # Without --no-erase fish_vi_key_bindings will default to
+        # resetting all bindings.
+        # The argument specifies the initial mode (insert, "default" or visual).
+        fish_vi_key_bindings --no-erase insert
+
+        # Nullify fzf default keybindings
+        bind \cT "" -M insert
+        bind \cR "" -M insert
+
+        bind \er fzf-history-widget -M insert
+        bind \ef fzf-file-preview-widget -M insert
+        bind \ec fzf-cd-preview-widget -M insert
+        bind \ep fzf-ps-widget -M insert
+
+        bind \e\f clear-op -M insert
+        bind \eb back-op -M insert
+        bind \eB backtrack-op -M insert
+        bind \e/ list-op -M insert
+
+        bind \ea aichat_fish -M insert
+      '';
+
+      fzf-cd-preview-widget = ''
+        set selected_dir (fd --type d --hidden --no-ignore --exclude .git --exclude .direnv | fzf --height 40% --reverse --preview 'dir-preview {}' --preview-window=right:40%)
+
+        if test -n "$selected_dir"
+            cd "$selected_dir"
+        end
+        commandline -f repaint
+      '';
+
+      fzf-file-preview-widget = ''
+        commandline -i (fd --hidden --no-ignore --exclude .git --exclude .direnv | fzf --height 40% --preview-window=right:40% --reverse --preview 'switch-preview {}')
+        commandline -f repaint
+      '';
+
+      fzf-ps-widget = ''
+        commandline -i (pgrep -a . | fzf --height 40%)
+        commandline -f repaint
+      '';
+
+      image-preview = ''
+        set image "$argv[1]"
+
+        # Retrieve the current terminal dimensions and reduce them slightly to avoid boundary issues
+        set term_width (math (tput cols) - 1)
+        set term_height (math (tput lines) - 1)
+
+        chafa "$image" --size="$term_width"x"$term_height"
+      '';
+
+      switch-preview = ''
+        set path "$argv[1]"
+
+        if test -f "$path"
+            if test ! -s "$path"
+                echo "File is empty"
+            else
+                archive-preview "$path"
+                if string match -q "image/*" (file -b --mime-type "$path")
+                    image-preview "$path"
+                else
+                    file-preview "$path"
+                end
+            end
+        else if test -d "$path"
+            dir-preview "$path"
+        else
+            echo "Preview unavailable"
+        end
+      '';
+
+      tre = ''
+        command tre "$argv" -e | less
+      '';
 
       bluetooth_toggle = ''
         set bluetooth_status (rfkill list bluetooth | grep -i -o "Soft blocked: yes")
