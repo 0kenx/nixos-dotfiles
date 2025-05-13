@@ -1,9 +1,9 @@
-{inputs, pkgs, config, lib, ...}: 
+{inputs, pkgs, config, lib, nixosConfig, ...}:
 
 let
   # Import the Hyprland display configuration
-  hyprlandConfig = import ./hyprland-config.nix { inherit config lib pkgs; };
-  
+  hyprlandConfig = import ./hyprland-config.nix { inherit config lib pkgs nixosConfig; };
+
   # Extract monitor and workspace configurations
   monitors = hyprlandConfig.hyprlandConfig.monitors;
   workspaces = hyprlandConfig.hyprlandConfig.workspaces;
@@ -551,25 +551,25 @@ in {
   # Dynamic wallpaper configuration based on host display configuration
   xdg.configFile."hypr/hyprpaper.conf" = {
     text = let
-      primary = config.nixosConfig.system.nixos-dotfiles.host.displays.primary;
-      secondary = config.nixosConfig.system.nixos-dotfiles.host.displays.secondary;
-      tertiary = config.nixosConfig.system.nixos-dotfiles.host.displays.tertiary;
-      
+      primary = nixosConfig.system.nixos-dotfiles.host.displays.primary;
+      secondary = nixosConfig.system.nixos-dotfiles.host.displays.secondary;
+      tertiary = nixosConfig.system.nixos-dotfiles.host.displays.tertiary;
+
       # Determine wallpaper orientation based on rotation
-      secondaryOrientation = if config.nixosConfig.system.nixos-dotfiles.host.displays.secondaryRotate == "left" 
-                             || config.nixosConfig.system.nixos-dotfiles.host.displays.secondaryRotate == "right"
+      secondaryOrientation = if nixosConfig.system.nixos-dotfiles.host.displays.secondaryRotate == "left"
+                             || nixosConfig.system.nixos-dotfiles.host.displays.secondaryRotate == "right"
                              then "vertical" else "horizontal";
-      
-      tertiaryOrientation = if config.nixosConfig.system.nixos-dotfiles.host.displays.tertiaryRotate == "left" 
-                            || config.nixosConfig.system.nixos-dotfiles.host.displays.tertiaryRotate == "right"
+
+      tertiaryOrientation = if nixosConfig.system.nixos-dotfiles.host.displays.tertiaryRotate == "left"
+                            || nixosConfig.system.nixos-dotfiles.host.displays.tertiaryRotate == "right"
                             then "vertical" else "horizontal";
-      
+
       # Select appropriate wallpapers based on orientation
       primaryWallpaper = "/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg";
-      secondaryWallpaper = if secondaryOrientation == "vertical" 
+      secondaryWallpaper = if secondaryOrientation == "vertical"
                           then "/etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg"
                           else "/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg";
-      tertiaryWallpaper = if tertiaryOrientation == "vertical" 
+      tertiaryWallpaper = if tertiaryOrientation == "vertical"
                           then "/etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg"
                           else "/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg";
     in ''

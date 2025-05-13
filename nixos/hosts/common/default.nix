@@ -17,14 +17,14 @@
       
       # Default display configuration
       displays = {
-        primary = "eDP-1"; # Most common primary display name for laptops
-        secondary = null;
-        tertiary = null;
-        primaryScale = 1.0;
-        secondaryScale = 1.0;
-        tertiaryScale = 1.0;
-        secondaryRotate = null;
-        tertiaryRotate = null;
+        primary = lib.mkDefault "eDP-1"; # Most common primary display name for laptops
+        secondary = lib.mkDefault null;
+        tertiary = lib.mkDefault null;
+        primaryScale = lib.mkDefault 1.0;
+        secondaryScale = lib.mkDefault 1.0;
+        tertiaryScale = lib.mkDefault 1.0;
+        secondaryRotate = lib.mkDefault null;
+        tertiaryRotate = lib.mkDefault null;
       };
       
       # Default module enablement

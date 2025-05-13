@@ -70,24 +70,24 @@
           sops-nix.nixosModules.sops
 
           # 5. Home Manager integration last
-            # inputs.home-manager.nixosModules.home-manager
-            # {
-            # home-manager.useGlobalPkgs = true;
-            # home-manager.useUserPackages = true;
-            # home-manager.backupFileExtension = "backup";
+          inputs.home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
 
             # Pass all necessary parameters explicitly to home/default.nix
-            # home-manager.users.${username} = import ./home {
-            #   inherit inputs username channel;
-            #   host = hostname;
-            # };
+            home-manager.users.${username} = import ./home {
+              inherit inputs username channel;
+              host = hostname;
+            };
 
             # Pass flake inputs and system config to home-manager modules
-            # home-manager.extraSpecialArgs = {
-            #   inherit inputs username channel;
-            #   host = hostname;
-            # };
-            # }
+            home-manager.extraSpecialArgs = {
+              inherit inputs username channel;
+              host = hostname;
+            };
+          }
         ];
       };
   in

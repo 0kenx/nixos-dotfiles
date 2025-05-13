@@ -3,7 +3,7 @@
 {
   # This import makes home-manager options available in NixOS modules.
   # It does NOT configure any specific user's home-manager setup.
-  # imports = [ inputs.home-manager.nixosModules.home-manager ];
+  imports = [ inputs.home-manager.nixosModules.home-manager ];
 
   # Define custom option for our use in other modules
   options.users.defaultUserName = lib.mkOption {
