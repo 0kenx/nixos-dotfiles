@@ -867,9 +867,10 @@
       # Create SSH control directory if it doesn't exist
       mkdir -p ~/.ssh/sockets
 
-      # Start keychain to manage SSH keys persistently
+      # Start keychain to manage SSH keys persistently without auto-adding keys
       if command -v keychain >/dev/null
-        keychain --quiet --agents ssh ~/.ssh/github_nxfi
+        # Use keychain but don't automatically add keys
+        keychain --quiet --noask --agents ssh
 
         # Load keychain environment variables
         if test -f ~/.keychain/(hostname)-fish
@@ -882,21 +883,8 @@
           eval (ssh-agent -c)
         end
 
-        # Function to add SSH keys if not already added
-        function add_ssh_keys
-          set -l keys ~/.ssh/github_nxfi
-
-          # Check if the agent has any identities
-          if not ssh-add -l &>/dev/null
-            ssh-add $keys
-          # Check if the specific key is already added
-          else if not ssh-add -l | grep -q "$(ssh-keygen -lf $keys | awk '{print $2}')"
-            ssh-add $keys
-          end
-        end
-
-        # Add SSH keys on shell startup
-        add_ssh_keys
+        # Note: We no longer automatically add keys on startup
+        # Users can manually run `ssh-add ~/.ssh/github_nxfi` when needed
       end
 
       # Set fish colors (can be customized)
