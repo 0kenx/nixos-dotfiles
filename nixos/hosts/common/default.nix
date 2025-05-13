@@ -7,12 +7,12 @@
     host = {
       # Default hardware configuration (conservative options)
       hardware = {
-        hasBluetooth = false;
-        hasNvidia = false;
-        hasFingerprint = false;
-        hasTouchpad = false;
-        hasWebcam = false;
-        isBattery = false;
+        hasBluetooth = lib.mkDefault false;
+        hasNvidia = lib.mkDefault false;
+        hasFingerprint = lib.mkDefault false;
+        hasTouchpad = lib.mkDefault false;
+        hasWebcam = lib.mkDefault false;
+        isBattery = lib.mkDefault false;
       };
       
       # Default display configuration
@@ -30,25 +30,25 @@
       # Default module enablement
       modules = {
         enable = {
-          hyprland = true;
-          gnome = false;
-          cuda = false;
-          localLLM = false;
-          printing = false;
-          clamav = false;
-          macRandomize = false;
-          autoUpgrade = false;
+          hyprland = lib.mkDefault true;
+          gnome = lib.mkDefault false;
+          cuda = lib.mkDefault false;
+          localLLM = lib.mkDefault false;
+          printing = lib.mkDefault false;
+          clamav = lib.mkDefault false;
+          macRandomize = lib.mkDefault false;
+          autoUpgrade = lib.mkDefault false;
         };
       };
       
       # Default Git configuration (empty, will be populated from sops-nix)
       git = {
         user = {
-          name = "Default User";
-          email = "user@example.com";
-          signingKey = null;
+          name = lib.mkDefault "Default User";
+          email = lib.mkDefault "user@example.com";
+          signingKey = lib.mkDefault null;
         };
-        includes = [];
+        includes = lib.mkDefault [];
       };
     };
   };

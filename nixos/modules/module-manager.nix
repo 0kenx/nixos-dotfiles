@@ -1,40 +1,13 @@
 # Module manager for conditional module loading based on host configuration
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, resolvedHostDotfilesConfig, ... }:
 
 let
-  # Helper function to safely access host configuration
-  # This function gracefully handles undefined paths with default values
-  getConfigValue = path: default:
-    if lib.hasAttrByPath path config
-    then lib.getAttrFromPath path config
-    else default;
+  # Use pre-resolved host configuration directly from specialArgs
+  # to avoid circular dependencies with home-manager and other modules
 
-  # Host module preferences with defaults
-  # These are fallback values that only apply if no host configuration exists
-  hostModules = getConfigValue ["system" "nixos-dotfiles" "host" "modules" "enable"] {
-    hyprland = true;
-    gnome = false;
-    cuda = false;
-    localLLM = false;
-    printing = false;
-    clamav = false;
-    macRandomize = false;
-    autoUpgrade = false;
-  };
-
-  # Host hardware capabilities with defaults
-  hostHardware = getConfigValue ["system" "nixos-dotfiles" "host" "hardware"] {
-    hasNvidia = false;
-    hasBluetooth = false;
-    hasFingerprint = false;
-  };
-
-  # Safer access functions for specific values
-  moduleEnabled = name: getConfigValue ["system" "nixos-dotfiles" "host" "modules" "enable" name]
-    (if builtins.hasAttr name hostModules then hostModules.${name} else false);
-
-  hardwareHas = capability: getConfigValue ["system" "nixos-dotfiles" "host" "hardware" capability]
-    (if builtins.hasAttr capability hostHardware then hostHardware.${capability} else false);
+  # Helper functions to access values from the pre-resolved configuration
+  moduleEnabled = name: resolvedHostDotfilesConfig.modules.enable.${name} or false;
+  hardwareHas = capability: resolvedHostDotfilesConfig.hardware.${capability} or false;
 in {
   # Import modules conditionally based on host configuration
   imports = lib.flatten [
@@ -47,7 +20,7 @@ in {
     ]
 
     # Auto-upgrade is conditionally imported
-    # (lib.optional (moduleEnabled "autoUpgrade") ./system/auto-upgrade.nix)
+    (lib.optional (moduleEnabled "autoUpgrade") ./system/auto-upgrade.nix)
 
     # Hardware modules - additional hardware modules not in core-modules.nix
     [
@@ -56,14 +29,14 @@ in {
     ]
 
     # Conditional hardware modules
-    # (lib.optional (hardwareHas "hasNvidia") ./hardware/nvidia.nix)
-    # (lib.optional (!(hardwareHas "hasNvidia")) ./hardware/disable-nvidia.nix)
-    # (lib.optional (hardwareHas "hasBluetooth") ./hardware/bluetooth.nix)
-    # (lib.optional (hardwareHas "hasFingerprint") ./hardware/fingerprint-scanner.nix)
+    (lib.optional (hardwareHas "hasNvidia") ./hardware/nvidia.nix)
+    (lib.optional (!(hardwareHas "hasNvidia")) ./hardware/disable-nvidia.nix)
+    (lib.optional (hardwareHas "hasBluetooth") ./hardware/bluetooth.nix)
+    (lib.optional (hardwareHas "hasFingerprint") ./hardware/fingerprint-scanner.nix)
 
     # Desktop environment modules - conditionally imported based on host preferences
-    # (lib.optional (moduleEnabled "hyprland") ./desktop/hyprland.nix)
-    # (lib.optional (moduleEnabled "gnome") ./desktop/gnome.nix)
+    (lib.optional (moduleEnabled "hyprland") ./desktop/hyprland.nix)
+    (lib.optional (moduleEnabled "gnome") ./desktop/gnome.nix)
     [
       ./desktop/display-manager.nix
       ./desktop/theme.nix
@@ -78,7 +51,7 @@ in {
     ]
 
     # Conditional networking modules
-    # (lib.optional (moduleEnabled "macRandomize") ./networking/mac-randomize.nix)
+    (lib.optional (moduleEnabled "macRandomize") ./networking/mac-randomize.nix)
 
     # Development modules - base development tools always imported
     [
@@ -94,7 +67,7 @@ in {
     ]
 
     # Conditional development modules
-    # (lib.optional (moduleEnabled "localLLM") ./development/llm-local.nix)
+    (lib.optional (moduleEnabled "localLLM") ./development/llm-local.nix)
 
     # Security modules - base security always imported
     [
@@ -103,7 +76,7 @@ in {
     ]
 
     # Conditional security modules
-    # (lib.optional (moduleEnabled "clamav") ./security/clamav-scanner.nix)
+    (lib.optional (moduleEnabled "clamav") ./security/clamav-scanner.nix)
 
     # Application modules - base applications always imported
     [
@@ -112,11 +85,11 @@ in {
     ]
 
     # Conditional application modules
-    # (lib.optional (moduleEnabled "printing") ./applications/printing.nix)
+    (lib.optional (moduleEnabled "printing") ./applications/printing.nix)
   ];
 
   # This enables CUDA for the entire system if the host has it enabled
-  # nixpkgs.config = lib.mkIf (moduleEnabled "cuda") {
-  #  cudaSupport = true;
-  # };
+  nixpkgs.config = lib.mkIf (moduleEnabled "cuda") {
+    cudaSupport = true;
+  };
 }

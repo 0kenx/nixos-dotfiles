@@ -47,7 +47,7 @@
     # Function to generate a NixOS system for a specific host
     mkNixosSystem = { hostname }:
       let
-        # Create a minimal nixosSystem to extract display configuration
+        # Create a minimal nixosSystem to extract host configuration
         hostInfoSystem = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = [
@@ -58,8 +58,10 @@
           ];
         };
 
+        # Extract all relevant host configurations from the pre-evaluated system
+        resolvedHostDotfilesConfig = hostInfoSystem.config.system.nixos-dotfiles.host;
         # Extract display configuration from the pre-evaluated system
-        hostDisplayConfig = hostInfoSystem.config.system.nixos-dotfiles.host.displays;
+        hostDisplayConfig = resolvedHostDotfilesConfig.displays;
       in
       nixpkgs.lib.nixosSystem {
         inherit system;
@@ -67,8 +69,8 @@
           host = hostname;
           pkgs-unstable = pkgsUnstable;
           inherit self inputs username channel pkgs;
-          # Pass the pre-resolved display configuration
-          inherit hostDisplayConfig;
+          # Pass the pre-resolved configurations
+          inherit resolvedHostDotfilesConfig hostDisplayConfig;
         };
         modules = [
           # 1. First load hardware configuration (needed by other modules)
@@ -93,9 +95,9 @@
 
             # Pass all necessary parameters explicitly to home/default.nix
             # Including pre-resolved hostDisplayConfig to avoid circular dependencies
-            home-manager.users.${username} = { pkgs, lib, ... }: 
+            home-manager.users.${username} = { pkgs, lib, ... }:
               import ./home {
-                inherit inputs username channel pkgs lib hostDisplayConfig; 
+                inherit inputs username channel pkgs lib hostDisplayConfig;
                 host = hostname;
               };
 
@@ -103,6 +105,9 @@
             home-manager.extraSpecialArgs = {
               inherit inputs username channel hostDisplayConfig;
               host = hostname;
+              # Pass other parts of host config for modules that might need it
+              hostModuleFlags = resolvedHostDotfilesConfig.modules.enable;
+              hostHardwareFlags = resolvedHostDotfilesConfig.hardware;
             };
           }
         ];
