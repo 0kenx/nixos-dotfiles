@@ -116,7 +116,7 @@ in {
   ];
 
   # This enables CUDA for the entire system if the host has it enabled
-  # nixpkgs.config = lib.mkIf (moduleEnabled "cuda") {
-  #   cudaSupport = true;
-  # };
+  nixpkgs.config = lib.mkIf (moduleEnabled "cuda") {
+    cudaSupport = true;
+  };
 }

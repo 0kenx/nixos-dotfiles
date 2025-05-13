@@ -78,14 +78,14 @@
 
             # Pass all necessary parameters explicitly to home/default.nix
             home-manager.users.${username} = import ./home {
-              inherit inputs username channel;
+              inherit inputs username channel; # nixosConfig will be implicitly available via extraSpecialArgs
               host = hostname;
             };
 
             # Pass flake inputs and system config to home-manager modules
             home-manager.extraSpecialArgs = {
               inherit inputs username channel;
-              host = hostname;
+              host = hostname;  # nixosConfig is added by Home Manager itself to these specialArgs
             };
           }
         ];
