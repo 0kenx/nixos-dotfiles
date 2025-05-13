@@ -415,15 +415,32 @@
     interactiveShellInit = ''
       # Set fish_greeting to empty to disable greeting
       set -U fish_greeting
-      
+
       # Enable vi mode
       fish_vi_key_bindings
       set -g fish_cursor_default block
       set -g fish_cursor_insert line
       set -g fish_cursor_visual underscore
-      
+
       # Add Alt+S keyboard shortcut for sudo !!
       bind \es 'echo "sudo !!"; commandline "sudo !!"'
+
+      # SSH agent initialization and connection reuse
+      # Create SSH control directory if it doesn't exist
+      mkdir -p ~/.ssh/sockets
+
+      # Function to add SSH keys if not already added
+      function add_ssh_keys
+        set -l keys ~/.ssh/github_nxfi
+
+        # Check if the key is already added
+        if not ssh-add -l | grep -q "$(ssh-keygen -lf $keys | awk '{print $2}')"
+          ssh-add $keys
+        end
+      end
+
+      # Add SSH keys on shell startup
+      add_ssh_keys
 
       # Set fish colors (can be customized)
       set -U fish_color_normal normal
