@@ -15,6 +15,13 @@
     port = 18888;
     host = "127.0.0.1";
   };
+
+  # Add proper shutdown timeout for open-webui service
+  systemd.services.open-webui = {
+    serviceConfig = {
+      TimeoutStopSec = "10s";
+    };
+  };
   
   # Local LLM tools and clients
   environment.systemPackages = [

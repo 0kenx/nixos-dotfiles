@@ -159,7 +159,7 @@
         };
 
         "custom/webcam" = {
-          interval = 1;
+          interval = 5;  # Check every 5 seconds, webcam state rarely changes
           exec = "fish -c check_webcam";
           return-type = "json";
         };
@@ -179,14 +179,14 @@
         };
 
         "custom/recording" = {
-          interval = 1;
+          interval = 3;  # Recording status only needs to update every 3 seconds
           exec-if = "pgrep wl-screenrec";
           exec = "fish -c check_recording";
           return-type = "json";
         };
 
         "custom/geo" = {
-          interval = 1;
+          interval = 10;  # Geoclue status rarely changes, 10 seconds is plenty
           exec-if = "pgrep geoclue";
           exec = "fish -c check_geo_module";
           return-type = "json";
@@ -194,14 +194,14 @@
 
         "custom/airplane_mode" = {
           return-type = "json";
-          interval = 1;
+          interval = 5;  # Network state doesn't change that frequently
           exec = "fish -c check_airplane_mode";
           on-click = "fish -c airplane_mode_toggle";
         };
 
         "custom/night_mode" = {
           return-type = "json";
-          interval = 1;
+          interval = 30;  # Night mode state changes very rarely
           exec = "fish -c check_night_mode";
           on-click = "fish -c night_mode_toggle";
         };
@@ -210,7 +210,7 @@
           return-type = "json";
           exec = "fish -c dunst_pause";
           on-click = "dunstctl set-paused toggle";
-          restart-interval = 1;
+          restart-interval = 3;  # Notification status can be checked less frequently
         };
 
         "idle_inhibitor" = {

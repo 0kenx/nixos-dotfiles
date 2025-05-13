@@ -112,7 +112,7 @@
       dcl = "docker container ls";
     };
 
-    # Fish shell functions
+    # Lazy-loaded Fish shell functions using autoload pattern
     functions = {
       # Git functions
       current_branch = ''

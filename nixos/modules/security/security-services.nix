@@ -27,14 +27,7 @@
   security.pam.services.hyprlock = {};
   # security.polkit.enable = true;
   programs.browserpass.enable = true;
-  services.clamav = {
-    daemon.enable = true;
-    fangfrisch.enable = true;
-    fangfrisch.interval = "daily";
-    updater.enable = true;
-    updater.interval = "daily"; #man systemd.time
-    updater.frequency = 12;
-  };
+  # ClamAV moved to dedicated clamav-scanner.nix module
   programs.firejail = {
     enable = true;
     wrappedBinaries = { 
