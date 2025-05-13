@@ -54,27 +54,34 @@ let
       (map (i: "${toString i},monitor:${tertiaryDisplayOutput}") (lib.range 21 30))
     else []);
 
-  # Script to initialize display layout dynamically
-  monitorScript = ''
-    # Configure monitors if more than one is connected
-    if [ "$(hyprctl monitors -j | jq '. | length')" -gt "1" ]; then
+  # Create a separate monitor setup script instead of embedding bash in the config
+  monitorSetupScript = pkgs.writeShellScript "hyprland-monitor-setup" ''
+    #!/usr/bin/env bash
+    # Detect monitors and configure them appropriately
+    if hyprctl monitors -j | jq -e '. | length > 0' > /dev/null; then
+      # Primary monitor is always set up first
       hyprctl keyword monitor "${primaryMonitorLine}"
+
+      # If we have secondary monitor and it's detected
       ${if secondaryDisplayOutput != null then ''
+      if hyprctl monitors -j | jq -e '. | length > 1' > /dev/null; then
         ${if secondaryPositionValue != "auto-right" then ''
-          hyprctl keyword monitor "${secondaryMonitorLine}"
+        # Use predefined position
+        hyprctl keyword monitor "${secondaryMonitorLine}"
         '' else ''
-          primary_height=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"${primaryDisplayOutput}\") | .height")
-          primary_width=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"${primaryDisplayOutput}\") | .width")
-          secondary_width=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"${secondaryDisplayOutput}\") | .width") # Assuming it becomes height if rotated
-          position="$primary_width,0"
-          hyprctl keyword monitor "${secondaryDisplayOutput},preferred,$position,${secondaryScaleFactor}${secondaryTransformValue}"
+        # Calculate position based on primary monitor
+        PWIDTH=$(hyprctl monitors -j | jq -r '.[] | select(.name=="'"${primaryDisplayOutput}"'") | .width')
+        hyprctl keyword monitor "${secondaryDisplayOutput},preferred,$PWIDTH\x0,${secondaryScaleFactor}${secondaryTransformValue}"
         ''}
+      fi
       '' else ""}
+
+      # If we have tertiary monitor and it's detected
       ${if tertiaryDisplayOutput != null then ''
+      if hyprctl monitors -j | jq -e '. | length > 2' > /dev/null; then
         hyprctl keyword monitor "${tertiaryMonitorLine}"
+      fi
       '' else ""}
-    else
-      hyprctl keyword monitor "${primaryMonitorLine}"
     fi
   '';
 in {
@@ -91,8 +98,8 @@ in {
       # Use exec-once to set up monitors programmatically
       exec-once = [
         "fish -c autostart"
-        # Script to detect and configure monitors
-        "bash -c '${monitorScript}'"
+        # Use our externally created script for monitor setup
+        "${monitorSetupScript}"
       ];
 
       # Fallback static configuration in case the script fails
