@@ -165,7 +165,7 @@
         };
 
         privacy = {
-          icon-spacing = 1;
+          icon-spacing = 6;
           icon-size = 12;
           transition-duration = 250;
           modules = [
@@ -245,7 +245,7 @@
         modules-right = ["keyboard-state" "hyprland/language"];
 
         "hyprland/window" = {
-          format = "👼 {title} 😈";
+          format = "{title}";
           max-length = 50;
         };
 
@@ -302,7 +302,7 @@
         };
 
         cpu = {
-          format = "󰻠{usage}%";
+          format = "󰻠 {usage}%";
           states = {
             high = 90;
             "upper-medium" = 70;
@@ -315,7 +315,7 @@
         };
 
         memory = {
-          format = "{percentage}%";
+          format = " {percentage}%";
           tooltip-format = "Main: ({used} GiB/{total} GiB)({percentage}%), available {avail} GiB\nSwap: ({swapUsed} GiB/{swapTotal} GiB)({swapPercentage}%), available {swapAvail} GiB";
           states = {
             high = 90;
@@ -329,7 +329,7 @@
         };
 
         disk = {
-          format = "󰋊{percentage_used}%";
+          format = "󰋊 {percentage_used}%";
           tooltip-format = "({used}/{total})({percentage_used}%) in '{path}', available {free}({percentage_free}%)";
           states = {
             high = 90;
@@ -347,7 +347,7 @@
           "thermal-zone" = 8;
           "critical-threshold" = 80;
           format = "{icon}{temperatureC}󰔄";
-          "format-critical" = "🔥{icon}{temperatureC}󰔄";
+          "format-critical" = "🔥 {icon}{temperatureC}󰔄";
           "format-icons" = ["" "" "" "" ""];
         };
 
@@ -360,8 +360,8 @@
             low = 10;
           };
           format = "{icon}{capacity}%";
-          "format-charging" = "󱐋{icon}{capacity}%";
-          "format-plugged" = "󰚥{icon}{capacity}%";
+          "format-charging" = "󱐋 {icon}{capacity}%";
+          "format-plugged" = "󰚥 {icon}{capacity}%";
           "format-time" = "{H} h {M} min";
           "format-icons" = ["󱃍" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
           "tooltip-format" = "{timeTo}";
@@ -403,12 +403,12 @@
             low = 10;
           };
           "tooltip-format" = "{desc}";
-          format = "{icon}{volume}%\n{format_source}";
-          "format-bluetooth" = "󰂱{icon}{volume}%\n{format_source}";
-          "format-bluetooth-muted" = "󰂱󰝟{volume}%\n{format_source}";
-          "format-muted" = "󰝟{volume}%\n{format_source}";
-          "format-source" = "󰍬{volume}%";
-          "format-source-muted" = "󰍭{volume}%";
+          format = "{icon} {volume}%\n{format_source}";
+          "format-bluetooth" = "󰂱 {icon} {volume}%\n{format_source}";
+          "format-bluetooth-muted" = "󰂱󰝟 {volume}%\n{format_source}";
+          "format-muted" = "󰝟 {volume}%\n{format_source}";
+          "format-source" = "󰍬 {volume}%";
+          "format-source-muted" = "󰍭 {volume}%";
           "format-icons" = {
             headphone = "󰋋";
             "hands-free" = "";
