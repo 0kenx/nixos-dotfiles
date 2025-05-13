@@ -57,6 +57,7 @@
     ./modules/development/info-fetchers.nix
     ./modules/development/utils.nix
     ./modules/development/llm.nix
+    ./modules/development/llm-local.nix
     ./modules/development/work.nix
     ./modules/development/cad.nix
 

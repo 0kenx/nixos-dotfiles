@@ -20,6 +20,7 @@ modules/
 │   ├── cad.nix
 │   ├── info-fetchers.nix
 │   ├── llm.nix
+│   ├── llm-local.nix
 │   ├── lsp.nix
 │   ├── programming-languages.nix
 │   ├── terminal-utils.nix

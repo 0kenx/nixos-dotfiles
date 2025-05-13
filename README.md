@@ -296,15 +296,16 @@ This configuration includes several AI/LLM tools and services for local developm
 > These AI services are enabled by default.
 
 To disable them:
-1. Edit `nixos/llm.nix`
-2. Disable services by setting their `enable` attribute to `false`:
+1. Edit `nixos/modules/development/llm-local.nix` for local LLM services
+2. Edit `nixos/modules/development/llm.nix` for cloud LLM tools
+3. Disable services by setting their `enable` attribute to `false`:
    ```nix
+   # In llm-local.nix
    services.ollama.enable = false;
-   services.searx.enable = false;
    services.open-webui.enable = false;
    ```
-3. Remove AI CLI tools from `environment.systemPackages` if desired
-4. Rebuild your configuration with `nswitch`
+4. Remove AI CLI tools from `environment.systemPackages` if desired
+5. Rebuild your configuration with `nswitch`
 
 ## 🦀 Useful info for Rustaceans
 
