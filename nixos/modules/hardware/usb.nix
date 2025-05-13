@@ -88,7 +88,7 @@
           "org.freedesktop.udisks2.eject-media": YES,
           "org.freedesktop.udisks2.power-off-drive": YES
         };
-        if (subject.isInGroup("users")) {
+        if (subject.isInGroup("storage")) {
           return permission[action.id];
         }
       });

@@ -105,6 +105,8 @@ in {
         "hyprpaper"
         "waybar"
         "pypr"
+        # Start automounter
+        "udiskie --automount --notify --tray"
         # Clipboard history and utilities
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
