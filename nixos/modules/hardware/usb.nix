@@ -9,15 +9,14 @@
     enable = true;
     debug = true;
     autoMaster = ''
-      # Default mount point for USB drives
-      /media  /etc/auto.usb  --timeout=60
+      # Default automount configuration
+      /media /etc/auto.media --timeout=60
     '';
   };
 
-  environment.etc."auto.usb" = {
+  environment.etc."auto.media" = {
     text = ''
-      # Empty automount file for USB drives
-      # Actual mounting is handled by udisks2 and udev
+      # Automount configuration file for media devices
     '';
     mode = "0644";
   };
@@ -98,7 +97,8 @@
   # Ensure filesystems are supported
   boot.supportedFilesystems = [ "ntfs" "exfat" "vfat" ];
 
-  # No need for udevil service
+  # Enable udevil service for auto-mounting
+  services.devmon.enable = true;
 
   # Enable USB auto-mounting in file manager
   programs.thunar.plugins = lib.mkIf (config.programs.thunar.enable or false) [ pkgs.xfce.thunar-volman ];
@@ -115,27 +115,15 @@
   # Configure storage daemon for better device handling
   services.udisks2 = {
     enable = true;
-    mountOnMedia = true;
   };
 
   # Core USB hardware support
   hardware.enableRedistributableFirmware = true;
   
-  # Add simplified udev rules for USB devices
+  # Add minimal udev rules for USB devices - just load needed drivers
   services.udev.extraRules = ''
     # Load SCSI drivers when USB storage devices are detected
     ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="08", ATTR{bInterfaceSubClass}=="06", \
       RUN+="${pkgs.kmod}/bin/modprobe -a sd_mod sg sr_mod"
-
-    # Critical: Wait for devices to settle
-    ACTION=="add", SUBSYSTEM=="scsi", ATTR{type}=="0", \
-      RUN+="${pkgs.coreutils}/bin/sleep 2"
-      
-    # General rules for any USB drive
-    ACTION=="add", SUBSYSTEMS=="usb", SUBSYSTEMS=="block", \
-      ENV{DEVTYPE}=="disk", RUN+="${pkgs.coreutils}/bin/mkdir -p /run/media/%k"
-
-    ACTION=="add", SUBSYSTEMS=="usb", SUBSYSTEMS=="block", \
-      ENV{DEVTYPE}=="partition", RUN+="${pkgs.coreutils}/bin/mkdir -p /run/media/%k"
   '';
 }
