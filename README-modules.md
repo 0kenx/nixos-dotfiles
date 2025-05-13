@@ -1,6 +1,14 @@
-# NixOS Organized Configuration Structure
+# NixOS Modules
 
-This directory contains the NixOS configuration files organized into logical categories.
+This document describes the available modules in this NixOS configuration and how they can be enabled or disabled for specific hosts.
+
+## Module System Overview
+
+The configuration uses a modular approach, where modules can be:
+
+1. **Always enabled** - Core functionality needed for all systems
+2. **Conditionally enabled** - Based on host-specific configuration
+3. **Explicitly disabled** - Even if normally available for a host type
 
 ## Directory Structure
 
@@ -61,28 +69,155 @@ modules/
 │   ├── swap.nix
 │   ├── time.nix
 │   └── users.nix
-├── per-host.nix      # Host-specific configuration module
+├── host-config.nix   # Host configuration options
+├── module-manager.nix# Conditional module loading
 └── secrets.nix       # Secret management with sops-nix
 ```
 
-## Usage
+## Available Modules
 
-The configuration is organized by functionality, with each file focused on a specific aspect of the system. This organization:
+### System Modules
 
-1. Makes it easy to find configuration related to a specific domain
-2. Keeps each file small and focused on a single responsibility
-3. Allows selective inclusion of features by importing specific files
+These modules configure core system functionality:
 
-To enable or disable specific configurations, uncomment or comment their import lines in `configuration.nix`.
+| Module | Description | Always Enabled | Can Be Configured |
+|--------|-------------|----------------|-------------------|
+| nix-settings | Nix package manager configuration | ✅ | ✅ |
+| gc | Garbage collection settings | ✅ | ✅ |
+| time | System time and timezone settings | ✅ | ✅ |
+| swap | Swap configuration | ✅ | ✅ |
+| bootloader | System boot configuration | ✅ | ✅ |
+| auto-upgrade | Automatic system upgrades | ❌ | ✅ |
+| linux-kernel | Kernel configuration | ✅ | ✅ |
+| environment-variables | Global environment variables | ✅ | ✅ |
+| users | User accounts and permissions | ✅ | ✅ |
+| internationalisation | Language and locale settings | ✅ | ✅ |
+| nixpkgs | Package configuration | ✅ | ✅ |
+| services | Core system services | ✅ | ✅ |
 
-## Adding New Files
+### Hardware Modules
 
-When adding new configuration files:
+These modules configure hardware support:
 
-1. Place them in the appropriate category directory
-2. Import them in configuration.nix
-3. Keep files focused on a single responsibility
+| Module | Description | Always Enabled | Can Be Configured |
+|--------|-------------|----------------|-------------------|
+| nvidia | NVIDIA graphics support | ❌ | ✅ |
+| disable-nvidia | Explicitly disable NVIDIA | ❌ | ✅ |
+| opengl | OpenGL support | ✅ | ✅ |
+| sound | Audio system configuration | ✅ | ✅ |
+| usb | USB device support | ✅ | ✅ |
+| keyboard | Keyboard configuration | ✅ | ✅ |
+| fingerprint-scanner | Fingerprint reader support | ❌ | ✅ |
+| bluetooth | Bluetooth support | ❌ | ✅ |
+| screen | Display and backlight configuration | ✅ | ✅ |
 
-## Host-Specific Configuration
+### Desktop Modules
 
-Host-specific configuration is managed through files in the hosts/ directory, which can override general settings for specific machines. The `per-host.nix` module provides a common interface for host-specific options.
+These modules configure desktop environments:
+
+| Module | Description | Always Enabled | Can Be Configured |
+|--------|-------------|----------------|-------------------|
+| hyprland | Hyprland window manager | ❌ | ✅ |
+| gnome | GNOME desktop environment | ❌ | ✅ |
+| display-manager | Login manager configuration | ✅ | ✅ |
+| theme | Visual theme configuration | ✅ | ✅ |
+| fonts | Font configuration and availability | ✅ | ✅ |
+
+### Networking Modules
+
+These modules configure network functionality:
+
+| Module | Description | Always Enabled | Can Be Configured |
+|--------|-------------|----------------|-------------------|
+| networking | General networking configuration | ✅ | ✅ |
+| openssh | SSH server/client configuration | ✅ | ✅ |
+| firewall | System firewall configuration | ✅ | ✅ |
+| dns | DNS resolution configuration | ✅ | ✅ |
+| vpn | VPN client support | ✅ | ✅ |
+| mac-randomize | MAC address randomization | ❌ | ✅ |
+
+### Development Modules
+
+These modules configure development tools:
+
+| Module | Description | Always Enabled | Can Be Configured |
+|--------|-------------|----------------|-------------------|
+| programming-languages | Programming language support | ✅ | ✅ |
+| lsp | Language server protocols | ✅ | ✅ |
+| wasm | WebAssembly support | ✅ | ✅ |
+| terminal-utils | Terminal utilities | ✅ | ✅ |
+| info-fetchers | System information tools | ✅ | ✅ |
+| utils | Development utilities | ✅ | ✅ |
+| llm | LLM tools and APIs | ✅ | ✅ |
+| llm-local | Local LLM support (resource-intensive) | ❌ | ✅ |
+| work | Work-specific tools | ✅ | ✅ |
+| cad | CAD/3D modeling tools | ✅ | ✅ |
+
+### Security Modules
+
+These modules configure security features:
+
+| Module | Description | Always Enabled | Can Be Configured |
+|--------|-------------|----------------|-------------------|
+| yubikey | YubiKey support | ✅ | ✅ |
+| security-services | Security-related services | ✅ | ✅ |
+| clamav-scanner | Antivirus scanner | ❌ | ✅ |
+
+### Application Modules
+
+These modules configure applications:
+
+| Module | Description | Always Enabled | Can Be Configured |
+|--------|-------------|----------------|-------------------|
+| multimedia | Multimedia applications and codecs | ✅ | ✅ |
+| printing | Printer support | ❌ | ✅ |
+| virtualisation | Virtualization tools | ✅ | ✅ |
+| framepack | Frame packing tools | ❌ | ✅ |
+
+## Enabling/Disabling Modules
+
+Modules are enabled or disabled in your host configuration file (`hosts/*/default.nix`):
+
+```nix
+system.nixos-dotfiles.host.modules.enable = {
+  # Desktop environments
+  hyprland = true;  # Enable Hyprland
+  gnome = false;    # Disable GNOME
+  
+  # Development features
+  cuda = true;      # Enable CUDA
+  localLLM = true;  # Enable local LLM support
+  
+  # Peripherals
+  printing = true;  # Enable printing support
+  
+  # Security features
+  clamav = false;   # Disable ClamAV
+  
+  # Networking
+  macRandomize = false; # Disable MAC randomization
+  
+  # System
+  autoUpgrade = false;  # Disable automatic upgrades
+};
+```
+
+## How Module Loading Works
+
+The system uses the `module-manager.nix` file to conditionally load modules based on your host configuration. This allows for a clean, declarative way to enable or disable features without editing multiple files.
+
+The module manager:
+
+1. Always loads core modules required for any system
+2. Conditionally loads modules based on your host configuration settings
+3. Uses the host's hardware capabilities to determine appropriate modules
+4. Applies special configurations like CUDA support when enabled
+
+## Adding New Modules
+
+To add a new optional module:
+
+1. Create your module in the appropriate subdirectory of `modules/`
+2. Add an entry in `modules/host-config.nix` for your module option
+3. Add conditional loading logic in `modules/module-manager.nix`
+4. Update this documentation with your new module

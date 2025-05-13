@@ -1,143 +1,230 @@
-# Host-Specific Configuration Guide
+# Host-Specific Configuration for NixOS Dotfiles
 
-This NixOS configuration setup now supports host-specific configurations, allowing you to:
+This document explains how to set up and customize host-specific configurations within this NixOS dotfiles repository.
 
-1. Maintain different Git identities on different machines
-2. Keep secret or sensitive information separate from shared configuration
-3. Configure hardware-specific settings like monitor layouts
+## Overview
 
-## How It Works
+The configuration is designed to be modular, allowing you to:
 
-The configuration is now structured with:
+1. Use the same dotfiles repository across multiple machines
+2. Customize display setups, hardware support, and modules on a per-host basis
+3. Manage secrets securely using sops-nix
+4. Build and switch to specific host configurations using flake outputs
 
-1. **Shared Modules**: Common configurations used across all machines
-2. **Host-Specific Modules**: Configuration that varies between machines
-3. **Per-Host Configuration**: Options defined in `hosts/your-hostname.nix`
+## Getting Started
 
-## Setting Up a New Machine
-
-To set up a new machine:
-
-1. Create a new host configuration file in the `hosts/` directory:
+### 1. Clone the Repository
 
 ```bash
-cp hosts/example-laptop.nix hosts/your-hostname.nix
+git clone https://github.com/username/nixos-dotfiles.git
+cd nixos-dotfiles
 ```
 
-2. Edit `hosts/your-hostname.nix` to configure machine-specific settings:
+### 2. Initialize Secrets Submodule (Optional)
 
-```nix
-{config, lib, pkgs, ...}: {
-  imports = [
-    ../modules/per-host.nix
-  ];
-  
-  # Configuration specific to this host
-  nixosConfig.system.nixos-dotfiles = {
-    git = {
-      user = {
-        name = "Your Name";  # Git username for this machine
-        email = "your.email@example.com";  # Git email for this machine
-        signingKey = "YOUR_GPG_KEY_ID";  # GPG key for this machine
-      };
-      includes = [
-        {
-          condition = "gitdir:~/projects/";
-          contents = {
-            user = {
-              name = "Personal Name"; 
-              email = "personal@example.com";
-            };
-          };
-        }
-        # Add more directory-specific configurations
-      ];
-    };
-    
-    hyprland = {
-      monitors = [
-        "YOUR-MONITOR-1,preferred,auto,1.0"
-        "YOUR-MONITOR-2,preferred,auto,1.0"
-      ];
-    };
-  };
-}
+If you're using the included secrets management:
+
+```bash
+git submodule update --init --recursive
 ```
 
-3. Modify the `flake.nix` to include your new host configuration:
+### 3. Choose or Create a Host Configuration
+
+#### Using an Existing Host Configuration
+
+The repository includes example configurations for common setups:
+- `hosts/laptop/default.nix` - For laptops and portable devices
+- `hosts/workstation/default.nix` - For desktops and workstations
+
+#### Creating a New Host Configuration
+
+To create a new host configuration, copy an existing one and modify it:
+
+```bash
+mkdir -p nixos/hosts/my-hostname
+cp nixos/hosts/laptop/default.nix nixos/hosts/my-hostname/default.nix
+```
+
+Then edit `nixos/hosts/my-hostname/default.nix` to match your system.
+
+### 4. Build and Switch to Your Host Configuration
+
+```bash
+# From the repository root
+sudo nixos-rebuild switch --flake .#my-hostname
+```
+
+Where `my-hostname` is one of:
+- `laptop` - For the laptop configuration
+- `workstation` - For the workstation configuration
+- Any custom host you've created
+
+## Host Configuration Structure
+
+Each host configuration file (`hosts/*/default.nix`) defines:
+
+### 1. Basic Host Information
 
 ```nix
-# In flake.nix
-nixosConfigurations = {
-  your-hostname = nixpkgs.lib.nixosSystem {
-    inherit system;
-    specialArgs = { 
-      host = "your-hostname";
-      pkgs-unstable = pkgsUnstable;
-      inherit self inputs username channel pkgs; 
-    };
-    modules = [
-      ./configuration.nix
-      ./hardware-configuration.nix
-      
-      # Include host-specific configuration
-      ./hosts/your-hostname.nix  # Your host-specific config
-      ./modules/per-host.nix     # Host configuration module
-      
-      # ... other modules ...
-      
-      # Home Manager integration
-      inputs.home-manager.nixosModules.home-manager
-      {
-        home-manager.useGlobalPkgs = true;
-        home-manager.useUserPackages = true;
-        home-manager.users.${username} = import ./home;
-        
-        # Pass flake inputs and system config to home-manager modules
-        home-manager.extraSpecialArgs = { 
-          inherit inputs username; 
-          host = "your-hostname";
-        };
-      }
-    ];
-  };
-  
-  # ... other host configurations ...
+networking.hostName = "my-hostname";
+
+system.nixos-dotfiles.host = {
+  name = "my-hostname";
+  # ... other settings
 };
 ```
 
-4. Build and switch to your configuration:
+### 2. Hardware Capabilities
 
-```bash
-sudo nixos-rebuild switch --flake .#your-hostname
+```nix
+system.nixos-dotfiles.host.hardware = {
+  hasBluetooth = true;
+  hasNvidia = false;
+  hasFingerprint = true;
+  hasTouchpad = true;
+  hasWebcam = true;
+  isBattery = true;
+};
 ```
 
-## Available Host-Specific Options
+### 3. Display Configuration
 
-Currently, the following host-specific options are available:
+```nix
+system.nixos-dotfiles.host.displays = {
+  primary = "eDP-1";                  # Built-in laptop screen
+  secondary = "HDMI-A-1";             # External display
+  tertiary = null;                    # No third display
+  primaryScale = 1.6;                 # HiDPI scaling
+  secondaryScale = 1.0;
+  tertiaryScale = 1.0;
+  secondaryRotate = "left";           # Vertical orientation for secondary
+  tertiaryRotate = null;
+  secondaryPosition = "0x-1080";      # Explicit position for secondary monitor
+  tertiaryPosition = null;
+};
+```
 
-### Git Configuration
+The display positions can be:
+- `auto-right` - Default auto-right placement
+- `auto-left` - Default auto-left placement
+- `auto-up` - Default auto-up placement
+- `auto-down` - Default auto-down placement
+- `0x-1080` - Explicit position (x and y coordinates)
 
-- `nixosConfig.system.nixos-dotfiles.git.user.name`: Default Git username
-- `nixosConfig.system.nixos-dotfiles.git.user.email`: Default Git email
-- `nixosConfig.system.nixos-dotfiles.git.user.signingKey`: GPG key for signing commits
-- `nixosConfig.system.nixos-dotfiles.git.includes`: Directory-specific Git configurations
+For monitors with rotation, the system will calculate the best position automatically if not specified explicitly.
 
-### Hyprland Configuration
+### 4. Module Enablement
 
-- `nixosConfig.system.nixos-dotfiles.hyprland.monitors`: Monitor configurations for Hyprland
+```nix
+system.nixos-dotfiles.host.modules.enable = {
+  hyprland = true;       # Enable Hyprland
+  gnome = false;         # Disable GNOME
+  cuda = true;           # Enable CUDA
+  localLLM = true;       # Enable local LLM support
+  printing = true;       # Enable printing
+  clamav = false;        # Disable ClamAV
+  macRandomize = false;  # Disable MAC randomization
+  autoUpgrade = false;   # Disable automatic upgrades
+};
+```
 
-## Adding New Host-Specific Options
+### 5. Git Configuration
 
-To add new host-specific options:
+```nix
+system.nixos-dotfiles.host.git = {
+  user = {
+    name = "Your Name";
+    email = "your.email@example.com";
+    signingKey = "YOUR_GPG_KEY_ID";
+  };
+  includes = [
+    {
+      condition = "gitdir:~/projects/";
+      contents = {
+        user = {
+          name = "Your Name";
+          email = "your.email@example.com";
+        };
+      };
+    }
+    {
+      condition = "gitdir:~/work/";
+      contents = {
+        user = {
+          name = "Work Name";
+          email = "work.email@company.com";
+        };
+      };
+    }
+  ];
+};
+```
 
-1. Edit `modules/per-host.nix` to add your new option
-2. Update the relevant configuration file(s) to use the new option
-3. Add the option to your host-specific file(s)
+### 6. Host-Specific Packages
 
-## Best Practices
+```nix
+environment.systemPackages = with pkgs; [
+  # Add host-specific packages here
+  powertop
+  tlp
+];
+```
 
-1. Keep sensitive information (API keys, private tokens) in host-specific files
-2. Use conditional includes for Git to manage multiple identities
-3. Maintain a separate configuration for each physical machine
-4. Keep hardware-specific settings in the host configuration
+## How It Works
+
+### Module Management
+
+The system uses conditional module imports based on your host configuration. This is managed in `modules/module-manager.nix`, which:
+
+1. Always loads core modules required for any system
+2. Conditionally loads modules based on your host configuration settings
+3. Uses the host's hardware capabilities to determine appropriate modules
+4. Applies special configurations like CUDA support when enabled
+
+### Display Layout
+
+The display configuration is automatically translated to:
+
+1. Appropriate Hyprland monitor configurations
+2. Workspace assignments for each monitor
+3. Dynamic monitor positioning scripts that adjust based on rotation settings
+4. Wallpaper assignments based on display orientation
+
+The system supports both automatic positioning (auto-right, auto-left, etc.) and explicit positioning (0x-1080) for your displays, so you can create a consistent layout regardless of the actual connector names on different machines.
+
+### Secrets Management
+
+Secrets are managed using sops-nix and stored in the `nixos-secrets` submodule. 
+See [README-secrets.md](./README-secrets.md) for details on setting up secrets.
+
+## Tips
+
+### Checking Current Configuration
+
+To see the current host configuration:
+
+```bash
+sudo nixos-rebuild dry-build --flake .#hostname
+```
+
+### Testing a Different Host Configuration
+
+You can build and test a different host configuration without switching:
+
+```bash
+sudo nixos-rebuild test --flake .#other-hostname
+```
+
+### Updating All Hosts
+
+To update packages for all hosts:
+
+```bash
+nix flake update
+```
+
+Then rebuild for your current host:
+
+```bash
+sudo nixos-rebuild switch --flake .#hostname
+```

@@ -5,76 +5,19 @@
 { channel, ... }:
 
 {
-  # Import modules explicitly
+  # Import essential modules in the correct order:
+  # 1. First, the host configuration schema (no actual values yet)
+  # 2. Second, core modules that are required for all systems
+  # 3. Then, the module manager which conditionally imports other modules
   imports = [
-    # System modules
-    ./modules/system/nix-settings.nix
-    ./modules/system/gc.nix
-    ./modules/system/time.nix
-    ./modules/system/swap.nix
-    ./modules/system/bootloader.nix
-    # ./modules/system/auto-upgrade.nix
-    ./modules/system/linux-kernel.nix
-    ./modules/system/environment-variables.nix
-    ./modules/system/users.nix
-    ./modules/system/internationalisation.nix
-    ./modules/system/nixpkgs.nix
-    # ./modules/system/core-pkgs.nix
-    ./modules/system/services.nix
-    # ./modules/system/location.nix
+    # Host configuration schema definition (defines the option types)
+    ./modules/host-config.nix
 
-    # Hardware modules
-    ./modules/hardware/nvidia.nix
-    # ./modules/hardware/disable-nvidia.nix
-    ./modules/hardware/opengl.nix
-    ./modules/hardware/sound.nix
-    ./modules/hardware/usb.nix
-    ./modules/hardware/keyboard.nix
-    # ./modules/hardware/fingerprint-scanner.nix
-    ./modules/hardware/bluetooth.nix
-    ./modules/hardware/screen.nix
+    # Core modules that don't depend on host configuration
+    ./modules/system/core-modules.nix
 
-    # Desktop modules
-    ./modules/desktop/hyprland.nix
-    ./modules/desktop/display-manager.nix
-    # ./modules/desktop/gnome.nix
-    ./modules/desktop/theme.nix
-    ./modules/desktop/fonts.nix
-
-    # Networking modules
-    ./modules/networking/networking.nix
-    ./modules/networking/openssh.nix
-    ./modules/networking/firewall.nix
-    ./modules/networking/dns.nix
-    ./modules/networking/vpn.nix
-    # ./modules/networking/mac-randomize.nix
-
-    # Development modules
-    ./modules/development/programming-languages.nix
-    ./modules/development/lsp.nix
-    ./modules/development/wasm.nix
-    ./modules/development/terminal-utils.nix
-    ./modules/development/info-fetchers.nix
-    ./modules/development/utils.nix
-    ./modules/development/llm.nix
-    ./modules/development/llm-local.nix
-    ./modules/development/work.nix
-    ./modules/development/cad.nix
-
-    # Security modules
-    ./modules/security/yubikey.nix
-    ./modules/security/security-services.nix
-    # ./modules/security/clamav-scanner.nix
-
-    # Application modules
-    ./modules/applications/multimedia.nix
-    # ./modules/applications/printing.nix
-    ./modules/applications/virtualisation.nix
-    # ./modules/applications/framepack.nix
-
-    # Host-specific modules
-    ./modules/per-host.nix
-    ./modules/secrets.nix
+    # Module manager for conditional imports based on host configuration
+    ./modules/module-manager.nix
   ];
 
   # This value determines the NixOS release from which the default

@@ -1,4 +1,14 @@
-{inputs, pkgs, config, lib, ...}: {
+{inputs, pkgs, config, lib, ...}: 
+
+let
+  # Import the Hyprland display configuration
+  hyprlandConfig = import ./hyprland-config.nix { inherit config lib pkgs; };
+  
+  # Extract monitor and workspace configurations
+  monitors = hyprlandConfig.hyprlandConfig.monitors;
+  workspaces = hyprlandConfig.hyprlandConfig.workspaces;
+  monitorScript = hyprlandConfig.hyprlandConfig.monitorPositioningScript;
+in {
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = true;
@@ -9,49 +19,18 @@
 
     settings = {
       # Monitor configuration from host-specific settings
-      # Use exec-once to set up monitors programmatically with bottom alignment
+      # Use exec-once to set up monitors programmatically
       exec-once = [
         "fish -c autostart"
-        # Calculate position for bottom alignment: y = -(main_height - secondary_width)
-        # and apply monitor configuration dynamically
-        # "bash -c 'main_res=$(hyprctl monitors -j | jq -r \".[] | select(.name==\\\"HDMI-A-1\\\") | .height\"); sec_width=$(hyprctl monitors -j | jq -r \".[] | select(.name==\\\"DP-5\\\") | .width\"); y_pos=$(($main_res - $sec_width)); hyprctl keyword monitor \"HDMI-A-1,preferred,auto,1.6\"; hyprctl keyword monitor \"DP-5,preferred,0x-$y_pos,1.6,transform,1\"'"
+        # Script to detect and configure monitors
+        "bash -c '${monitorScript}'"
       ];
 
       # Fallback static configuration in case the script fails
-      monitor = [
-        "HDMI-A-1,preferred,auto,1.6"  # Main monitor
-        "DP-5,preferred,0x-1080,1.6,transform,1" # Secondary monitor (vertical, left of main, bottom aligned @4k)
-      ];
+      monitor = monitors;
 
-      # Workspace assignment
-      workspace = [
-        # Main monitor workspaces
-        "1,monitor:HDMI-A-1"
-        "2,monitor:HDMI-A-1"
-        "3,monitor:HDMI-A-1"
-        "4,monitor:HDMI-A-1"
-        "5,monitor:HDMI-A-1"
-        "6,monitor:HDMI-A-1"
-        "7,monitor:HDMI-A-1"
-        "8,monitor:HDMI-A-1"
-        "9,monitor:HDMI-A-1"
-        "10,monitor:HDMI-A-1"
-
-        # Secondary monitor workspaces
-        "11,monitor:DP-5"
-        "12,monitor:DP-5"
-        "13,monitor:DP-5"
-        "14,monitor:DP-5"
-        "15,monitor:DP-5"
-        "16,monitor:DP-5"
-        "17,monitor:DP-5"
-        "18,monitor:DP-5"
-        "19,monitor:DP-5"
-        "20,monitor:DP-5"
-      ];
-
-      # Execute apps at launch
-      # Moved to the monitor configuration section above
+      # Workspace assignment based on host configuration
+      workspace = workspaces;
 
       # Define variables for Catppuccin Macchiato colors
       "$rosewater" = "rgb(f4dbd6)";
@@ -254,37 +233,6 @@
       "$dropterm" = "title:^wezterm_dropdown$";
       "$volume_sidemenu" = "title:^Volume Control$";
 
-      # Submaps
- #      submap = {
- #       resize = {
- #          binde = [
- #           ",right,resizeactive,10 0"
- #           ",left,resizeactive,-10 0"
- #            ",up,resizeactive,0 -10"
-  #           ",down,resizeactive,0 10"
-  #           ",l,resizeactive,10 0"
-   #          ",h,resizeactive,-10 0"
-  #           ",k,resizeactive,0 -10"
-  #           ",j,resizeactive,0 10"
-   #        ];
-   #        bind = [",escape,submap,reset"];
-   #      };
-   #      reset = {}; # Reset submap
-    #     move = {
-   #        bind = [
-    #         ",right,movewindow,r"
-   #          ",left,movewindow,l"
-    #         ",up,movewindow,u"
-    #        ",down,movewindow,d"
-     #        ",l,movewindow,r"
-    #         ",h,movewindow,l"
-     #        ",k,movewindow,u"
-     #        ",j,movewindow,d"
-     #       ",escape,submap,reset"
-    #      ];
-    #     };
-   #    };
-
       # All keybindings
       bind = [
         # Submaps
@@ -375,7 +323,7 @@
         "$mainMod, Tab, cyclenext,"
         "$mainMod, Tab, bringactivetotop,"
 
-        # Workspace switching (internal monitor)
+        # Workspace switching - dynamic based on monitor count
         "$mainMod, 1, workspace, 1"
         "$mainMod, 2, workspace, 2"
         "$mainMod, 3, workspace, 3"
@@ -387,7 +335,7 @@
         "$mainMod, 9, workspace, 9"
         "$mainMod, 0, workspace, 10"
 
-        # Workspace switching (external monitor)
+        # Secondary monitor workspaces
         "$mainMod ALT, 1, workspace, 11"
         "$mainMod ALT, 2, workspace, 12"
         "$mainMod ALT, 3, workspace, 13"
@@ -399,7 +347,19 @@
         "$mainMod ALT, 9, workspace, 19"
         "$mainMod ALT, 0, workspace, 20"
 
-        # Move windows to workspaces (internal monitor)
+        # Tertiary monitor workspaces
+        "$mainMod CTRL, 1, workspace, 21"
+        "$mainMod CTRL, 2, workspace, 22"
+        "$mainMod CTRL, 3, workspace, 23"
+        "$mainMod CTRL, 4, workspace, 24"
+        "$mainMod CTRL, 5, workspace, 25"
+        "$mainMod CTRL, 6, workspace, 26"
+        "$mainMod CTRL, 7, workspace, 27"
+        "$mainMod CTRL, 8, workspace, 28"
+        "$mainMod CTRL, 9, workspace, 29"
+        "$mainMod CTRL, 0, workspace, 30"
+
+        # Move windows to workspaces - primary monitor
         "$mainMod SHIFT, 1, movetoworkspace, 1"
         "$mainMod SHIFT, 2, movetoworkspace, 2"
         "$mainMod SHIFT, 3, movetoworkspace, 3"
@@ -411,7 +371,7 @@
         "$mainMod SHIFT, 9, movetoworkspace, 9"
         "$mainMod SHIFT, 0, movetoworkspace, 10"
 
-        # Move windows to workspaces (external monitor)
+        # Move windows to workspaces - secondary monitor
         "$mainMod ALT SHIFT, 1, movetoworkspace, 11"
         "$mainMod ALT SHIFT, 2, movetoworkspace, 12"
         "$mainMod ALT SHIFT, 3, movetoworkspace, 13"
@@ -422,6 +382,18 @@
         "$mainMod ALT SHIFT, 8, movetoworkspace, 18"
         "$mainMod ALT SHIFT, 9, movetoworkspace, 19"
         "$mainMod ALT SHIFT, 0, movetoworkspace, 20"
+
+        # Move windows to workspaces - tertiary monitor
+        "$mainMod CTRL SHIFT, 1, movetoworkspace, 21"
+        "$mainMod CTRL SHIFT, 2, movetoworkspace, 22"
+        "$mainMod CTRL SHIFT, 3, movetoworkspace, 23"
+        "$mainMod CTRL SHIFT, 4, movetoworkspace, 24"
+        "$mainMod CTRL SHIFT, 5, movetoworkspace, 25"
+        "$mainMod CTRL SHIFT, 6, movetoworkspace, 26"
+        "$mainMod CTRL SHIFT, 7, movetoworkspace, 27"
+        "$mainMod CTRL SHIFT, 8, movetoworkspace, 28"
+        "$mainMod CTRL SHIFT, 9, movetoworkspace, 29"
+        "$mainMod CTRL SHIFT, 0, movetoworkspace, 30"
 
         # Workspace scrolling
         "$mainMod, mouse_down, workspace, e+1"
@@ -576,14 +548,39 @@
     };
   };
 
-  # Configure Hyprpaper
+  # Dynamic wallpaper configuration based on host display configuration
   xdg.configFile."hypr/hyprpaper.conf" = {
-    text = ''
+    text = let
+      primary = config.nixosConfig.system.nixos-dotfiles.host.displays.primary;
+      secondary = config.nixosConfig.system.nixos-dotfiles.host.displays.secondary;
+      tertiary = config.nixosConfig.system.nixos-dotfiles.host.displays.tertiary;
+      
+      # Determine wallpaper orientation based on rotation
+      secondaryOrientation = if config.nixosConfig.system.nixos-dotfiles.host.displays.secondaryRotate == "left" 
+                             || config.nixosConfig.system.nixos-dotfiles.host.displays.secondaryRotate == "right"
+                             then "vertical" else "horizontal";
+      
+      tertiaryOrientation = if config.nixosConfig.system.nixos-dotfiles.host.displays.tertiaryRotate == "left" 
+                            || config.nixosConfig.system.nixos-dotfiles.host.displays.tertiaryRotate == "right"
+                            then "vertical" else "horizontal";
+      
+      # Select appropriate wallpapers based on orientation
+      primaryWallpaper = "/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg";
+      secondaryWallpaper = if secondaryOrientation == "vertical" 
+                          then "/etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg"
+                          else "/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg";
+      tertiaryWallpaper = if tertiaryOrientation == "vertical" 
+                          then "/etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg"
+                          else "/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg";
+    in ''
+      # Preload all wallpapers
       preload = /etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg
       preload = /etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg
 
-      wallpaper = HDMI-A-1,/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg
-      wallpaper = DP-5,/etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg
+      # Assign wallpapers to each monitor
+      wallpaper = ${primary},${primaryWallpaper}
+      ${if secondary != null then "wallpaper = ${secondary},${secondaryWallpaper}" else ""}
+      ${if tertiary != null then "wallpaper = ${tertiary},${tertiaryWallpaper}" else ""}
 
       ipc = off
       splash = false

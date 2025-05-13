@@ -11,5 +11,7 @@
     ./gtk.nix
     ./ssh.nix
   ];
+  
+  # Make the host information available to home-manager modules
+  nixosConfig.system.nixos-dotfiles.host.name = host;
 }
-
