@@ -120,9 +120,23 @@
   
   # Configure delta through git config
   programs.git.extraConfig = {
+    # SSH credentials helper for submodules
+    credential.helper = "cache --timeout=3600";
+
+    # For handling submodules better
+    submodule = {
+      recurse = true;
+    };
+
+    # Use SSH connections more efficiently
+    ssh = {
+      variant = "ssh";
+    };
+
+    # Delta configuration
     delta = {
       features = "catppuccin-macchiato";
-      
+
       # Catppuccin Macchiato theme settings for Delta
       "catppuccin-macchiato" = {
         "blame-palette" = "#24273a #1e2030 #181926 #363a4f #494d64";

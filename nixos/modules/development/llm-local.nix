@@ -1,7 +1,7 @@
 { pkgs, pkgs-unstable, config, ... }:
 
 {
-
+  # Ollama service for local LLM inference
   services.ollama = {
     enable = true;
     package = pkgs-unstable.ollama;
@@ -9,26 +9,23 @@
     acceleration = "cuda";
   };
 
-
+  # Web UI for Ollama
   services.open-webui = {
     enable = true;
     port = 18888;
     host = "127.0.0.1";
   };
   
+  # Local LLM tools and clients
   environment.systemPackages = [
     pkgs.oterm
     pkgs.alpaca
-    pkgs.aichat
-    pkgs.aider-chat
     #framepack
 
-    pkgs-unstable.claude-code
-
+    # Other local LLM tools (commented out but available)
     # tgpt
     # smartcat
     # nextjs-ollama-llm-ui
     # open-webui
   ];
-
 }

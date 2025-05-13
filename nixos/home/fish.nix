@@ -415,15 +415,32 @@
     interactiveShellInit = ''
       # Set fish_greeting to empty to disable greeting
       set -U fish_greeting
-      
+
       # Enable vi mode
       fish_vi_key_bindings
       set -g fish_cursor_default block
       set -g fish_cursor_insert line
       set -g fish_cursor_visual underscore
-      
+
       # Add Alt+S keyboard shortcut for sudo !!
       bind \es 'echo "sudo !!"; commandline "sudo !!"'
+
+      # SSH agent initialization and connection reuse
+      # Create SSH control directory if it doesn't exist
+      mkdir -p ~/.ssh/sockets
+
+      # Function to add SSH keys if not already added
+      function add_ssh_keys
+        set -l keys ~/.ssh/github_nxfi
+
+        # Check if the key is already added
+        if not ssh-add -l | grep -q "$(ssh-keygen -lf $keys | awk '{print $2}')"
+          ssh-add $keys
+        end
+      end
+
+      # Add SSH keys on shell startup
+      add_ssh_keys
 
       # Set fish colors (can be customized)
       set -U fish_color_normal normal
@@ -498,12 +515,25 @@
             echo -n ')'
             
             # Number of untracked, staged and changed files
-            set -l git_status (git status --porcelain 2>/dev/null)
-            
+            set -l git_status (git status --porcelain 2>/dev/null | string split "\n")
+
             # Count added, modified and untracked files
-            set -l added_count (echo $git_status | grep -c -E '^A|^M')
-            set -l modified_count (echo $git_status | grep -c -E '^ M|^MM')
-            set -l untracked_count (echo $git_status | grep -c -E '^\?\?')
+            set -l added_count 0
+            set -l modified_count 0
+            set -l untracked_count 0
+
+            # Process each line of git status output
+            for line in $git_status
+                if string match -qr '^A|^M.|^D.' -- $line
+                    set added_count (math $added_count + 1)
+                end
+                if string match -qr '^ M|^.M|^.D|^MM|^AM|^MD|^AD' -- $line
+                    set modified_count (math $modified_count + 1)
+                end
+                if string match -qr '^\?\?' -- $line
+                    set untracked_count (math $untracked_count + 1)
+                end
+            end
             
             # Count unpushed commits
             set -l unpushed_count 0
