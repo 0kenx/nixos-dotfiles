@@ -1,4 +1,4 @@
-{inputs, username, host, ...}: {
+{inputs, username, host, channel, ...}: {
   imports = [
     ./rofi.nix
     ./fish.nix
@@ -11,7 +11,14 @@
     ./gtk.nix
     ./ssh.nix
   ];
-  
-  # Make the host information available to home-manager modules
-  nixosConfig.system.nixos-dotfiles.host.name = host;
+
+  # Basic Home Manager configuration
+  home.username = "${username}";
+  home.homeDirectory = "/home/${username}";
+  home.stateVersion = "${channel}";
+  programs.home-manager.enable = true;
+
+  # IMPORTANT: Removed circular reference to NixOS configuration
+  # The 'host' variable is already available to all imported home/ modules
+  # from home-manager.extraSpecialArgs in flake.nix
 }

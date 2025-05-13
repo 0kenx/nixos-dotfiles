@@ -8,11 +8,11 @@
 
   # Host-specific configuration
   networking.hostName = "workstation";
-  
+
   # Enable specific features for workstation
   system.nixos-dotfiles.host = {
     name = "workstation";
-    
+
     # Hardware capabilities
     hardware = {
       hasBluetooth = true;
@@ -22,7 +22,7 @@
       hasWebcam = true;
       isBattery = false; # Desktop computer
     };
-    
+
     # Display setup for multi-monitor workstation with explicit positioning
     displays = {
       primary = "HDMI-A-1"; # Main display
@@ -37,7 +37,7 @@
       secondaryPosition = "0x-1080"; # Place vertical monitor with bottom aligned
       tertiaryPosition = null;
     };
-    
+
     # Module enablement for workstation
     modules = {
       enable = {
@@ -51,7 +51,7 @@
         autoUpgrade = false; # Manual control for workstation
       };
     };
-    
+
     # Git configuration using secrets from sops-nix
     git = {
       user = {
@@ -81,20 +81,20 @@
       ];
     };
   };
-  
+
   # Additional workstation-specific packages
   environment.systemPackages = with pkgs; [
     # Development tools
-    cuda-tools
-    cudnn
-    tensorrt
-    
+    # cuda-tools
+    # cudnn
+    # tensorrt
+
     # Professional applications
-    blender
-    davinci-resolve
-    
+    # blender
+    # davinci-resolve
+
     # Utilities
-    radeontop # If using AMD GPU
-    nvtop # For NVIDIA monitoring
+    # radeontop # If using AMD GPU
+    # nvtop # For NVIDIA monitoring
   ];
 }

@@ -1,30 +1,12 @@
 {lib, ...}:
 
+# IMPORTANT: This file has been disabled to prevent option conflicts
+# The options below have been moved to host-config.nix
+# DO NOT IMPORT THIS FILE
+
 with lib;
 
 {
-  options.system.nixos-dotfiles = {
-    # Note: Git configuration now uses SOPS for secure secrets
-    # See README-secrets.md for details
-
-    # Host-specific information
-    host = {
-      name = mkOption {
-        type = types.str;
-        default = "default";
-        description = "Name of this host configuration";
-      };
-    };
-    
-    # Hyprland configuration options
-    hyprland = {
-      monitors = mkOption {
-        type = types.listOf types.str;
-        default = ["eDP-1,preferred,auto,1"];
-        description = "Monitor configurations for this host";
-      };
-    };
-    
-    # Other host-specific configurations can be added here
-  };
+  # This file is kept for reference only, but should not be used
+  # All host-specific options should be defined in modules/host-config.nix
 }

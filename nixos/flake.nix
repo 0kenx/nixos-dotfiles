@@ -25,25 +25,25 @@
     username = "dev";
     system = "x86_64-linux";
     channel = "24.11";
-    
+
     # Define a common nixpkgs configuration
     commonNixpkgsConfig = {
       allowUnfree = true;
       # You can add other shared configurations like overlays here if needed
     };
-    
+
     pkgs = import nixpkgs {
       inherit system;
       config = commonNixpkgsConfig; # Apply the common config
     };
-    
+
     pkgsUnstable = import nixpkgs-unstable {
       inherit system;
       config = commonNixpkgsConfig; # Apply the common config here too
     };
-    
+
     lib = pkgs.lib;
-    
+
     # Function to generate a NixOS system for a specific host
     mkNixosSystem = { hostname }:
       nixpkgs.lib.nixosSystem {
@@ -70,18 +70,24 @@
           sops-nix.nixosModules.sops
 
           # 5. Home Manager integration last
-          inputs.home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.${username} = import ./home;
+            # inputs.home-manager.nixosModules.home-manager
+            # {
+            # home-manager.useGlobalPkgs = true;
+            # home-manager.useUserPackages = true;
+            # home-manager.backupFileExtension = "backup";
+
+            # Pass all necessary parameters explicitly to home/default.nix
+            # home-manager.users.${username} = import ./home {
+            #   inherit inputs username channel;
+            #   host = hostname;
+            # };
 
             # Pass flake inputs and system config to home-manager modules
-            home-manager.extraSpecialArgs = {
-              inherit inputs username;
-              host = hostname;
-            };
-          }
+            # home-manager.extraSpecialArgs = {
+            #   inherit inputs username channel;
+            #   host = hostname;
+            # };
+            # }
         ];
       };
   in
@@ -90,7 +96,7 @@
     nixosConfigurations = {
       # Main development machine configuration (generic default for development)
       dev = mkNixosSystem { hostname = "workstation"; };
-      
+
       # Specific host configurations
       laptop = mkNixosSystem { hostname = "laptop"; };
       workstation = mkNixosSystem { hostname = "workstation"; };
