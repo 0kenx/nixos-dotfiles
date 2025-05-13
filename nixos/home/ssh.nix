@@ -2,6 +2,11 @@
   # Enable SSH agent service
   services.ssh-agent.enable = true;
 
+  # Install keychain for persistent SSH agent management
+  home.packages = with pkgs; [
+    keychain
+  ];
+
   programs.ssh = {
     enable = true;
 

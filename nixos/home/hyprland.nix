@@ -97,9 +97,22 @@ in {
       # Monitor configuration from host-specific settings
       # Use exec-once to set up monitors programmatically
       exec-once = [
-        "fish -c autostart"
-        # Use our externally created script for monitor setup
+        # Import environment variables for systemd
+        "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
+        # Set up monitors first
         "${monitorSetupScript}"
+        # Start Hyprland components explicitly (no systemd)
+        "hyprpaper"
+        "waybar"
+        "pypr"
+        # Start automounter
+        "udiskie --automount --notify --tray"
+        # Clipboard history and utilities
+        "wl-paste --type text --watch cliphist store"
+        "wl-paste --type image --watch cliphist store"
+        "wl-clip-persist --clipboard regular"
+        "avizo-service"
+        "systemctl --user start psi-notify"
       ];
 
       # Fallback static configuration in case the script fails
@@ -623,6 +636,9 @@ in {
       ];
     };
   };
+
+  # We're using exec-once to start hyprpaper and pyprland directly
+  # No need for systemd services
 
   # Dynamic wallpaper configuration based on pre-resolved host display configuration
   xdg.configFile."hypr/hyprpaper.conf" = {

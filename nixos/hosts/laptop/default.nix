@@ -46,7 +46,7 @@
         localLLM = false; # No resource-intensive LLM
         printing = true; # Enable printing
         clamav = false; # Optional antivirus
-        macRandomize = true; # Privacy feature for mobile device
+        macRandomize = false; # Privacy feature for mobile device
         autoUpgrade = true; # Keep laptop updated
       };
     };

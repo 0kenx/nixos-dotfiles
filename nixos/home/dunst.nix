@@ -1,7 +1,10 @@
 {pkgs, ...}: {
   services.dunst = {
     enable = true;
-    
+
+    # Enable Wayland display for Hyprland
+    waylandDisplay = "wayland-1";
+
     settings = {
       global = {
         # Appearance
