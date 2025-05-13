@@ -16,7 +16,7 @@
         spacing = 4;
 
         modules-left = ["hyprland/workspaces" "hyprland/submap"];
-        modules-center = ["clock#time" "custom/separator" "custom/timezone_hk" "custom/timezone_la" "custom/timezone_ny" "custom/separator" "custom/unixepoch" "custom/separator" "clock#weekday" "custom/separator_dot" "clock#calendar"];
+        modules-center = ["clock#time" "custom/separator" "custom/timezone_hk" "custom/separator_dot" "custom/timezone_la" "custom/separator_dot" "custom/timezone_ny" "custom/separator" "custom/unixepoch" "custom/separator" "clock#weekday" "custom/separator_dot" "clock#calendar"];
         modules-right = ["bluetooth" "network" "group/misc" "custom/logout_menu"];
 
         "hyprland/workspaces" = {
