@@ -1,37 +1,24 @@
 { config, pkgs, lib, inputs, username, host, channel, ... }:
 
 {
+  # This import makes home-manager options available in NixOS modules.
+  # It does NOT configure any specific user's home-manager setup.
   imports = [ inputs.home-manager.nixosModules.home-manager ];
-  
+
   # Define custom option for our use in other modules
   options.users.defaultUserName = lib.mkOption {
     type = lib.types.str;
     default = username;
     description = "Default username for the system";
   };
-  
+
   config = {
-    # Set the default username value 
+    # Set the default username value
     users.defaultUserName = username;
-    
-    home-manager = {
-      useUserPackages = true;
-      useGlobalPkgs = true;
-      backupFileExtension = "backup";
-      extraSpecialArgs = { inherit inputs username host; };
-      users.${username} = {
-        imports =
-          if (host == "nixos") then
-            [ ../../home/default.nix ]
-          else
-            [ ../../home ];
-        home.username = "${username}";
-        home.homeDirectory = "/home/${username}";
-        home.stateVersion = "${channel}";
-        programs.home-manager.enable = true;
-      };
-    };
-    
+
+    # IMPORTANT: ALL home-manager configuration is now centralized in flake.nix
+    # DO NOT define any home-manager settings here to avoid conflicts
+
     # Define a user account. Don't forget to set a password with 'passwd'.
     users.users.${username} = {
       isNormalUser = true;

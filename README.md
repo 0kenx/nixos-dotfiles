@@ -19,6 +19,8 @@
 - [Components](#-components)
 - [Features](#-features)
 - [Installation](#-installation)
+- [Host-Specific Setup](#-host-specific-setup)
+- [Module Structure](#-module-structure)
 - [Keybindings](#️-keybindings)
 - [Useful aliases in Fish Shell](#-useful-aliases-in-fish-shell)
 - [AI Tools and Services](#-ai-tools-and-services)
@@ -183,6 +185,45 @@ And many other useful utilities. The full list can be found in the system config
   - Customize graphical applications to suit your preferences.
 
   After this, you will have a complete system.
+
+## 🖥️ Host-Specific Setup
+
+This configuration supports multiple hosts (laptop, workstation, etc.) with different hardware capabilities and module selections. The system is designed to be modular and flexible, allowing you to:
+
+1. Use the same dotfiles repository across different machines
+2. Rebuild with specific flake outputs (e.g., `#laptop`, `#workstation`) instead of a generic `#dev`
+3. Configure different hardware capabilities, monitor setups, and module preferences per host
+4. Use universal abstractions for monitor/display layouts (primary, secondary, tertiary instead of specific interfaces)
+
+To set up a new host:
+
+1. Create a new host configuration file under `nixos/hosts/` (use existing templates as a reference)
+2. Update hardware capabilities, display configuration, and module preferences
+3. Add the new host to `flake.nix` under `nixosConfigurations`
+4. Rebuild with `sudo nixos-rebuild switch --flake /etc/nixos#your-hostname`
+
+For detailed documentation on host-specific configuration, see [README-host-setup.md](README-host-setup.md).
+
+## 🧩 Module Structure
+
+The module system has been carefully designed to avoid circular dependencies and to ensure that modules are loaded in the correct order.
+
+Key components include:
+
+- **Host Configuration Schema**: Defines the structure for host-specific configuration options
+- **Core Modules**: Essential modules that are loaded before the module manager
+- **Module Manager**: Conditionally imports modules based on host configuration
+- **Host-Specific Configuration**: Provides actual values for the host configuration options
+
+The import order is critical:
+
+1. Hardware Configuration
+2. Host-Specific Configuration (actual values)
+3. Configuration with Host Configuration Schema + Core Modules + Module Manager
+4. Secret Management
+5. Home Manager
+
+For a detailed explanation of the module structure, import order, and how to add new modules or hosts, see [README-module-structure.md](README-module-structure.md).
 
 ## ⌨️ Keybindings
 
