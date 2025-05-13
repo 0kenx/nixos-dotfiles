@@ -25,37 +25,52 @@
     username = "dev";
     system = "x86_64-linux";
     channel = "24.11";
-
+    
     # Define a common nixpkgs configuration
     commonNixpkgsConfig = {
       allowUnfree = true;
       # You can add other shared configurations like overlays here if needed
     };
-
+    
     pkgs = import nixpkgs {
       inherit system;
       config = commonNixpkgsConfig; # Apply the common config
     };
-
+    
     pkgsUnstable = import nixpkgs-unstable {
       inherit system;
       config = commonNixpkgsConfig; # Apply the common config here too
     };
-
+    
     lib = pkgs.lib;
-
+    
     # Function to generate a NixOS system for a specific host
     mkNixosSystem = { hostname }:
+      let
+        # Create a minimal nixosSystem to extract display configuration
+        hostInfoSystem = nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = [
+            # We need to include the option definitions first
+            ./modules/host-config.nix
+            # Then we include the host-specific configuration that sets these options
+            ./hosts/${hostname}/default.nix
+          ];
+        };
+
+        # Extract display configuration from the pre-evaluated system
+        hostDisplayConfig = hostInfoSystem.config.system.nixos-dotfiles.host.displays;
+      in
       nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = {
           host = hostname;
           pkgs-unstable = pkgsUnstable;
           inherit self inputs username channel pkgs;
+          # Pass the pre-resolved display configuration
+          inherit hostDisplayConfig;
         };
         modules = [
-          # Important: The import order has been carefully designed to avoid infinite recursion
-
           # 1. First load hardware configuration (needed by other modules)
           ./hardware-configuration.nix
 
@@ -77,15 +92,17 @@
             home-manager.backupFileExtension = "backup";
 
             # Pass all necessary parameters explicitly to home/default.nix
-            home-manager.users.${username} = import ./home {
-              inherit inputs username channel; # nixosConfig will be implicitly available via extraSpecialArgs
-              host = hostname;
-            };
+            # Including pre-resolved hostDisplayConfig to avoid circular dependencies
+            home-manager.users.${username} = { pkgs, lib, ... }: 
+              import ./home {
+                inherit inputs username channel pkgs lib hostDisplayConfig; 
+                host = hostname;
+              };
 
             # Pass flake inputs and system config to home-manager modules
             home-manager.extraSpecialArgs = {
-              inherit inputs username channel;
-              host = hostname;  # nixosConfig is added by Home Manager itself to these specialArgs
+              inherit inputs username channel hostDisplayConfig;
+              host = hostname;
             };
           }
         ];
@@ -96,7 +113,7 @@
     nixosConfigurations = {
       # Main development machine configuration (generic default for development)
       dev = mkNixosSystem { hostname = "workstation"; };
-
+      
       # Specific host configurations
       laptop = mkNixosSystem { hostname = "laptop"; };
       workstation = mkNixosSystem { hostname = "workstation"; };

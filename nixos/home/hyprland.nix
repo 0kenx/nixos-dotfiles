@@ -1,13 +1,82 @@
-{inputs, pkgs, config, lib, nixosConfig, ...}:
+{inputs, pkgs, config, lib, nixosConfig, hostDisplayConfig, username, host, channel, ...}:
 
 let
-  # Import the Hyprland display configuration
-  hyprlandConfig = import ./hyprland-config.nix { inherit config lib pkgs nixosConfig; };
+  # Use pre-resolved display configuration directly
+  # This avoids circular dependencies with module-manager.nix
+  primaryDisplayOutput = hostDisplayConfig.primary or "eDP-1";
+  secondaryDisplayOutput = hostDisplayConfig.secondary or null;
+  tertiaryDisplayOutput = hostDisplayConfig.tertiary or null;
 
-  # Extract monitor and workspace configurations
-  monitors = hyprlandConfig.hyprlandConfig.monitors;
-  workspaces = hyprlandConfig.hyprlandConfig.workspaces;
-  monitorScript = hyprlandConfig.hyprlandConfig.monitorPositioningScript;
+  primaryScaleFactor = toString (hostDisplayConfig.primaryScale or 1.0);
+  secondaryScaleFactor = toString (hostDisplayConfig.secondaryScale or 1.0);
+  tertiaryScaleFactor = toString (hostDisplayConfig.tertiaryScale or 1.0);
+
+  getRotateValue = rotation:
+    if rotation == "left" then "1"
+    else if rotation == "right" then "3"
+    else if rotation == "inverted" then "2"
+    else "0"; # normal rotation
+
+  secondaryRotationSetting = hostDisplayConfig.secondaryRotate or null;
+  tertiaryRotationSetting = hostDisplayConfig.tertiaryRotate or null;
+
+  secondaryTransformValue = if secondaryRotationSetting != null
+    then ",transform,${getRotateValue secondaryRotationSetting}"
+    else "";
+
+  tertiaryTransformValue = if tertiaryRotationSetting != null
+    then ",transform,${getRotateValue tertiaryRotationSetting}"
+    else "";
+
+  secondaryPositionValue = hostDisplayConfig.secondaryPosition or "auto-right";
+  tertiaryPositionValue = hostDisplayConfig.tertiaryPosition or "auto-right";
+
+  primaryMonitorLine = "${primaryDisplayOutput},preferred,auto,${primaryScaleFactor}";
+  secondaryMonitorLine = if secondaryDisplayOutput != null
+    then "${secondaryDisplayOutput},preferred,${secondaryPositionValue},${secondaryScaleFactor}${secondaryTransformValue}"
+    else "";
+  tertiaryMonitorLine = if tertiaryDisplayOutput != null
+    then "${tertiaryDisplayOutput},preferred,${tertiaryPositionValue},${tertiaryScaleFactor}${tertiaryTransformValue}"
+    else "";
+
+  monitors = lib.filter (m: m != "") [
+    primaryMonitorLine
+    secondaryMonitorLine
+    tertiaryMonitorLine
+  ];
+
+  workspaces =
+    (map (i: "${toString i},monitor:${primaryDisplayOutput}") (lib.range 1 10)) ++
+    (if secondaryDisplayOutput != null then
+      (map (i: "${toString i},monitor:${secondaryDisplayOutput}") (lib.range 11 20))
+    else []) ++
+    (if tertiaryDisplayOutput != null then
+      (map (i: "${toString i},monitor:${tertiaryDisplayOutput}") (lib.range 21 30))
+    else []);
+
+  # Script to initialize display layout dynamically
+  monitorScript = ''
+    # Configure monitors if more than one is connected
+    if [ "$(hyprctl monitors -j | jq '. | length')" -gt "1" ]; then
+      hyprctl keyword monitor "${primaryMonitorLine}"
+      ${if secondaryDisplayOutput != null then ''
+        ${if secondaryPositionValue != "auto-right" then ''
+          hyprctl keyword monitor "${secondaryMonitorLine}"
+        '' else ''
+          primary_height=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"${primaryDisplayOutput}\") | .height")
+          primary_width=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"${primaryDisplayOutput}\") | .width")
+          secondary_width=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"${secondaryDisplayOutput}\") | .width") # Assuming it becomes height if rotated
+          position="$primary_width,0"
+          hyprctl keyword monitor "${secondaryDisplayOutput},preferred,$position,${secondaryScaleFactor}${secondaryTransformValue}"
+        ''}
+      '' else ""}
+      ${if tertiaryDisplayOutput != null then ''
+        hyprctl keyword monitor "${tertiaryMonitorLine}"
+      '' else ""}
+    else
+      hyprctl keyword monitor "${primaryMonitorLine}"
+    fi
+  '';
 in {
   wayland.windowManager.hyprland = {
     enable = true;
@@ -548,20 +617,20 @@ in {
     };
   };
 
-  # Dynamic wallpaper configuration based on host display configuration
+  # Dynamic wallpaper configuration based on pre-resolved host display configuration
   xdg.configFile."hypr/hyprpaper.conf" = {
     text = let
-      primary = nixosConfig.system.nixos-dotfiles.host.displays.primary;
-      secondary = nixosConfig.system.nixos-dotfiles.host.displays.secondary;
-      tertiary = nixosConfig.system.nixos-dotfiles.host.displays.tertiary;
+      primary = primaryDisplayOutput;
+      secondary = secondaryDisplayOutput;
+      tertiary = tertiaryDisplayOutput;
 
       # Determine wallpaper orientation based on rotation
-      secondaryOrientation = if nixosConfig.system.nixos-dotfiles.host.displays.secondaryRotate == "left"
-                             || nixosConfig.system.nixos-dotfiles.host.displays.secondaryRotate == "right"
+      secondaryOrientation = if secondaryRotationSetting == "left"
+                             || secondaryRotationSetting == "right"
                              then "vertical" else "horizontal";
 
-      tertiaryOrientation = if nixosConfig.system.nixos-dotfiles.host.displays.tertiaryRotate == "left"
-                            || nixosConfig.system.nixos-dotfiles.host.displays.tertiaryRotate == "right"
+      tertiaryOrientation = if tertiaryRotationSetting == "left"
+                            || tertiaryRotationSetting == "right"
                             then "vertical" else "horizontal";
 
       # Select appropriate wallpapers based on orientation

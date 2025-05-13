@@ -1,4 +1,4 @@
-{inputs, username, host, channel, ...}: {
+{inputs, username, host, channel, pkgs, lib, hostDisplayConfig, ...}: {
   imports = [
     ./rofi.nix
     ./fish.nix
