@@ -1,219 +1,144 @@
 {inputs, username, host, ...}: {
   programs.starship = {
-    enable = false; # Disabled to use custom fish prompt
+    enable = true;
     settings = {
-      aws = {
-        symbol = "󰸏 ";
-        format = "\\[[$symbol($profile)(\\($region\\))(\\[$duration\\])]($style)\\]";
+      # Create a compact format with custom vim mode indicator
+      format = "$custom$username $directory$git_branch$git_status $character";
+      right_format = "$status$cmd_duration$time";
+      add_newline = false;
+
+      # Define the character module for the prompt character
+      character = {
+        success_symbol = "[>](bold green)";
+        error_symbol = "[>](bold red)";
+        vimcmd_symbol = "[>](bold blue)";
       };
-      bun = {
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      c = {
-        symbol = " ";
-        format = "\\[[$symbol($version(-$name))]($style)\\]";
-      };
-      cmake = {
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      cmd_duration = {
-        format = "\\[[⏱ $duration]($style)\\]";
-      };
-      cobol = {
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      conda = {
-        format = "\\[[$symbol$environment]($style)\\]";
-      };
-      crystal = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      daml = {
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      dart = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      deno = {
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      docker_context = {
-        symbol = " ";
-        format = "\\[[$symbol$context]($style)\\]";
-      };
-      dotnet = {
-        symbol = "󰪮 ";
-        format = "\\[[$symbol($version)(🎯 $tfm)]($style)\\]";
-      };
-      elixir = {
-        symbol = " ";
-        format = "\\[[$symbol($version \\(OTP $otp_version\\))]($style)\\]";
-      };
-      elm = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      erlang = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      gcloud = {
-        symbol = " ";
-        format = "\\[[$symbol$account(@$domain)(\\($region\\))]($style)\\]";
-      };
-      git_branch = {
-        format = "\\[[$symbol$branch]($style)\\]";
-      };
-      git_status = {
-        format = "(\\[[$all_status$ahead_behind\\]]($style))";
-      };
-      golang = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      guix_shell = {
-        symbol = " ";
-        format = "\\[[$symbol]($style)\\]";
-      };
-      haskell = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      haxe = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      helm = {
-        symbol = "⎈ ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      hg_branch = {
-        format = "\\[[$symbol$branch]($style)\\]";
-      };
-      java = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      julia = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      kotlin = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      kubernetes = {
-        symbol = "󱃾 ";
-        format = "\\[[$symbol$context( \\($namespace\\))]($style)\\]";
-      };
-      lua = {
-        symbol = "󰢱 ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      memory_usage = {
-        format = "\\[$symbol[$ram( | $swap)]($style)\\]";
-      };
-      meson = {
-        format = "\\[[$symbol$project]($style)\\]";
-      };
-      nim = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      nix_shell = {
-        symbol = " ";
-        format = "\\[[$symbol$state( \\($name\\))]($style)\\]";
-      };
-      nodejs = {
-        symbol = "󰎙 ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      ocaml = {
-        symbol = " ";
-        format = "\\[[$symbol($version)(\\($switch_indicator$switch_name\\))]($style)\\]";
-      };
-      opa = {
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      openstack = {
-        format = "\\[[$symbol$cloud(\\($project\\))]($style)\\]";
-      };
-      os = {
-        format = "\\[[$symbol]($style)\\]";
-      };
-      package = {
-        format = "\\[[$symbol$version]($style)\\]";
-      };
-      perl = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      php = {
-        symbol = "󰌟 ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      pulumi = {
-        format = "\\[[$symbol$stack]($style)\\]";
-      };
-      purescript = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      python = {
-        symbol = " ";
-        format = "\\[[$symbol$$pyenv_prefix($version)(\\($virtualenv\\))]($style)\\]";
-      };
-      raku = {
-        format = "\\[[$symbol($version-$vm_version)]($style)\\]";
-      };
-      red = {
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      ruby = {
-        symbol = "󰴭 ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      rust = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      scala = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      spack = {
-        format = "\\[[$symbol$environment]($style)\\]";
-      };
-      sudo = {
-        format = "\\[[as $symbol]\\]";
-      };
-      swift = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
-      };
-      terraform = {
-        symbol = " ";
-        format = "\\[[$symbol$workspace]($style)\\]";
-      };
-      time = {
-        format = "\\[[$time]($style)\\]";
-      };
+
+      # Configure the username display
       username = {
-        format = "\\[[$user]($style)\\]";
+        style_user = "blue bold";
+        style_root = "red bold";
+        format = "[$user]($style)";
+        disabled = false;
+        show_always = true;
       };
-      vagrant = {
-        format = "\\[[$symbol($version)]($style)\\]";
+
+      # Configure directory display
+      directory = {
+        style = "blue";
+        format = "[$path]($style)";
+        truncation_length = 3;
+        truncation_symbol = "…/";
+        fish_style_pwd_dir_length = 1;
       };
-      vlang = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
+
+      # Configure git branch display
+      git_branch = {
+        symbol = "";
+        style = "bold yellow";
+        format = " ⟨[$branch]($style)⟩";
       };
-      zig = {
-        symbol = " ";
-        format = "\\[[$symbol($version)]($style)\\]";
+
+      # Configure git status display
+      git_status = {
+        format = "[$all_status$ahead_behind](bold red)";
+        ahead = "↑$count";
+        behind = "↓$count";
+        diverged = "⇕↑$ahead_count↓$behind_count";
+        staged = "+$count";
+        conflicted = "!$count";
+        untracked = "?$count";
+        modified = "!$count";
       };
+
+      # Command duration display
+      cmd_duration = {
+        min_time = 0;
+        format = "|[$duration](bright-black)";
+        show_milliseconds = true;
+      };
+
+      # Configure the time display
+      time = {
+        disabled = false;
+        format = "|[$time](bright-black)";
+        time_format = "%H:%M:%S";
+      };
+
+      # Configure the status display
+      status = {
+        disabled = false;
+        format = "[$symbol]($style)";
+        symbol = "✗";
+        success_symbol = "✓";
+        style = "red bold";
+        success_style = "green bold";
+        map_symbol = true;
+      };
+
+      # Make a custom vi_mode Starship section
+      custom.vi_mode = {
+        command = "echo $vi_mode_symbol";
+        when = "test -n \"$vi_mode_symbol\"";
+        format = "$output ";
+      };
+
+      # Disable all unused modules
+      aws = { disabled = true; };
+      bun = { disabled = true; };
+      c = { disabled = true; };
+      cmake = { disabled = true; };
+      cobol = { disabled = true; };
+      conda = { disabled = true; };
+      crystal = { disabled = true; };
+      daml = { disabled = true; };
+      dart = { disabled = true; };
+      deno = { disabled = true; };
+      docker_context = { disabled = true; };
+      dotnet = { disabled = true; };
+      elixir = { disabled = true; };
+      elm = { disabled = true; };
+      erlang = { disabled = true; };
+      gcloud = { disabled = true; };
+      golang = { disabled = true; };
+      guix_shell = { disabled = true; };
+      haskell = { disabled = true; };
+      haxe = { disabled = true; };
+      helm = { disabled = true; };
+      hg_branch = { disabled = true; };
+      java = { disabled = true; };
+      julia = { disabled = true; };
+      kotlin = { disabled = true; };
+      kubernetes = { disabled = true; };
+      lua = { disabled = true; };
+      memory_usage = { disabled = true; };
+      meson = { disabled = true; };
+      nim = { disabled = true; };
+      nix_shell = { disabled = false; };
+      nodejs = { disabled = true; };
+      ocaml = { disabled = true; };
+      opa = { disabled = true; };
+      openstack = { disabled = true; };
+      os = { disabled = true; };
+      package = { disabled = true; };
+      perl = { disabled = true; };
+      php = { disabled = true; };
+      pulumi = { disabled = true; };
+      purescript = { disabled = true; };
+      python = { disabled = true; };
+      raku = { disabled = true; };
+      red = { disabled = true; };
+      ruby = { disabled = true; };
+      rust = { disabled = true; };
+      scala = { disabled = true; };
+      spack = { disabled = true; };
+      sudo = { disabled = true; };
+      swift = { disabled = true; };
+      terraform = { disabled = true; };
+      vagrant = { disabled = true; };
+      vlang = { disabled = true; };
+      zig = { disabled = true; };
     };
   };
 }
+

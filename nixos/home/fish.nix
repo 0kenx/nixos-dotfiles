@@ -850,11 +850,44 @@
       # Set fish_greeting to empty to disable greeting
       set -U fish_greeting
 
-      # Enable vi mode
+      # Enable vi mode with explicit settings to ensure the mode is correctly detected by Starship
       fish_vi_key_bindings
       set -g fish_cursor_default block
       set -g fish_cursor_insert line
       set -g fish_cursor_visual underscore
+
+      # Custom function to handle vi mode changes and expose them to Starship
+      function on_fish_bind_mode --on-variable fish_bind_mode
+        # export the vi_mode_symbol variable which Starship can use
+        set --global --export vi_mode_symbol ""
+
+        # Set vi_mode_symbol based on the current mode with colors
+        if test "$fish_key_bindings" = fish_vi_key_bindings
+          set --local color
+          set --local symbol
+          switch $fish_bind_mode
+            case default
+              set color blue
+              set symbol N
+            case insert
+              set color green
+              set symbol I
+            case replace replace_one
+              set color red
+              set symbol R
+            case visual
+              set color yellow
+              set symbol V
+            case '*'
+              set color cyan
+              set symbol "?"
+          end
+          set vi_mode_symbol (set_color --bold $color)"[$symbol]"(set_color normal)
+        end
+      end
+
+      # Initial call to set the mode indicator
+      on_fish_bind_mode
 
       # Add Alt+S keyboard shortcut for sudo !!
       bind \es 'echo "sudo !!"; commandline "sudo !!"'
@@ -921,123 +954,9 @@
       end
 
       # Load and configure custom prompt using nerdfonts
+      # fish_prompt is handled by Starship - just provide empty function
       function fish_prompt
-        # Save the status
-        set -l last_status $status
-
-        # Vi mode indicator
-        set_color normal
-        echo -n "["
-        switch $fish_bind_mode
-          case default
-            set_color red
-            echo -n 'N'
-          case insert
-            set_color green
-            echo -n 'I'
-          case replace_one
-            set_color yellow
-            echo -n 'R'
-          case visual
-            set_color magenta
-            echo -n 'V'
-        end
-        set_color normal
-        echo -n "]"
-
-        # Username (no hostname)
-        set_color blue
-        echo -n (whoami)
-        set_color normal
-        echo -n ' '
-
-        # Current directory
-        set_color blue
-        echo -n (prompt_pwd)
-        set_color normal
-
-        # Git status if in a git repo
-        if git rev-parse --is-inside-work-tree >/dev/null 2>&1
-          set -l branch (__git_branch_name)
-
-          if test -n "$branch"
-            set_color normal
-            echo -n ' ('
-
-            # Branch name
-            set_color yellow
-            echo -n "$branch"
-            set_color normal
-            echo -n ')'
-
-            # Number of untracked, staged and changed files
-            set -l git_status (git status --porcelain 2>/dev/null | string split "\n")
-
-            # Count added, modified and untracked files
-            set -l added_count 0
-            set -l modified_count 0
-            set -l untracked_count 0
-
-            # Process each line of git status output
-            for line in $git_status
-                if string match -qr '^A|^M.|^D.' -- $line
-                    set added_count (math $added_count + 1)
-                end
-                if string match -qr '^ M|^.M|^.D|^MM|^AM|^MD|^AD' -- $line
-                    set modified_count (math $modified_count + 1)
-                end
-                if string match -qr '^\?\?' -- $line
-                    set untracked_count (math $untracked_count + 1)
-                end
-            end
-
-            # Count unpushed commits
-            set -l unpushed_count 0
-            set -l current_remote (git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
-            if test $status -eq 0
-              # Successfully got upstream branch, count unpushed commits
-              set unpushed_count (git log --oneline $current_remote..HEAD 2>/dev/null | wc -l)
-            else
-              # No upstream branch found, count all commits
-              set -l has_commits (git log -1 --oneline 2>/dev/null)
-              if test -n "$has_commits"
-                # Repository has commits but no upstream
-                set unpushed_count (git log --oneline 2>/dev/null | wc -l)
-              end
-            end
-
-            # Display statistics if there are any changes
-            if test $added_count -gt 0
-              set_color green
-              echo -n "+"$added_count
-              set_color normal
-            end
-
-            if test $modified_count -gt 0
-              set_color yellow
-              echo -n "!"$modified_count
-              set_color normal
-            end
-
-            if test $untracked_count -gt 0
-              set_color red
-              echo -n "?"$untracked_count
-              set_color normal
-            end
-
-            if test $unpushed_count -gt 0
-              set_color cyan
-              echo -n "↑"$unpushed_count
-              set_color normal
-            end
-          end
-        end
-
-        # Prompt character
-        set_color normal
-        echo -n ' > '
-
-        set_color normal
+        # Empty - Starship will handle this
       end
 
       function __format_time
@@ -1081,32 +1000,9 @@
         echo -n $output
       end
 
+      # fish_right_prompt is handled by Starship - just provide empty function
       function fish_right_prompt
-        set -l last_status $status
-
-        # Command status indicator
-        if test $last_status -eq 0
-          set_color green
-          echo -n "✓ "
-        else
-          set_color red
-          echo -n "❌ $last_status"
-        end
-
-        # Command execution time
-        if set -q CMD_DURATION
-          set -l duration (__format_time $CMD_DURATION)
-          if test -n "$duration"
-            set_color brblack
-            echo -n " | $duration"
-          end
-        end
-
-        # Clock
-        set_color brblack
-        echo -n " | "(date "+%H:%M:%S")
-
-        set_color normal
+        # Empty - Starship will handle this
       end
 
       # Vi mode indicator
@@ -1115,23 +1011,8 @@
       end
 
       # Helper function to get vi mode indicator
-      function __vi_mode_prompt
-        switch $fish_bind_mode
-          case default
-            set_color red
-            echo -n 'N'
-          case insert
-            set_color green
-            echo -n 'I'
-          case replace_one
-            set_color yellow
-            echo -n 'R'
-          case visual
-            set_color magenta
-            echo -n 'V'
-        end
-        set_color normal
-      end
+      # Remove the __vi_mode_prompt function as it's no longer needed
+      # Starship will handle vi mode indicators
 
       # Ensure the vi mode prompt isn't overridden by other settings
       set -g fish_vi_force_cursor 1

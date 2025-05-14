@@ -15,7 +15,7 @@
     ./bat.nix
     ./mpv.nix
     ./kitty.nix
-    # ./starship.nix # Disabled to use custom fish prompt
+    ./starship.nix
     ./zellij.nix
     ./delta.nix
     ./bottom.nix
