@@ -3,7 +3,7 @@
     enable = true;
     settings = {
       # Create a compact format with custom vim mode indicator
-      format = "$custom$username $directory$git_branch$git_status $character";
+      format = "$custom$username $directory$git_branch$git_status$git_metrics $character";
       right_format = "$status$cmd_duration$python$nodejs$rust$c$golang$zig$lua$time";
       add_newline = false;
 
@@ -54,10 +54,20 @@
         ignore_submodules = false;
       };
 
-      # Git state configuration
-      git_state = {
-        format = "[$state( $progress_current/$progress_total)]($style) ";
-        style = "bright-black";
+      # Git metrics to show added/deleted lines
+      git_metrics = {
+        disabled = false;
+        added_style = "bold green";
+        deleted_style = "bold red";
+        only_nonzero_diffs = true;
+        format = "([+$added]($added_style) )([-$deleted]($deleted_style) )";
+      };
+
+      # Git commit module to show unpushed commits
+      git_commit = {
+        only_detached = false;
+        format = "[$hash]($style) ";
+        style = "bold yellow";
       };
 
       # Command duration display
