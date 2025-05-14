@@ -313,6 +313,8 @@ in {
         "opacity 1.0 override 1.0 override, class:^gimp$"
         "opacity 1.0 override 1.0 override, class:^Gimp"
         "opacity 1.0 override 1.0 override, title:.*GIMP$"
+        "float, title:iwgtk"
+        "float, title:overskride"
       ];
 
       # Variable for mod key

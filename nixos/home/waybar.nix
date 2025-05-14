@@ -33,6 +33,16 @@
             "8" = "󰲮";
             "9" = "󰲰";
             "10" = "󰿬";
+            "11" = "⓫";
+            "12" = "⓬";
+            "13" = "⓭";
+            "14" = "⓮";
+            "15" = "⓯";
+            "16" = "⓰";
+            "17" = "⓱";
+            "18" = "⓲";
+            "19" = "⓳";
+            "20" = "⓴";
             "special" = "";
           };
           show-special = true;
@@ -48,6 +58,7 @@
 
         "clock#time" = {
           format = "{:%H:%M %z}";
+          tooltip = false;
         };
 
         "custom/timezone_hk" = {
@@ -132,11 +143,11 @@
 
         network = {
           format = "󰤭";
-          format-wifi = "{icon}({signalStrength}%){essid}";
+          format-wifi = "{icon} {signalStrength}% {essid}";
           format-icons = ["󰤯" "󰤟" "󰤢" "󰤥" "󰤨"];
           format-disconnected = "󰤫 Disconnected";
           tooltip-format = "wifi <span color='#ee99a0'>off</span>";
-          tooltip-format-wifi = "SSID: {essid}({signalStrength}%), {frequency} MHz\nInterface: {ifname}\nIP: {ipaddr}\nGW: {gwaddr}\n\n<span color='#a6da95'>{bandwidthUpBits}</span>\t<span color='#ee99a0'>{bandwidthDownBits}</span>\t<span color='#c6a0f6'>󰹹{bandwidthTotalBits}</span>";
+          tooltip-format-wifi = "SSID: {essid}({signalStrength}%), {frequency} GHz\nInterface: {ifname}\nIP: {ipaddr}\nGW: {gwaddr}\n\n<span color='#a6da95'>{bandwidthUpBits}</span>\t<span color='#ee99a0'>{bandwidthDownBits}</span>\t<span color='#c6a0f6'>󰹹{bandwidthTotalBits}</span>";
           tooltip-format-disconnected = "<span color='#ed8796'>disconnected</span>";
           max-length = 35;
           on-click = "fish -c wifi_toggle";
@@ -159,7 +170,7 @@
         };
 
         "custom/webcam" = {
-          interval = 5;  # Check every 5 seconds, webcam state rarely changes
+          interval = 5;
           exec = "fish -c check_webcam";
           return-type = "json";
         };
@@ -179,14 +190,14 @@
         };
 
         "custom/recording" = {
-          interval = 3;  # Recording status only needs to update every 3 seconds
+          interval = 3;
           exec-if = "pgrep wl-screenrec";
           exec = "fish -c check_recording";
           return-type = "json";
         };
 
         "custom/geo" = {
-          interval = 10;  # Geoclue status rarely changes, 10 seconds is plenty
+          interval = 10;
           exec-if = "pgrep geoclue";
           exec = "fish -c check_geo_module";
           return-type = "json";
@@ -194,14 +205,14 @@
 
         "custom/airplane_mode" = {
           return-type = "json";
-          interval = 5;  # Network state doesn't change that frequently
+          interval = 5;
           exec = "fish -c check_airplane_mode";
           on-click = "fish -c airplane_mode_toggle";
         };
 
         "custom/night_mode" = {
           return-type = "json";
-          interval = 30;  # Night mode state changes very rarely
+          interval = 30;
           exec = "fish -c check_night_mode";
           on-click = "fish -c night_mode_toggle";
         };
@@ -210,7 +221,7 @@
           return-type = "json";
           exec = "fish -c dunst_pause";
           on-click = "dunstctl set-paused toggle";
-          restart-interval = 3;  # Notification status can be checked less frequently
+          restart-interval = 3;
         };
 
         "idle_inhibitor" = {
@@ -310,8 +321,8 @@
             "lower-medium" = 30;
             low = 10;
           };
-          on-click = "wezterm start btop";
-          on-click-right = "wezterm start btm";
+          on-click = "ghostty -e btop";
+          on-click-right = "ghostty -e btm";
         };
 
         memory = {
@@ -324,8 +335,8 @@
             "lower-medium" = 30;
             low = 10;
           };
-          on-click = "wezterm start btop";
-          on-click-right = "wezterm start btm";
+          on-click = "ghostty -e btop";
+          on-click-right = "ghostty -e btm";
         };
 
         disk = {
@@ -338,8 +349,8 @@
             "lower-medium" = 30;
             low = 10;
           };
-          on-click = "wezterm start btop";
-          on-click-right = "wezterm start btm";
+          on-click = "ghostty -e btop";
+          on-click-right = "ghostty -e btm";
         };
 
         temperature = {
@@ -597,7 +608,6 @@
       #clock.calendar {
         color: @mauve;
       }
-
 
       #bluetooth {
         background-color: alpha(@surface1, 0.7);
