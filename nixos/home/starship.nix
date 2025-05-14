@@ -36,7 +36,7 @@
       git_branch = {
         symbol = "";
         style = "bold yellow";
-        format = " ⟨[$branch]($style)⟩";
+        format = " \\([$branch]($style)\\)";
       };
 
       # Configure git status display
@@ -54,14 +54,14 @@
       # Command duration display
       cmd_duration = {
         min_time = 0;
-        format = "|[$duration](bright-black)";
+        format = " [$duration](bright-black)";
         show_milliseconds = true;
       };
 
       # Configure the time display
       time = {
         disabled = false;
-        format = "|[$time](bright-black)";
+        format = "[|$time](bright-black)";
         time_format = "%H:%M:%S";
       };
 
@@ -69,7 +69,7 @@
       status = {
         disabled = false;
         format = "[$symbol]($style)";
-        symbol = "✗";
+        symbol = "✘ $status";
         success_symbol = "✓";
         style = "red bold";
         success_style = "green bold";
