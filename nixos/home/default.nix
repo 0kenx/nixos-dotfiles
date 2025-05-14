@@ -15,6 +15,11 @@
     ./bat.nix
     ./mpv.nix
     ./kitty.nix
+    ./starship.nix
+    ./zellij.nix
+    ./delta.nix
+    ./bottom.nix
+    ./tealdeer.nix
   ];
 
   # We're now explicitly starting components with exec-once in Hyprland

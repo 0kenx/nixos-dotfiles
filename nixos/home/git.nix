@@ -14,10 +14,6 @@
     
     # Core settings
     extraConfig = {
-      core = {
-        pager = "delta";
-      };
-      
       # Interactive mode
       interactive = {
         diffFilter = "delta --color-only";
@@ -113,12 +109,9 @@
     ];
   };
   
-  # Add delta package
-  home.packages = with pkgs; [
-    delta
-  ];
-  
-  # Configure delta through git config
+  # Delta is now handled by the delta.nix module
+
+  # Configure git extra settings
   programs.git.extraConfig = {
     # SSH credentials helper for submodules
     credential.helper = "cache --timeout=3600";
@@ -131,35 +124,6 @@
     # Use SSH connections more efficiently
     ssh = {
       variant = "ssh";
-    };
-
-    # Delta configuration
-    delta = {
-      features = "catppuccin-macchiato";
-
-      # Catppuccin Macchiato theme settings for Delta
-      "catppuccin-macchiato" = {
-        "blame-palette" = "#24273a #1e2030 #181926 #363a4f #494d64";
-        "commit-decoration-style" = "box ul";
-        "dark" = "true";
-        "file-decoration-style" = "#cad3f5";
-        "file-style" = "#cad3f5";
-        "hunk-header-decoration-style" = "box ul";
-        "hunk-header-file-style" = "bold";
-        "hunk-header-line-number-style" = "bold #a5adcb";
-        "hunk-header-style" = "file line-number syntax";
-        "line-numbers-left-style" = "#6e738d";
-        "line-numbers-minus-style" = "bold #ed8796";
-        "line-numbers-plus-style" = "bold #a6da95";
-        "line-numbers-right-style" = "#6e738d";
-        "line-numbers-zero-style" = "#6e738d";
-        "minus-emph-style" = "bold syntax #563f51";
-        "minus-style" = "syntax #383143";
-        "plus-emph-style" = "bold syntax #455450";
-        "plus-style" = "syntax #313943";
-        "map-styles" = "bold purple => syntax #4d4569, bold blue => syntax #3e4868, bold cyan => syntax #3f5364, bold yellow => syntax #575253";
-        "syntax-theme" = "Catppuccin Macchiato";
-      };
     };
   };
 }
