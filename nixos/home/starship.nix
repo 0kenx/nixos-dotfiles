@@ -61,7 +61,7 @@
         added_style = "bold green";
         deleted_style = "bold red";
         only_nonzero_diffs = true;
-        format = "\\(([+$added]($added_style))([-$deleted]($deleted_style))\\)";
+        format = "(\\(([+$added]($added_style))([-$deleted]($deleted_style))\\))";
       };
 
       # Git commit module to show unpushed commits
