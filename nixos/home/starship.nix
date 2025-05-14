@@ -37,7 +37,7 @@
         symbol = "";
         style = "bold yellow";
         format = " \\([$branch(:$remote_branch)]($style)\\) ";
-        always_show_remote = true;
+        always_show_remote = false;
       };
 
       # Configure git status display
@@ -53,8 +53,6 @@
         modified = "!$count";
         up_to_date = "";
         ignore_submodules = false;
-        ahead_behind_separator = "";
-        use_git_executable = true;
       };
 
       # Git metrics to show added/deleted lines
@@ -63,7 +61,7 @@
         added_style = "bold green";
         deleted_style = "bold red";
         only_nonzero_diffs = true;
-        format = "([+$added]($added_style) )([-$deleted]($deleted_style) )";
+        format = "\\([+$added]($added_style)[-$deleted]($deleted_style)\\)";
       };
 
       # Git commit module to show unpushed commits
