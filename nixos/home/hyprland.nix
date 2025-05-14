@@ -342,8 +342,8 @@ in {
         # Application launchers
         "$mainMod, T, exec, uwsm app -- ghostty"
         "$mainMod SHIFT, T, exec, uwsm app -- telegram-desktop"
-        "$mainMod, B, exec, uwsm app -- qutebrowser"
-        "$mainMod SHIFT, B, exec, uwsm app -- brave"
+        "$mainMod SHIFT, B, exec, uwsm app -- qutebrowser"
+        "$mainMod, B, exec, uwsm app -- google-chrome-stable"
         "$mainMod, F, exec, uwsm app -- thunar"
         "$mainMod, S, exec, uwsm app -- spotify"
         "$mainMod, Y, exec, uwsm app -- youtube-music"
