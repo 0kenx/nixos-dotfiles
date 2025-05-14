@@ -1,6 +1,6 @@
 {inputs, username, host, ...}: {
   programs.starship = {
-    enable = true;
+    enable = false; # Disabled to use custom fish prompt
     settings = {
       aws = {
         symbol = "󰸏 ";

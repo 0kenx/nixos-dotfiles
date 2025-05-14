@@ -926,8 +926,23 @@
         set -l last_status $status
 
         # Vi mode indicator
+        set_color normal
         echo -n "["
-        __vi_mode_prompt
+        switch $fish_bind_mode
+          case default
+            set_color red
+            echo -n 'N'
+          case insert
+            set_color green
+            echo -n 'I'
+          case replace_one
+            set_color yellow
+            echo -n 'R'
+          case visual
+            set_color magenta
+            echo -n 'V'
+        end
+        set_color normal
         echo -n "]"
 
         # Username (no hostname)
@@ -994,25 +1009,25 @@
             # Display statistics if there are any changes
             if test $added_count -gt 0
               set_color green
-              echo -n "+$added_count"
+              echo -n "+"$added_count
               set_color normal
             end
 
             if test $modified_count -gt 0
               set_color yellow
-              echo -n "!$modified_count"
+              echo -n "!"$modified_count
               set_color normal
             end
 
             if test $untracked_count -gt 0
               set_color red
-              echo -n "?$untracked_count"
+              echo -n "?"$untracked_count
               set_color normal
             end
 
             if test $unpushed_count -gt 0
               set_color cyan
-              echo -n "↑$unpushed_count"
+              echo -n "↑"$unpushed_count
               set_color normal
             end
           end
@@ -1075,7 +1090,7 @@
           echo -n "✓ "
         else
           set_color red
-          echo -n "✗ $last_status"
+          echo -n "❌ $last_status"
         end
 
         # Command execution time
@@ -1083,13 +1098,13 @@
           set -l duration (__format_time $CMD_DURATION)
           if test -n "$duration"
             set_color brblack
-            echo -n "|$duration"
+            echo -n " | $duration"
           end
         end
 
         # Clock
         set_color brblack
-        echo -n "|"(date "+%H:%M:%S")
+        echo -n " | "(date "+%H:%M:%S")
 
         set_color normal
       end
@@ -1117,6 +1132,9 @@
         end
         set_color normal
       end
+
+      # Ensure the vi mode prompt isn't overridden by other settings
+      set -g fish_vi_force_cursor 1
     '';
   };
 }
