@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, hostDisplayConfig, ...}: {
   programs.waybar = {
     enable = true;
 
@@ -7,9 +7,66 @@
 
     # Configuration
     settings = [
-      # Top Bar Config
+      # Secondary Monitor Top Bar (simple layout with workspaces and taskbar)
+      {
+        name = "secondary_top_bar";
+        output = "${hostDisplayConfig.secondary}";
+        layer = "top";
+        position = "top";
+        height = 39;
+        spacing = 4;
+
+        modules-left = ["hyprland/workspaces"];
+        modules-center = [];
+        modules-right = ["wlr/taskbar"];
+
+        "hyprland/workspaces" = {
+          on-click = "activate";
+          format = "{icon}";
+          format-icons = {
+            "1" = "󰲠";
+            "2" = "󰲢";
+            "3" = "󰲤";
+            "4" = "󰲦";
+            "5" = "󰲨";
+            "6" = "󰲪";
+            "7" = "󰲬";
+            "8" = "󰲮";
+            "9" = "󰲰";
+            "10" = "󰿬";
+            "11" = "⓫";
+            "12" = "⓬";
+            "13" = "⓭";
+            "14" = "⓮";
+            "15" = "⓯";
+            "16" = "⓰";
+            "17" = "⓱";
+            "18" = "⓲";
+            "19" = "⓳";
+            "20" = "⓴";
+            "special" = "";
+          };
+          show-special = true;
+          persistent-workspaces = {
+            "*" = 10;
+          };
+        };
+
+        "wlr/taskbar" = {
+          format = "{icon}";
+          icon-size = 20;
+          icon-theme = "Numix-Circle";
+          tooltip-format = "{title}";
+          on-click = "activate";
+          on-click-right = "close";
+          on-click-middle = "fullscreen";
+        };
+      }
+
+      # Top Bar Config for Primary Monitor
       {
         name = "top_bar";
+        output = "${hostDisplayConfig.primary}";
         layer = "top";
         position = "top";
         height = 39;
@@ -243,9 +300,10 @@
         };
       }
 
-      # Bottom Bar Config
+      # Bottom Bar Config for Primary Monitor
       {
         name = "bottom_bar";
+        output = "${hostDisplayConfig.primary}";
         layer = "top";
         position = "bottom";
         height = 36;
@@ -283,9 +341,10 @@
         };
       }
 
-      # Left Bar Config
+      # Left Bar Config for Primary Monitor
       {
         name = "left_bar";
+        output = "${hostDisplayConfig.primary}";
         layer = "top";
         position = "left";
         spacing = 4;
@@ -449,6 +508,8 @@
       @define-color mantle #1e2030;
       @define-color crust  #181926;
 
+      /* Secondary monitor bar styles */
+
       @define-color text     #cad3f5;
       @define-color subtext0 #a5adcb;
       @define-color subtext1 #b8c0e0;
@@ -496,6 +557,16 @@
         border-right: solid alpha(@surface1, 0.7) 2;
         border-bottom: solid alpha(@surface1, 0.7) 2;
         border-radius: 0 15 15 0;
+      }
+
+      /* Secondary monitor bar styles */
+      window.secondary_top_bar#waybar {
+        background-color: alpha(@base, 0.7);
+        border-bottom: solid alpha(@surface1, 0.7) 2;
+      }
+
+      window.secondary_top_bar .modules-right {
+        margin-right: 10;
       }
 
       window.bottom_bar .modules-center {

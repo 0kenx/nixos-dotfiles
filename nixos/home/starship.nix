@@ -80,7 +80,7 @@
       custom.vi_mode = {
         command = "echo $vi_mode_symbol";
         when = "test -n \"$vi_mode_symbol\"";
-        format = "$output ";
+        format = "$output";
       };
 
       # Configure language-specific modules
