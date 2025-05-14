@@ -4,7 +4,7 @@
     settings = {
       # Create a compact format with custom vim mode indicator
       format = "$custom$username $directory$git_branch$git_status $character";
-      right_format = "$status$cmd_duration$time";
+      right_format = "$status$cmd_duration$python$nodejs$rust$c$golang$zig$lua$time";
       add_newline = false;
 
       # Define the character module for the prompt character
@@ -83,10 +83,46 @@
         format = "$output ";
       };
 
-      # Disable all unused modules
+      # Configure language-specific modules
+      python = {
+        disabled = false;
+        format = "[(py $version)](blue bold) ";
+        detect_extensions = ["py"];
+      };
+      nodejs = {
+        disabled = false;
+        format = "[(node $version)](green bold) ";
+        detect_extensions = ["js" "mjs" "cjs" "ts" "mts" "cts"];
+      };
+      rust = {
+        disabled = false;
+        format = "[(rust $version)](red bold) ";
+        detect_extensions = ["rs"];
+      };
+      c = {
+        disabled = false;
+        format = "[(c $version)](blue bold) ";
+        detect_extensions = ["c" "h"];
+      };
+      golang = {
+        disabled = false;
+        format = "[(go $version)](cyan bold) ";
+        detect_extensions = ["go"];
+      };
+      zig = {
+        disabled = false;
+        format = "[(zig $version)](yellow bold) ";
+        detect_extensions = ["zig"];
+      };
+      lua = {
+        disabled = false;
+        format = "[(lua $version)](blue bold) ";
+        detect_extensions = ["lua"];
+      };
+
+      # Disable other modules
       aws = { disabled = true; };
       bun = { disabled = true; };
-      c = { disabled = true; };
       cmake = { disabled = true; };
       cobol = { disabled = true; };
       conda = { disabled = true; };
@@ -100,7 +136,6 @@
       elm = { disabled = true; };
       erlang = { disabled = true; };
       gcloud = { disabled = true; };
-      golang = { disabled = true; };
       guix_shell = { disabled = true; };
       haskell = { disabled = true; };
       haxe = { disabled = true; };
@@ -110,12 +145,10 @@
       julia = { disabled = true; };
       kotlin = { disabled = true; };
       kubernetes = { disabled = true; };
-      lua = { disabled = true; };
       memory_usage = { disabled = true; };
       meson = { disabled = true; };
       nim = { disabled = true; };
       nix_shell = { disabled = false; };
-      nodejs = { disabled = true; };
       ocaml = { disabled = true; };
       opa = { disabled = true; };
       openstack = { disabled = true; };
@@ -125,11 +158,9 @@
       php = { disabled = true; };
       pulumi = { disabled = true; };
       purescript = { disabled = true; };
-      python = { disabled = true; };
       raku = { disabled = true; };
       red = { disabled = true; };
       ruby = { disabled = true; };
-      rust = { disabled = true; };
       scala = { disabled = true; };
       spack = { disabled = true; };
       sudo = { disabled = true; };
@@ -137,7 +168,6 @@
       terraform = { disabled = true; };
       vagrant = { disabled = true; };
       vlang = { disabled = true; };
-      zig = { disabled = true; };
     };
   };
 }
