@@ -112,7 +112,7 @@
       dcl = "docker container ls";
     };
 
-    # Fish shell functions
+    # Lazy-loaded Fish shell functions using autoload pattern
     functions = {
       # Git functions
       current_branch = ''
@@ -482,15 +482,11 @@
 
       fish_greeting = ''
         set_color blue
-        echo " Distro:  NixOS"
+        echo " Distro:  NixOS"
         set_color white
-        echo "󰅱 Langs:   Rust  Zig  Go  JS 󰛦 TS  Python  Lua  Wasm"
+        echo "󰅱 Langs:   Rust  Zig  Go  JS 󰛦 TS  Python  Lua  Wasm"
         set_color green
-        echo " Shell:  󰈺 Fish"
-        set_color yellow
-        echo "󰟶 Mood:   👨‍💻"
-        set_color cyan
-        figlet random -f binary
+        echo " Shell:  󰈺 Fish"
         # clear
       '';
 
