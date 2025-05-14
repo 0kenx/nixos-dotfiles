@@ -87,5 +87,6 @@
     tlp
     acpi
     light
+    zoom-us
   ];
 }
