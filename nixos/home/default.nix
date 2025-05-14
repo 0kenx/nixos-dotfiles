@@ -20,6 +20,13 @@
     ./delta.nix
     ./bottom.nix
     ./tealdeer.nix
+
+    # GUI Tools
+    ./qutebrowser.nix
+    ./swappy.nix
+    ./thunar.nix
+    ./wlogout.nix
+    ./xfce4.nix
   ];
 
   # We're now explicitly starting components with exec-once in Hyprland
