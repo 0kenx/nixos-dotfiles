@@ -25,7 +25,24 @@
   };
   services.fail2ban.enable = true;
   security.pam.services.hyprlock = {};
-  # security.polkit.enable = true;
+  security.polkit.enable = true;
+  security.polkit.extraConfig = ''
+    polkit.addRule(function(action, subject) {
+      if (action.id.indexOf("org.bluez") == 0 &&
+          (subject.isInGroup("users") || subject.isInGroup("bluetooth"))) {
+        return polkit.Result.YES;
+      }
+    });
+  '';
+
+  # Improve HID device permissions
+  services.udev.extraRules = ''
+    # Logitech devices
+    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="046d", MODE="0666"
+
+    # Generic HID device rules
+    ACTION=="add", SUBSYSTEM=="bluetooth", ATTR{type}=="1", RUN+="${pkgs.bluez}/bin/bluetoothctl -- connect %s{uniq}"
+  '';
   programs.browserpass.enable = true;
   # ClamAV moved to dedicated clamav-scanner.nix module
   programs.firejail = {
