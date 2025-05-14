@@ -20,6 +20,7 @@
     ./delta.nix
     ./bottom.nix
     ./tealdeer.nix
+    ./neofetch.nix
 
     # GUI Tools
     ./qutebrowser.nix

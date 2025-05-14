@@ -2,7 +2,7 @@
 
 {
   environment.systemPackages = with pkgs; [
-    neofetch
+    # neofetch (moved to home-manager)
     onefetch
     ipfetch
     cpufetch

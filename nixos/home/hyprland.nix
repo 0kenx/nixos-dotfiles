@@ -195,9 +195,9 @@ in {
       # Environment variables
       env = [
         "GDK_SCALE,1.6"
-        "HYPRCURSOR_THEME,Catppuccin-Macchiato-Teal"
+        "HYPRCURSOR_THEME,Catppuccin-Macchiato-Sapphire"
         "HYPRCURSOR_SIZE,24"
-        "XCURSOR_THEME,Catppuccin-Macchiato-Teal"
+        "XCURSOR_THEME,Catppuccin-Macchiato-Sapphire"
         "XCURSOR_SIZE,24"
       ];
 
@@ -206,7 +206,7 @@ in {
         gaps_in = 5;
         gaps_out = 10;
         border_size = 2;
-        "col.active_border" = "$teal";
+        "col.active_border" = "$sapphire";
         "col.inactive_border" = "$surface1";
         layout = "dwindle";
       };
@@ -223,7 +223,7 @@ in {
           range = 15;
           render_power = 3;
           offset = "0, 0";
-          color = "$teal";
+          color = "$sapphire";
           color_inactive = "0xff$baseAlpha";
         };
         active_opacity = 0.8;
@@ -313,6 +313,8 @@ in {
         "opacity 1.0 override 1.0 override, class:^gimp$"
         "opacity 1.0 override 1.0 override, class:^Gimp"
         "opacity 1.0 override 1.0 override, title:.*GIMP$"
+        "float, title:iwgtk"
+        "float, title:overskride"
       ];
 
       # Variable for mod key
@@ -378,6 +380,26 @@ in {
         "$mainMod SHIFT, P, pseudo" # dwindle
         "$mainMod SHIFT, O, togglesplit" # dwindle
         "$mainMod ALT, M, exit"
+
+        # Moving windows
+        "$mainMod SHIFT, left, swapwindow, l"
+        "$mainMod SHIFT, right, swapwindow, r"
+        "$mainMod SHIFT, up, swapwindow, u"
+        "$mainMod SHIFT, down, swapwindow, d"
+        "$mainMod SHIFT, h, swapwindow, l"
+        "$mainMod SHIFT, l, swapwindow, r"
+        "$mainMod SHIFT, k, swapwindow, u"
+        "$mainMod SHIFT, j, swapwindow, d"
+
+        # Window resizing
+        "$mainMod CTRL, left, resizeactive, -60 0"
+        "$mainMod CTRL, right, resizeactive, 60 0"
+        "$mainMod CTRL, up, resizeactive, 0 -60"
+        "$mainMod CTRL, down, resizeactive, 0 60"
+        "$mainMod CTRL, h, resizeactive, -60 0"
+        "$mainMod CTRL, l, resizeactive, 60 0"
+        "$mainMod CTRL, k, resizeactive, 0 -60"
+        "$mainMod CTRL, j, resizeactive, 0 60"
 
         # System toggles
         "$mainMod SHIFT, A, exec, fish -c airplane_mode_toggle"

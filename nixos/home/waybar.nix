@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, hostDisplayConfig, ...}: {
   programs.waybar = {
     enable = true;
 
@@ -7,12 +7,69 @@
 
     # Configuration
     settings = [
-      # Top Bar Config
+      # Secondary Monitor Top Bar (simple layout with workspaces and taskbar)
       {
-        name = "top_bar";
+        name = "secondary_top_bar";
+        output = "${hostDisplayConfig.secondary}";
         layer = "top";
         position = "top";
-        height = 36;
+        height = 39;
+        spacing = 4;
+
+        modules-left = ["hyprland/workspaces"];
+        modules-center = [];
+        modules-right = ["wlr/taskbar"];
+
+        "hyprland/workspaces" = {
+          on-click = "activate";
+          format = "{icon}";
+          format-icons = {
+            "1" = "󰲠";
+            "2" = "󰲢";
+            "3" = "󰲤";
+            "4" = "󰲦";
+            "5" = "󰲨";
+            "6" = "󰲪";
+            "7" = "󰲬";
+            "8" = "󰲮";
+            "9" = "󰲰";
+            "10" = "󰿬";
+            "11" = "⓫";
+            "12" = "⓬";
+            "13" = "⓭";
+            "14" = "⓮";
+            "15" = "⓯";
+            "16" = "⓰";
+            "17" = "⓱";
+            "18" = "⓲";
+            "19" = "⓳";
+            "20" = "⓴";
+            "special" = "";
+          };
+          show-special = true;
+          persistent-workspaces = {
+            "*" = 10;
+          };
+        };
+
+        "wlr/taskbar" = {
+          format = "{icon}";
+          icon-size = 20;
+          icon-theme = "Numix-Circle";
+          tooltip-format = "{title}";
+          on-click = "activate";
+          on-click-right = "close";
+          on-click-middle = "fullscreen";
+        };
+      }
+
+      # Top Bar Config for Primary Monitor
+      {
+        name = "top_bar";
+        output = "${hostDisplayConfig.primary}";
+        layer = "top";
+        position = "top";
+        height = 39;
         spacing = 4;
 
         modules-left = ["hyprland/workspaces" "hyprland/submap"];
@@ -33,6 +90,16 @@
             "8" = "󰲮";
             "9" = "󰲰";
             "10" = "󰿬";
+            "11" = "⓫";
+            "12" = "⓬";
+            "13" = "⓭";
+            "14" = "⓮";
+            "15" = "⓯";
+            "16" = "⓰";
+            "17" = "⓱";
+            "18" = "⓲";
+            "19" = "⓳";
+            "20" = "⓴";
             "special" = "";
           };
           show-special = true;
@@ -48,6 +115,7 @@
 
         "clock#time" = {
           format = "{:%H:%M %z}";
+          tooltip = false;
         };
 
         "custom/timezone_hk" = {
@@ -132,11 +200,11 @@
 
         network = {
           format = "󰤭";
-          format-wifi = "{icon}({signalStrength}%){essid}";
+          format-wifi = "{icon} {signalStrength}% {essid}";
           format-icons = ["󰤯" "󰤟" "󰤢" "󰤥" "󰤨"];
           format-disconnected = "󰤫 Disconnected";
           tooltip-format = "wifi <span color='#ee99a0'>off</span>";
-          tooltip-format-wifi = "SSID: {essid}({signalStrength}%), {frequency} MHz\nInterface: {ifname}\nIP: {ipaddr}\nGW: {gwaddr}\n\n<span color='#a6da95'>{bandwidthUpBits}</span>\t<span color='#ee99a0'>{bandwidthDownBits}</span>\t<span color='#c6a0f6'>󰹹{bandwidthTotalBits}</span>";
+          tooltip-format-wifi = "SSID: {essid}({signalStrength}%), {frequency} GHz\nInterface: {ifname}\nIP: {ipaddr}\nGW: {gwaddr}\n\n<span color='#a6da95'>{bandwidthUpBits}</span>\t<span color='#ee99a0'>{bandwidthDownBits}</span>\t<span color='#c6a0f6'>󰹹{bandwidthTotalBits}</span>";
           tooltip-format-disconnected = "<span color='#ed8796'>disconnected</span>";
           max-length = 35;
           on-click = "fish -c wifi_toggle";
@@ -159,7 +227,7 @@
         };
 
         "custom/webcam" = {
-          interval = 5;  # Check every 5 seconds, webcam state rarely changes
+          interval = 5;
           exec = "fish -c check_webcam";
           return-type = "json";
         };
@@ -179,14 +247,14 @@
         };
 
         "custom/recording" = {
-          interval = 3;  # Recording status only needs to update every 3 seconds
+          interval = 3;
           exec-if = "pgrep wl-screenrec";
           exec = "fish -c check_recording";
           return-type = "json";
         };
 
         "custom/geo" = {
-          interval = 10;  # Geoclue status rarely changes, 10 seconds is plenty
+          interval = 10;
           exec-if = "pgrep geoclue";
           exec = "fish -c check_geo_module";
           return-type = "json";
@@ -194,14 +262,14 @@
 
         "custom/airplane_mode" = {
           return-type = "json";
-          interval = 5;  # Network state doesn't change that frequently
+          interval = 5;
           exec = "fish -c check_airplane_mode";
           on-click = "fish -c airplane_mode_toggle";
         };
 
         "custom/night_mode" = {
           return-type = "json";
-          interval = 30;  # Night mode state changes very rarely
+          interval = 30;
           exec = "fish -c check_night_mode";
           on-click = "fish -c night_mode_toggle";
         };
@@ -210,7 +278,7 @@
           return-type = "json";
           exec = "fish -c dunst_pause";
           on-click = "dunstctl set-paused toggle";
-          restart-interval = 3;  # Notification status can be checked less frequently
+          restart-interval = 3;
         };
 
         "idle_inhibitor" = {
@@ -232,9 +300,10 @@
         };
       }
 
-      # Bottom Bar Config
+      # Bottom Bar Config for Primary Monitor
       {
         name = "bottom_bar";
+        output = "${hostDisplayConfig.primary}";
         layer = "top";
         position = "bottom";
         height = 36;
@@ -250,7 +319,7 @@
         };
 
         "hyprland/language" = {
-          format-en = "🇺🇸 ENG (US)";
+          format-en = "🇺🇸 EN(US)";
           format-uk = "🇺🇦 UKR";
           format-ru = "🇷🇺 RUS";
           keyboard-name = "at-translated-set-2-keyboard";
@@ -272,13 +341,14 @@
         };
       }
 
-      # Left Bar Config
+      # Left Bar Config for Primary Monitor
       {
         name = "left_bar";
+        output = "${hostDisplayConfig.primary}";
         layer = "top";
         position = "left";
         spacing = 4;
-        width = 75;
+        width = 45;
         margin-top = 10;
         margin-bottom = 10;
 
@@ -302,7 +372,7 @@
         };
 
         cpu = {
-          format = "󰻠 {usage}%";
+          format = "󰻠\n{usage}%";
           states = {
             high = 90;
             "upper-medium" = 70;
@@ -310,12 +380,12 @@
             "lower-medium" = 30;
             low = 10;
           };
-          on-click = "wezterm start btop";
-          on-click-right = "wezterm start btm";
+          on-click = "ghostty -e btop";
+          on-click-right = "ghostty -e btm";
         };
 
         memory = {
-          format = " {percentage}%";
+          format = "\n{percentage}%";
           tooltip-format = "Main: ({used} GiB/{total} GiB)({percentage}%), available {avail} GiB\nSwap: ({swapUsed} GiB/{swapTotal} GiB)({swapPercentage}%), available {swapAvail} GiB";
           states = {
             high = 90;
@@ -324,12 +394,12 @@
             "lower-medium" = 30;
             low = 10;
           };
-          on-click = "wezterm start btop";
-          on-click-right = "wezterm start btm";
+          on-click = "ghostty -e btop";
+          on-click-right = "ghostty -e btm";
         };
 
         disk = {
-          format = "󰋊 {percentage_used}%";
+          format = "󰋊\n{percentage_used}%";
           tooltip-format = "({used}/{total})({percentage_used}%) in '{path}', available {free}({percentage_free}%)";
           states = {
             high = 90;
@@ -338,16 +408,16 @@
             "lower-medium" = 30;
             low = 10;
           };
-          on-click = "wezterm start btop";
-          on-click-right = "wezterm start btm";
+          on-click = "ghostty -e btop";
+          on-click-right = "ghostty -e btm";
         };
 
         temperature = {
           tooltip = false;
           "thermal-zone" = 8;
           "critical-threshold" = 80;
-          format = "{icon}{temperatureC}󰔄";
-          "format-critical" = "🔥 {icon}{temperatureC}󰔄";
+          format = "{icon}\n{temperatureC}󰔄";
+          "format-critical" = "🔥 {icon}\n{temperatureC}󰔄";
           "format-icons" = ["" "" "" "" ""];
         };
 
@@ -359,16 +429,16 @@
             "lower-medium" = 30;
             low = 10;
           };
-          format = "{icon}{capacity}%";
-          "format-charging" = "󱐋 {icon}{capacity}%";
-          "format-plugged" = "󰚥 {icon}{capacity}%";
+          format = "{icon}\n{capacity}%";
+          "format-charging" = "󱐋 {icon}\n{capacity}%";
+          "format-plugged" = "󰚥 {icon}\n{capacity}%";
           "format-time" = "{H} h {M} min";
           "format-icons" = ["󱃍" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
           "tooltip-format" = "{timeTo}";
         };
 
         backlight = {
-          format = "{icon}{percent}%";
+          format = "{icon}\n{percent}%";
           "format-icons" = [
             "󰌶"
             "󱩎"
@@ -403,12 +473,12 @@
             low = 10;
           };
           "tooltip-format" = "{desc}";
-          format = "{icon} {volume}%\n{format_source}";
-          "format-bluetooth" = "󰂱 {icon} {volume}%\n{format_source}";
-          "format-bluetooth-muted" = "󰂱󰝟 {volume}%\n{format_source}";
-          "format-muted" = "󰝟 {volume}%\n{format_source}";
-          "format-source" = "󰍬 {volume}%";
-          "format-source-muted" = "󰍭 {volume}%";
+          format = "{icon}\n{volume}%\n{format_source}";
+          "format-bluetooth" = "󰂱 {icon}\n{volume}%\n{format_source}";
+          "format-bluetooth-muted" = "󰂱󰝟\n{volume}%\n{format_source}";
+          "format-muted" = "󰝟\n{volume}%\n{format_source}";
+          "format-source" = "󰍬\n{volume}%";
+          "format-source-muted" = "󰍭\n{volume}%";
           "format-icons" = {
             headphone = "󰋋";
             "hands-free" = "";
@@ -427,7 +497,7 @@
         };
 
         "systemd-failed-units" = {
-          format = "✗ {nr_failed}";
+          format = "✗\n{nr_failed}";
         };
       }
     ];
@@ -437,6 +507,8 @@
       @define-color base   #24273a;
       @define-color mantle #1e2030;
       @define-color crust  #181926;
+
+      /* Secondary monitor bar styles */
 
       @define-color text     #cad3f5;
       @define-color subtext0 #a5adcb;
@@ -485,6 +557,16 @@
         border-right: solid alpha(@surface1, 0.7) 2;
         border-bottom: solid alpha(@surface1, 0.7) 2;
         border-radius: 0 15 15 0;
+      }
+
+      /* Secondary monitor bar styles */
+      window.secondary_top_bar#waybar {
+        background-color: alpha(@base, 0.7);
+        border-bottom: solid alpha(@surface1, 0.7) 2;
+      }
+
+      window.secondary_top_bar .modules-right {
+        margin-right: 10;
       }
 
       window.bottom_bar .modules-center {
@@ -567,7 +649,7 @@
         padding-left: 20;
         padding-right: 20;
         margin-top: 5;
-        margin-bottom: 5;
+        margin-bottom: 9;
       }
 
       #custom-separator {
@@ -598,14 +680,13 @@
         color: @mauve;
       }
 
-
       #bluetooth {
         background-color: alpha(@surface1, 0.7);
         border-radius: 15;
         padding-left: 15;
         padding-right: 15;
         margin-top: 5;
-        margin-bottom: 5;
+        margin-bottom: 9;
       }
 
       #bluetooth.disabled {
@@ -629,7 +710,7 @@
         margin-left: 2;
         margin-right: 2;
         margin-top: 5;
-        margin-bottom: 5;
+        margin-bottom: 9;
       }
 
       #network.disabled {
@@ -646,7 +727,7 @@
       }
 
       #idle_inhibitor {
-        margin-right: 2;
+        margin-right: 15;
       }
 
       #idle_inhibitor.deactivated {
@@ -658,7 +739,7 @@
       }
 
       #custom-airplane_mode {
-        margin-right: 2;
+        margin-right: 15;
       }
 
       #custom-airplane_mode.off {
@@ -666,7 +747,7 @@
       }
 
       #custom-night_mode {
-        margin-right: 2;
+        margin-right: 15;
       }
 
       #custom-night_mode.off {
@@ -674,7 +755,7 @@
       }
 
       #custom-dunst {
-        margin-right: 2;
+        margin-right: 15;
       }
 
       #custom-media.Paused {
@@ -683,37 +764,37 @@
 
       #custom-webcam {
         color: @maroon;
-        margin-right: 3;
+        margin-right: 15;
       }
 
       #privacy-item.screenshare {
         color: @peach;
-        margin-right: 5;
+        margin-right: 15;
       }
 
       #privacy-item.audio-in {
         color: @pink;
-        margin-right: 4;
+        margin-right: 15;
       }
 
       #custom-recording {
         color: @red;
-        margin-right: 4;
+        margin-right: 15;
       }
 
       #custom-geo {
         color: @yellow;
-        margin-right: 4;
+        margin-right: 15;
       }
 
       #custom-logout_menu {
         color: @red;
         background-color: alpha(@surface1, 0.7);
         border-radius: 15 0 0 15;
-        padding-left: 10;
-        padding-right: 5;
+        padding-left: 15;
+        padding-right: 15;
         margin-top: 5;
-        margin-bottom: 5;
+        margin-bottom: 9;
       }
 
       window.left_bar .modules-center {
@@ -722,8 +803,8 @@
         margin-right: 5;
         margin-top: 15;
         margin-bottom: 15;
-        padding-top: 5;
-        padding-bottom: 5;
+        padding-top: 15;
+        padding-bottom: 15;
       }
 
       #taskbar {
@@ -738,7 +819,7 @@
       }
 
       #tray {
-        margin-bottom: 10;
+        margin-bottom: 30;
         margin-right: 10;
         margin-left: 10;
       }
