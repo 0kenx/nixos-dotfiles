@@ -32,11 +32,12 @@
         fish_style_pwd_dir_length = 1;
       };
 
-      # Configure git branch display
+      # Configure git branch display with tracking info
       git_branch = {
         symbol = "";
         style = "bold yellow";
-        format = " \\([$branch]($style)\\)";
+        format = " \\([$branch(:$remote_branch)]($style)\\) ";
+        always_show_remote = true;
       };
 
       # Configure git status display
@@ -52,6 +53,8 @@
         modified = "!$count";
         up_to_date = "";
         ignore_submodules = false;
+        ahead_behind_separator = "";
+        use_git_executable = true;
       };
 
       # Git metrics to show added/deleted lines
