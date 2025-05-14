@@ -10,6 +10,23 @@
     ./git.nix
     ./gtk.nix
     ./ssh.nix
+    ./helix.nix
+    ./zathura.nix
+    ./bat.nix
+    ./mpv.nix
+    ./kitty.nix
+    ./starship.nix
+    ./zellij.nix
+    ./delta.nix
+    ./bottom.nix
+    ./tealdeer.nix
+
+    # GUI Tools
+    ./qutebrowser.nix
+    ./swappy.nix
+    ./thunar.nix
+    ./wlogout.nix
+    ./xfce4.nix
   ];
 
   # We're now explicitly starting components with exec-once in Hyprland
