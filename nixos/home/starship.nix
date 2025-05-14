@@ -3,7 +3,7 @@
     enable = true;
     settings = {
       # Create a compact format with custom vim mode indicator
-      format = "$custom$username $directory$git_branch$git_status $character";
+      format = "$custom$username $directory$git_branch$git_state$git_status $character";
       right_format = "$status$cmd_duration$python$nodejs$rust$c$golang$zig$lua$time";
       add_newline = false;
 
@@ -45,10 +45,22 @@
         ahead = "↑$count";
         behind = "↓$count";
         diverged = "⇕↑$ahead_count↓$behind_count";
+        stashed = "≡$count";
         staged = "+$count";
         conflicted = "!$count";
         untracked = "?$count";
         modified = "!$count";
+        up_to_date = "";
+        untracked_count = true;
+        show_sync_count = true;
+        count_behind = true;
+        count_ahead = true;
+      };
+
+      # Git state configuration
+      git_state = {
+        format = "[$state( $progress_current/$progress_total)]($style) ";
+        style = "bright-black";
       };
 
       # Command duration display
