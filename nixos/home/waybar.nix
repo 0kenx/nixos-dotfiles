@@ -12,7 +12,7 @@
         name = "top_bar";
         layer = "top";
         position = "top";
-        height = 36;
+        height = 39;
         spacing = 4;
 
         modules-left = ["hyprland/workspaces" "hyprland/submap"];
@@ -261,7 +261,7 @@
         };
 
         "hyprland/language" = {
-          format-en = "🇺🇸 ENG (US)";
+          format-en = "🇺🇸 EN(US)";
           format-uk = "🇺🇦 UKR";
           format-ru = "🇷🇺 RUS";
           keyboard-name = "at-translated-set-2-keyboard";
@@ -289,7 +289,7 @@
         layer = "top";
         position = "left";
         spacing = 4;
-        width = 75;
+        width = 45;
         margin-top = 10;
         margin-bottom = 10;
 
@@ -313,7 +313,7 @@
         };
 
         cpu = {
-          format = "󰻠 {usage}%";
+          format = "󰻠\n{usage}%";
           states = {
             high = 90;
             "upper-medium" = 70;
@@ -326,7 +326,7 @@
         };
 
         memory = {
-          format = " {percentage}%";
+          format = "\n{percentage}%";
           tooltip-format = "Main: ({used} GiB/{total} GiB)({percentage}%), available {avail} GiB\nSwap: ({swapUsed} GiB/{swapTotal} GiB)({swapPercentage}%), available {swapAvail} GiB";
           states = {
             high = 90;
@@ -340,7 +340,7 @@
         };
 
         disk = {
-          format = "󰋊 {percentage_used}%";
+          format = "󰋊\n{percentage_used}%";
           tooltip-format = "({used}/{total})({percentage_used}%) in '{path}', available {free}({percentage_free}%)";
           states = {
             high = 90;
@@ -357,8 +357,8 @@
           tooltip = false;
           "thermal-zone" = 8;
           "critical-threshold" = 80;
-          format = "{icon}{temperatureC}󰔄";
-          "format-critical" = "🔥 {icon}{temperatureC}󰔄";
+          format = "{icon}\n{temperatureC}󰔄";
+          "format-critical" = "🔥 {icon}\n{temperatureC}󰔄";
           "format-icons" = ["" "" "" "" ""];
         };
 
@@ -370,16 +370,16 @@
             "lower-medium" = 30;
             low = 10;
           };
-          format = "{icon}{capacity}%";
-          "format-charging" = "󱐋 {icon}{capacity}%";
-          "format-plugged" = "󰚥 {icon}{capacity}%";
+          format = "{icon}\n{capacity}%";
+          "format-charging" = "󱐋 {icon}\n{capacity}%";
+          "format-plugged" = "󰚥 {icon}\n{capacity}%";
           "format-time" = "{H} h {M} min";
           "format-icons" = ["󱃍" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
           "tooltip-format" = "{timeTo}";
         };
 
         backlight = {
-          format = "{icon}{percent}%";
+          format = "{icon}\n{percent}%";
           "format-icons" = [
             "󰌶"
             "󱩎"
@@ -414,12 +414,12 @@
             low = 10;
           };
           "tooltip-format" = "{desc}";
-          format = "{icon} {volume}%\n{format_source}";
-          "format-bluetooth" = "󰂱 {icon} {volume}%\n{format_source}";
-          "format-bluetooth-muted" = "󰂱󰝟 {volume}%\n{format_source}";
-          "format-muted" = "󰝟 {volume}%\n{format_source}";
-          "format-source" = "󰍬 {volume}%";
-          "format-source-muted" = "󰍭 {volume}%";
+          format = "{icon}\n{volume}%\n{format_source}";
+          "format-bluetooth" = "󰂱 {icon}\n{volume}%\n{format_source}";
+          "format-bluetooth-muted" = "󰂱󰝟\n{volume}%\n{format_source}";
+          "format-muted" = "󰝟\n{volume}%\n{format_source}";
+          "format-source" = "󰍬\n{volume}%";
+          "format-source-muted" = "󰍭\n{volume}%";
           "format-icons" = {
             headphone = "󰋋";
             "hands-free" = "";
@@ -438,7 +438,7 @@
         };
 
         "systemd-failed-units" = {
-          format = "✗ {nr_failed}";
+          format = "✗\n{nr_failed}";
         };
       }
     ];
@@ -578,7 +578,7 @@
         padding-left: 20;
         padding-right: 20;
         margin-top: 5;
-        margin-bottom: 5;
+        margin-bottom: 9;
       }
 
       #custom-separator {
@@ -615,7 +615,7 @@
         padding-left: 15;
         padding-right: 15;
         margin-top: 5;
-        margin-bottom: 5;
+        margin-bottom: 9;
       }
 
       #bluetooth.disabled {
@@ -639,7 +639,7 @@
         margin-left: 2;
         margin-right: 2;
         margin-top: 5;
-        margin-bottom: 5;
+        margin-bottom: 9;
       }
 
       #network.disabled {
@@ -656,7 +656,7 @@
       }
 
       #idle_inhibitor {
-        margin-right: 2;
+        margin-right: 15;
       }
 
       #idle_inhibitor.deactivated {
@@ -668,7 +668,7 @@
       }
 
       #custom-airplane_mode {
-        margin-right: 2;
+        margin-right: 15;
       }
 
       #custom-airplane_mode.off {
@@ -676,7 +676,7 @@
       }
 
       #custom-night_mode {
-        margin-right: 2;
+        margin-right: 15;
       }
 
       #custom-night_mode.off {
@@ -684,7 +684,7 @@
       }
 
       #custom-dunst {
-        margin-right: 2;
+        margin-right: 15;
       }
 
       #custom-media.Paused {
@@ -693,37 +693,37 @@
 
       #custom-webcam {
         color: @maroon;
-        margin-right: 3;
+        margin-right: 15;
       }
 
       #privacy-item.screenshare {
         color: @peach;
-        margin-right: 5;
+        margin-right: 15;
       }
 
       #privacy-item.audio-in {
         color: @pink;
-        margin-right: 4;
+        margin-right: 15;
       }
 
       #custom-recording {
         color: @red;
-        margin-right: 4;
+        margin-right: 15;
       }
 
       #custom-geo {
         color: @yellow;
-        margin-right: 4;
+        margin-right: 15;
       }
 
       #custom-logout_menu {
         color: @red;
         background-color: alpha(@surface1, 0.7);
         border-radius: 15 0 0 15;
-        padding-left: 10;
-        padding-right: 5;
+        padding-left: 15;
+        padding-right: 15;
         margin-top: 5;
-        margin-bottom: 5;
+        margin-bottom: 9;
       }
 
       window.left_bar .modules-center {
@@ -732,8 +732,8 @@
         margin-right: 5;
         margin-top: 15;
         margin-bottom: 15;
-        padding-top: 5;
-        padding-bottom: 5;
+        padding-top: 15;
+        padding-bottom: 15;
       }
 
       #taskbar {
@@ -748,7 +748,7 @@
       }
 
       #tray {
-        margin-bottom: 10;
+        margin-bottom: 30;
         margin-right: 10;
         margin-left: 10;
       }
