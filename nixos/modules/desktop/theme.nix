@@ -9,7 +9,7 @@
   environment.variables.HYPRCURSOR_SIZE = "24";
   qt = {
     enable = true;
-    platformTheme = "gtk2";
+    platformTheme = "gtk2"; # Keep the old format for system-wide setting
     style = "gtk2";
   };
   console = {

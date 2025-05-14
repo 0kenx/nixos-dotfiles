@@ -10,6 +10,11 @@
     ./git.nix
     ./gtk.nix
     ./ssh.nix
+    ./helix.nix
+    ./zathura.nix
+    ./bat.nix
+    ./mpv.nix
+    ./kitty.nix
   ];
 
   # We're now explicitly starting components with exec-once in Hyprland
