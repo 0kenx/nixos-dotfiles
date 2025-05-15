@@ -22,11 +22,17 @@
         inputs.nixpkgs.follows = "nixpkgs";
       };
 
+      # HyprPanel
+      hyprpanel = {
+        url = "github:Jas-SinghFSU/HyprPanel";
+        inputs.nixpkgs.follows = "nixpkgs";
+      };
+
       # No need to reference nixos-secrets as git repo
       # We assume that /etc/nixos/nixos-secrets exists
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, self, sops-nix, claude-desktop, ... } @ inputs:
+  outputs = { nixpkgs, nixpkgs-unstable, self, sops-nix, claude-desktop, hyprpanel, ... } @ inputs:
   let
     username = "dev";
     system = "x86_64-linux";
@@ -41,6 +47,9 @@
     pkgs = import nixpkgs {
       inherit system;
       config = commonNixpkgsConfig; # Apply the common config
+      overlays = [
+        hyprpanel.overlay
+      ];
     };
     
     pkgsUnstable = import nixpkgs-unstable {

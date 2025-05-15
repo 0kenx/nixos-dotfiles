@@ -103,7 +103,7 @@ in {
         "${monitorSetupScript}"
         # Start Hyprland components explicitly (no systemd)
         "hyprpaper"
-        "waybar"
+        "hyprpanel"
         "pypr"
         # Start automounter
         "udiskie --automount --notify --tray"

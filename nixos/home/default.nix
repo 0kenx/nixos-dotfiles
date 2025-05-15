@@ -5,8 +5,9 @@
     ./hyprland.nix
     ./neovim.nix
     ./ghostty.nix
-    ./dunst.nix
-    ./waybar.nix
+    ./hyprpanel.nix
+    # dunst.nix disabled - using hyprpanel for notifications
+    # waybar.nix disabled - using hyprpanel
     ./git.nix
     ./gtk.nix
     ./ssh.nix
