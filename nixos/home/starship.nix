@@ -36,21 +36,21 @@
       git_branch = {
         symbol = "";
         style = "bold yellow";
-        format = "( \\([$branch(:$remote_branch)]($style)\\) )";
+        format = "( \\([$branch(:$remote_branch)]($style)\\))";
         always_show_remote = false;
       };
 
       # Configure git status display
       git_status = {
-        format = "[$all_status$ahead_behind](bold red)";
-        ahead = "↑$count";
-        behind = "↓$count";
-        diverged = "⇕↑$ahead_count⇣$behind_count";
-        stashed = "≡$count";
-        staged = "+$count";
-        conflicted = "!$count";
-        untracked = "?$count";
-        modified = "!$count";
+        format = "$all_status$ahead_behind";
+        ahead = "[↑$count](bold green)";
+        behind = "[↓$count](bold red)";
+        diverged = "[⇕↑$ahead_count⇣$behind_count](bold yellow)";
+        stashed = "[≡$count](bold cyan)";
+        staged = "[+$count](bold green)";
+        conflicted = "[!$count](bold red)";
+        untracked = "[?$count](bold blue)";
+        modified = "[!$count](bold yellow)";
         up_to_date = "";
         ignore_submodules = false;
       };
