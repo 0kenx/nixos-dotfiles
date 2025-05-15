@@ -3,7 +3,7 @@
     enable = true;
     settings = {
       # Create a compact format with custom vim mode indicator
-      format = "$custom$username $directory$git_branch$git_status $character";
+      format = "$custom$username $directory$git_branch$git_status$git_metrics $character";
       right_format = "$status$cmd_duration$python$nodejs$rust$c$golang$zig$lua$time";
       add_newline = false;
 
@@ -32,23 +32,43 @@
         fish_style_pwd_dir_length = 1;
       };
 
-      # Configure git branch display
+      # Configure git branch display with tracking info
       git_branch = {
         symbol = "";
         style = "bold yellow";
-        format = " \\([$branch]($style)\\)";
+        format = "( \\([$branch(:$remote_branch)]($style)\\))";
+        always_show_remote = false;
       };
 
       # Configure git status display
       git_status = {
-        format = "[$all_status$ahead_behind](bold red)";
-        ahead = "↑$count";
-        behind = "↓$count";
-        diverged = "⇕↑$ahead_count↓$behind_count";
-        staged = "+$count";
-        conflicted = "!$count";
-        untracked = "?$count";
-        modified = "!$count";
+        format = "$all_status$ahead_behind";
+        ahead = "[↑$count](bold green)";
+        behind = "[↓$count](bold red)";
+        diverged = "[⇕↑$ahead_count⇣$behind_count](bold yellow)";
+        stashed = "[≡$count](bold cyan)";
+        staged = "[+$count](bold green)";
+        conflicted = "[!$count](bold red)";
+        untracked = "[?$count](bold blue)";
+        modified = "[!$count](bold yellow)";
+        up_to_date = "";
+        ignore_submodules = false;
+      };
+
+      # Git metrics to show added/deleted lines
+      git_metrics = {
+        disabled = false;
+        added_style = "bold green";
+        deleted_style = "bold red";
+        only_nonzero_diffs = true;
+        format = "(\\(([+$added]($added_style))([-$deleted]($deleted_style))\\))";
+      };
+
+      # Git commit module to show unpushed commits
+      git_commit = {
+        only_detached = false;
+        format = "[$hash]($style) ";
+        style = "bold yellow";
       };
 
       # Command duration display

@@ -16,11 +16,17 @@
         inputs.nixpkgs.follows = "nixpkgs";
       };
 
+      # Claude Desktop Linux flake
+      claude-desktop = {
+        url = "github:k3d3/claude-desktop-linux-flake";
+        inputs.nixpkgs.follows = "nixpkgs";
+      };
+
       # No need to reference nixos-secrets as git repo
       # We assume that /etc/nixos/nixos-secrets exists
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, self, sops-nix, ... } @ inputs:
+  outputs = { nixpkgs, nixpkgs-unstable, self, sops-nix, claude-desktop, ... } @ inputs:
   let
     username = "dev";
     system = "x86_64-linux";
@@ -68,7 +74,7 @@
         specialArgs = {
           host = hostname;
           pkgs-unstable = pkgsUnstable;
-          inherit self inputs username channel pkgs;
+          inherit self inputs username channel pkgs system;
           # Pass the pre-resolved configurations
           inherit resolvedHostDotfilesConfig hostDisplayConfig;
         };
