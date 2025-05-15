@@ -105,14 +105,12 @@
               import ./home {
                 inherit inputs username channel pkgs lib hostDisplayConfig;
                 host = hostname;
-                pkgs-unstable = pkgsUnstable;
               };
 
             # Pass flake inputs and system config to home-manager modules
             home-manager.extraSpecialArgs = {
               inherit inputs username channel hostDisplayConfig;
               host = hostname;
-              pkgs-unstable = pkgsUnstable;
               # Pass other parts of host config for modules that might need it
               hostModuleFlags = resolvedHostDotfilesConfig.modules.enable;
               hostHardwareFlags = resolvedHostDotfilesConfig.hardware;

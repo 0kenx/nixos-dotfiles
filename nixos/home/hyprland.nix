@@ -1,4 +1,4 @@
-{inputs, pkgs, pkgs-unstable, config, lib, nixosConfig, hostDisplayConfig, username, host, channel, ...}:
+{inputs, pkgs, config, lib, nixosConfig, hostDisplayConfig, username, host, channel, ...}:
 
 let
   # Use pre-resolved display configuration directly
@@ -90,8 +90,8 @@ in {
     systemd.enable = true;
     xwayland.enable = true;
 
-    # Use the unstable channel for latest Hyprland
-    package = pkgs-unstable.hyprland;
+    # Use the same settings as the system configuration
+    package = pkgs.hyprland;
 
     settings = {
       # Monitor configuration from host-specific settings
@@ -520,8 +520,8 @@ in {
     };
   };
 
-  # Additional Hyprland-related packages from unstable
-  home.packages = with pkgs-unstable; [
+  # Additional Hyprland-related packages
+  home.packages = with pkgs; [
     pyprland
     hyprpicker
     hyprcursor
@@ -533,7 +533,6 @@ in {
   # Configure Hyprlock
   programs.hyprlock = {
     enable = true;
-    package = pkgs-unstable.hyprlock;
     settings = {
       general = {
         disable_loading_bar = true;
@@ -627,7 +626,6 @@ in {
   # Configure Hypridle
   services.hypridle = {
     enable = true;
-    package = pkgs-unstable.hypridle;
     settings = {
       general = {
         lock_cmd = "pidof hyprlock || hyprlock";

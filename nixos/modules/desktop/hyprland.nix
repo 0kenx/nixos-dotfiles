@@ -1,11 +1,10 @@
-{ inputs, pkgs, pkgs-unstable, config, ... }:
+{ inputs, pkgs, config, ... }:
 
 {
-  # Enable Hyprland system-wide (from unstable channel)
+  # Enable Hyprland system-wide
   programs.hyprland = {
     enable = true;
     withUWSM = true;
-    package = pkgs-unstable.hyprland;
   };
   
   # Set environment variables for Wayland compatibility
@@ -13,14 +12,8 @@
   environment.sessionVariables.WLR_NO_HARDWARE_CURSORS = "1";
 
   # Enable Hyprlock and Hypridle system-wide (configuration is in home-manager)
-  programs.hyprlock = {
-    enable = true;
-    package = pkgs-unstable.hyprlock;
-  };
-  services.hypridle = {
-    enable = true;
-    package = pkgs-unstable.hypridle;
-  };
+  programs.hyprlock.enable = true;
+  services.hypridle.enable = true;
 
   # System-wide packages needed for Hyprland
   environment.systemPackages = with pkgs; [

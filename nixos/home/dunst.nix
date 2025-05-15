@@ -1,7 +1,6 @@
-{pkgs, pkgs-unstable, ...}: {
+{pkgs, ...}: {
   services.dunst = {
     enable = true;
-    package = pkgs-unstable.dunst;
 
     # Enable Wayland display for Hyprland
     waylandDisplay = "wayland-1";
