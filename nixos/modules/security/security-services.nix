@@ -96,7 +96,10 @@
     clamav       #scan command: sudo freshclam; clamscan [options] [file/directory/-]
     chkrootkit   #scan command: sudo chkrootkit
 
-    # passphrase2pgp
+    # Disk encryption
+    veracrypt    # GUI/CLI tool for creating and mounting encrypted volumes
+
+    # Password and security tools
     pass-wayland
     pass2csv
     passExtensions.pass-tomb
