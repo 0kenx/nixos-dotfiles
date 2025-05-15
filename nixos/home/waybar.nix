@@ -1,9 +1,9 @@
-{pkgs, hostDisplayConfig, ...}: {
+{pkgs, pkgs-unstable, hostDisplayConfig, ...}: {
   programs.waybar = {
     enable = true;
 
-    # Use the system-installed Waybar
-    package = pkgs.waybar;
+    # Use Waybar from unstable channel
+    package = pkgs-unstable.waybar;
 
     # Configuration
     settings = [
