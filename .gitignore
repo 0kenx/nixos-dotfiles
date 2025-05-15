@@ -2,3 +2,6 @@
 .env
 
 **/.claude/settings.local.json
+
+# Secrets directories
+nixos/nixos-secrets/
