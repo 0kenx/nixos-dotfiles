@@ -341,7 +341,7 @@ in {
         "$mainMod, Z, exec, pypr zoom"
 
         # Application launchers
-        "$mainMod, T, exec, uwsm app -- ghostty"
+        "$mainMod, RETURN, exec, uwsm app -- ghostty"
         #"$mainMod SHIFT, T, exec, uwsm app -- telegram-desktop"
         "$mainMod SHIFT, B, exec, uwsm app -- qutebrowser"
         "$mainMod, B, exec, uwsm app -- google-chrome-stable"
