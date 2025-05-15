@@ -36,7 +36,7 @@
       git_branch = {
         symbol = "";
         style = "bold yellow";
-        format = " \\([$branch(:$remote_branch)]($style)\\) ";
+        format = "( \\([$branch(:$remote_branch)]($style)\\) )";
         always_show_remote = false;
       };
 
