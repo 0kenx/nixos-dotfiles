@@ -17,6 +17,8 @@ in {
       ./system/swap.nix
       ./system/bootloader.nix
       ./system/linux-kernel.nix
+      ./system/utils.nix
+      ./system/info-fetchers.nix
     ]
 
     # Auto-upgrade is conditionally imported
@@ -55,15 +57,16 @@ in {
 
     # Development modules - base development tools always imported
     [
-      ./development/programming-languages.nix
+      ./development/toolchain.nix
       ./development/lsp.nix
       ./development/wasm.nix
       ./development/terminal-utils.nix
-      ./development/info-fetchers.nix
-      ./development/utils.nix
       ./development/llm.nix
       ./development/work.nix
       ./development/cad.nix
+      ./development/ide.nix
+      ./development/devops.nix
+      ./development/db.nix
     ]
 
     # Conditional development modules

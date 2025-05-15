@@ -2,7 +2,16 @@
 
 {
   environment.systemPackages = with pkgs; [
-    devenv
+    # Build tools
+    mold
+    gcc
+    clang
+    lld
+    musl
+    gnumake
+    cmake
+    
+    # Language runtimes
     go
     (python312Full.withPackages(ps: with ps; [ pygobject3 gobject-introspection pyqt6-sip]))
     python312Packages.uv
@@ -10,12 +19,13 @@
     bun
     lua
     zig
+    jdk11
+    
+    # Other tools
     numbat
-
-    postgresql
-    beekeeper-studio
+    devenv
   ];
-
+  
   # Configure devenv and its cachix
   nix.extraOptions = ''
     # Setup devenv cachix
