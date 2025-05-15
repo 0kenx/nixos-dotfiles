@@ -315,6 +315,7 @@ in {
         "opacity 1.0 override 1.0 override, title:.*GIMP$"
         "float, title:iwgtk"
         "float, title:overskride"
+        "float, class:Claude"
       ];
 
       # Variable for mod key
@@ -341,16 +342,16 @@ in {
 
         # Application launchers
         "$mainMod, T, exec, uwsm app -- ghostty"
-        "$mainMod SHIFT, T, exec, uwsm app -- telegram-desktop"
+        #"$mainMod SHIFT, T, exec, uwsm app -- telegram-desktop"
         "$mainMod SHIFT, B, exec, uwsm app -- qutebrowser"
         "$mainMod, B, exec, uwsm app -- google-chrome-stable"
         "$mainMod, F, exec, uwsm app -- thunar"
-        "$mainMod, S, exec, uwsm app -- spotify"
-        "$mainMod, Y, exec, uwsm app -- youtube-music"
+        #"$mainMod, S, exec, uwsm app -- spotify"
+        #"$mainMod, Y, exec, uwsm app -- youtube-music"
         "$mainMod, D, exec, rofi -show drun"
-        "$mainMod SHIFT, D, exec, firejail --apparmor discord"
-        "$mainMod, ESCAPE, exec, fish -c wlogout_uniqe"
-        "$mainMod SHIFT, L, exec, hyprlock"
+        #"$mainMod SHIFT, D, exec, firejail --apparmor discord"
+        #"$mainMod, ESCAPE, exec, fish -c wlogout_uniqe"
+        "$mainMod, ESCAPE, exec, hyprlock"
 
         # Screenshot and recording
         "$mainMod SHIFT, S, exec, fish -c screenshot_to_clipboard"
@@ -370,11 +371,11 @@ in {
         "$mainMod CTRL, U, exec, fish -c bookmark_delete"
 
         # Color picker
-        "$mainMod, C, exec, hyprpicker -a"
-        "$mainMod SHIFT, C, exec, pypr menu \"Color picker\""
+        #"$mainMod, C, exec, hyprpicker -a"
+        #"$mainMod SHIFT, C, exec, pypr menu \"Color picker\""
 
         # Window management
-        "$mainMod SHIFT, Q, killactive"
+        "$mainMod, Q, killactive"
         "$mainMod SHIFT, F, togglefloating"
         "$mainMod CTRL, F, fullscreen, 0"
         "$mainMod SHIFT, P, pseudo" # dwindle
@@ -404,13 +405,13 @@ in {
         # System toggles
         "$mainMod SHIFT, A, exec, fish -c airplane_mode_toggle"
         "$mainMod SHIFT, N, exec, dunstctl set-paused toggle"
-        "$mainMod SHIFT, Y, exec, fish -c bluetooth_toggle"
+        #"$mainMod SHIFT, Y, exec, fish -c bluetooth_toggle"
         "$mainMod SHIFT, W, exec, fish -c wifi_toggle"
 
         # Media controls
-        "$mainMod, p, exec, playerctl play-pause"
-        "$mainMod, bracketright, exec, playerctl next"
-        "$mainMod, bracketleft, exec, playerctl previous"
+        #"$mainMod, p, exec, playerctl play-pause"
+        #"$mainMod, bracketright, exec, playerctl next"
+        #"$mainMod, bracketleft, exec, playerctl previous"
 
         # Volume controls
         ", XF86AudioRaiseVolume, exec, volumectl -u up"

@@ -1,5 +1,0 @@
-[submodule "nixos/nixos-secrets"]
-	path = nixos/nixos-secrets
-  url = ./nixos/nixos-secrets
-  branch = main
-  ignore = dirty
