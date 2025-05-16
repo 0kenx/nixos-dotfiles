@@ -21,6 +21,7 @@
     ./bottom.nix
     ./tealdeer.nix
     ./neofetch.nix
+    ./aiterm.nix
 
     # GUI Tools
     ./qutebrowser.nix
