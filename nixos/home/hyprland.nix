@@ -179,7 +179,7 @@ in {
       input = {
         kb_layout = "us";
         kb_options = "grp:win_space_toggle";
-        follow_mouse = 1;
+        follow_mouse = 2;
         touchpad = {
           natural_scroll = true;
           tap-and-drag = true;
@@ -249,6 +249,8 @@ in {
         pseudotile = true;
         preserve_split = true;
         smart_split = true;
+        default_split_ratio = 1.2;
+        split_bias = 0;
       };
 
       # Master layout settings
@@ -270,7 +272,8 @@ in {
 
       # Binds settings
       binds = {
-        workspace_back_and_forth = true;
+        workspace_back_and_forth = false;
+        workspace_center_on = 1;
       };
 
       # Device settings
@@ -280,6 +283,11 @@ in {
           sensitivity = -0.5;
         }
       ];
+
+      # Cursor settings
+      cursor = {
+        default_monitor = ["eDP-1" "HDMI-A-1"];
+      };
 
       # Window rules
       windowrule = [
@@ -341,7 +349,7 @@ in {
         "$mainMod, Z, exec, pypr zoom"
 
         # Application launchers
-        "$mainMod, T, exec, uwsm app -- ghostty"
+        "$mainMod, RETURN, exec, uwsm app -- ghostty"
         #"$mainMod SHIFT, T, exec, uwsm app -- telegram-desktop"
         "$mainMod SHIFT, B, exec, uwsm app -- qutebrowser"
         "$mainMod, B, exec, uwsm app -- google-chrome-stable"

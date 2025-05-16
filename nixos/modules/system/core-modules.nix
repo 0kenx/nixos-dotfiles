@@ -12,16 +12,17 @@
     ./services.nix
     ./time.nix
     ./internationalisation.nix
-    
+    ./man-cache.nix
+
     # Hardware modules that are required for all systems
     ../hardware/opengl.nix
     ../hardware/sound.nix
     ../hardware/keyboard.nix
-    
+
     # Networking modules required for all systems
     ../networking/networking.nix
     ../networking/firewall.nix
-    
+
     # Secret management
     ../secrets.nix
   ];

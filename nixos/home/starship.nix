@@ -3,7 +3,7 @@
     enable = true;
     settings = {
       # Create a compact format with custom vim mode indicator
-      format = "$custom$username $directory$git_branch$git_status$git_metrics $character";
+      format = "$\{custom.vi_mode\}$username $directory$git_branch$git_state$git_status$git_metrics $character";
       right_format = "$status$cmd_duration$python$nodejs$rust$c$golang$zig$lua$time";
       add_newline = false;
 
@@ -26,18 +26,22 @@
       # Configure directory display
       directory = {
         style = "blue";
-        format = "[$path]($style)";
+        format = "[$path]($style)[$read_only]($read_only_style)";
         truncation_length = 3;
         truncation_symbol = "…/";
         fish_style_pwd_dir_length = 1;
+        before_repo_root_style = "blue";
+        repo_root_style = "blue bold";
+        repo_root_format = "[$before_root_path]($before_repo_root_style)[$repo_root]($repo_root_style)[$path]($style)[$read_only]($read_only_style)";
       };
 
       # Configure git branch display with tracking info
       git_branch = {
         symbol = "";
-        style = "bold yellow";
+        style = "italic yellow";
         format = "( \\([$branch(:$remote_branch)]($style)\\))";
         always_show_remote = false;
+        truncation_length = 12;
       };
 
       # Configure git status display
@@ -53,6 +57,19 @@
         modified = "[!$count](bold yellow)";
         up_to_date = "";
         ignore_submodules = false;
+      };
+
+      # Git state
+      git_state = {
+        rebase = "󰑏";
+        merge = "";
+        revert = "󰜊";
+        cherry_pick = "";
+        bisect = "󰃻";
+        am = "󰶯";
+        am_or_rebase = "󰶯/󰑏";
+        style = "red";
+        format = "[$state($progress_current/$progress_total)]($style)";
       };
 
       # Git metrics to show added/deleted lines

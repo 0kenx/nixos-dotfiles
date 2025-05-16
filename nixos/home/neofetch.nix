@@ -13,24 +13,24 @@
         info underline
 
         # Colorized info fields
-        info "$(color 1) OS" distro
+        info "$(color 1) OS" distro
         info "$(color 2)󰌢 Host" model
-        info "$(color 3) Kernel" kernel
-        info "$(color 4)↑ Uptime" uptime
-        info "$(color 5) Packages" packages
-        info "$(color 6) Shell" shell
+        info "$(color 3) Kernel" kernel
+        info "$(color 4) Uptime" uptime
+        info "$(color 5) Packages" packages
+        info "$(color 6) Shell" shell
         info "$(color 7)󰹑 Resolution" resolution
-        info "$(color 8)󰨇 DE" de
-        info "$(color 9)󰭠 WM" wm
+        info "$(color 8)󰨇 Desktop" de
+        info "$(color 9) Window Manager" wm
         info "$(color 10)󱕕 Theme" theme
-        info "$(color 11)󱁹 Icons" icons
-        info "$(color 12) Font" font
-        info "$(color 13) Terminal Font" term_font
-        info "$(color 14) Terminal" term
-        info "$(color 6) CPU" cpu
-        info "$(color 2) GPU" gpu
-        info "$(color 3)󰃽 GPU Driver" gpu_driver
-        info "$(color 4) Memory" memory
+        info "$(color 11) Icons" icons
+        info "$(color 12) Font" font
+        info "$(color 13)󰛖 Terminal Font" term_font
+        info "$(color 14) Terminal" term
+        info "$(color 6)󰻠 CPU" cpu
+        info "$(color 2) GPU" gpu
+        info "$(color 3)󰚠 GPU Driver" gpu_driver
+        info "$(color 4) Memory" memory
         info "$(color 5)󰋊 Disk" disk
         info "$(color 6)󰂀 Battery" battery
 
