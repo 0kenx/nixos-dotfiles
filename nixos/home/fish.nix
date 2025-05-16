@@ -30,18 +30,11 @@
       "l." = "ls -d .* --color=auto";
       count = "find . -type f | wc -l";
 
-      # apt related (these are likely not needed in NixOS, but kept for reference)
-      sapti = "sudo apt install -y";
-      saptd = "sudo apt install";
-      saptg = "sudo apt update && sudo apt upgrade";
-      saptr = "sudo apt remove";
-
       # sys related
       rm = "rmtrash";
       rmdir = "rmdirtrash";
       "ch+x" = "sudo chmod +x";
-      "cha+x" = "sudo chmod +x";
-      hs = "history | grep";
+      "cha+x" = "sudo chmod a+x";
       untar = "tar -zxvf";
       wget = "wget -c";
       "cd.." = "cd ..";
@@ -58,26 +51,18 @@
       "..8" = "cd ../../../../../../../..";
       "..9" = "cd ../../../../../../../../..";
       h = "history";
+      hg = "history | grep";
       now = "date +\"%T\"";
       nowtime = "date +\"%T\"";
       nowdate = "date +\"%d-%m-%Y\"";
       ping = "ping -c 5";
-      gfw = "proxychains4 !!";
+      #gfw = "proxychains4 !!";
       ports = "netstat -tulanp";
       meminfo = "free -m -l -t";
-      diff = "colordiff";
+      #diff = "colordiff";
       p = "parallel";
       pp = "parallel --pipe -k";
       vifm = "vifmrun";
-
-      # temp fixes
-      cursor = "/home/benji/soft/squashfs-root/AppRun";
-
-      # source mirrors
-      pip3tsu = "python3 -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple";
-      piptsu = "python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple";
-      pip3db = "python3 -m pip install -i https://pypi.douban.com/simple";
-      pipdb = "python -m pip install -i https://pypi.douban.com/simple/";
 
       # git abbreviations
       ga = "git add";
@@ -106,7 +91,6 @@
       gst = "git status";
       gsw = "git switch";
       gup = "git fetch && git rebase";
-      hg = "history | grep";
 
       # docker
       dcl = "docker container ls";
@@ -255,6 +239,10 @@
 
       weather = ''
         curl -s "wttr.in/$argv[1]?m1" | grep -vw "Follow"
+      '';
+
+      myip = ''
+        curl ifconfig.me
       '';
 
       activate = ''
