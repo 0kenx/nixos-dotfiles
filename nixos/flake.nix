@@ -22,11 +22,17 @@
         inputs.nixpkgs.follows = "nixpkgs";
       };
 
+      # AITerm - AI Terminal Assistant
+      aiterm = {
+        url = "github:0kenx/aiterm";
+        inputs.nixpkgs.follows = "nixpkgs";
+      };
+
       # No need to reference nixos-secrets as git repo
       # We assume that /etc/nixos/nixos-secrets exists
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, self, sops-nix, claude-desktop, ... } @ inputs:
+  outputs = { nixpkgs, nixpkgs-unstable, self, sops-nix, claude-desktop, aiterm, ... } @ inputs:
   let
     username = "dev";
     system = "x86_64-linux";
