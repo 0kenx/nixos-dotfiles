@@ -18,6 +18,7 @@ in {
       ./system/bootloader.nix
       ./system/linux-kernel.nix
       ./system/utils.nix
+      ./system/terminal-utils.nix
       ./system/info-fetchers.nix
     ]
 
@@ -60,7 +61,6 @@ in {
       ./development/toolchain.nix
       ./development/lsp.nix
       ./development/wasm.nix
-      ./development/terminal-utils.nix
       ./development/llm.nix
       ./development/work.nix
       ./development/cad.nix
