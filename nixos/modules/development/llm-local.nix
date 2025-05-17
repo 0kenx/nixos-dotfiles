@@ -5,7 +5,7 @@
   services.ollama = {
     enable = true;
     package = pkgs-unstable.ollama;
-    loadModels = [ "llama3.2-vision:11b" "deepseek-r1:14b" "gemma3:12b" "deepcoder:14b" "qwen3:14b" ];
+    loadModels = [ "deepseek-r1:14b" "gemma3:12b" "deepcoder:14b" "qwen3:14b" ];
     acceleration = "cuda";
   };
 

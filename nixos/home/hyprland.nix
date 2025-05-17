@@ -321,6 +321,8 @@ in {
         "opacity 1.0 override 1.0 override, class:^gimp$"
         "opacity 1.0 override 1.0 override, class:^Gimp"
         "opacity 1.0 override 1.0 override, title:.*GIMP$"
+        "opacity 1.0 override 1.0 override, title:.*FreeCAD.*$"
+        "opacity 1.0 override 1.0 override, class:org.freecad.FreeCAD"
         "float, title:iwgtk"
         "float, title:overskride"
         "float, class:Claude"
