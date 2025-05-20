@@ -14,12 +14,21 @@
     settings = {
       General = {
         EnableNetworkConfiguration = true;
+        RoamRetryInterval = 15;
+        RoamThreshold = -70;
+        AutoConnect = true;
       };
       Network = {
         EnableIPv6 = true;
+        RoutePriorityOffset = 300;
       };
       Scan = {
-        DisablePeriodicScan = true;
+        DisablePeriodicScan = false;
+        DisableRoamingScan = false;
+        InitialPeriodicScanInterval = 10;
+      };
+      Settings = {
+        AlwaysReconnect = true;
       };
     };
   };

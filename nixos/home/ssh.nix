@@ -21,26 +21,21 @@
         identityFile = "~/.ssh/github_nxfi";
         extraOptions = {
           "AddKeysToAgent" = "yes";
-          "ControlMaster" = "auto";
-          "ControlPath" = "~/.ssh/sockets/%r@%h-%p";
-          "ControlPersist" = "600";
+          "ControlMaster" = "no";
         };
       };
 
       "github.com" = {
         extraOptions = {
           "AddKeysToAgent" = "yes";
-          "ControlMaster" = "auto";
-          "ControlPath" = "~/.ssh/sockets/%r@%h-%p";
-          "ControlPersist" = "600";
+          "ControlMaster" = "no";
         };
       };
 
       "*" = {
         extraOptions = {
-          # Use the Nix store path for the PKCS11 provider
-          # This will be properly interpolated at build time
-          "PKCS11Provider" = "${pkgs.opensc}/lib/opensc-pkcs11.so";
+          # Comment out PKCS11Provider to prevent it from being used globally
+          # "PKCS11Provider" = "${pkgs.opensc}/lib/opensc-pkcs11.so";
           "AddKeysToAgent" = "yes";
           "ServerAliveInterval" = "60";
         };
@@ -48,6 +43,5 @@
     };
   };
 
-  # Create SSH control sockets directory
-  home.file.".ssh/sockets/.keep".text = "";
+  # SSH directory is created by the SSH module
 }

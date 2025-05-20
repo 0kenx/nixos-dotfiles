@@ -34,7 +34,7 @@
           gnome = lib.mkDefault false;
           cuda = lib.mkDefault false;
           localLLM = lib.mkDefault false;
-          printing = lib.mkDefault false;
+          printing = lib.mkDefault true;
           clamav = lib.mkDefault false;
           macRandomize = lib.mkDefault false;
           autoUpgrade = lib.mkDefault false;
