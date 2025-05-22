@@ -25,7 +25,8 @@
   programs.ssh = {
     # Set up OpenSC PKCS11 provider for SSH
     extraConfig = ''
-      PKCS11Provider ${pkgs.opensc}/lib/opensc-pkcs11.so
+      # Commented out to prevent PKCS prompt during git push
+      # PKCS11Provider ${pkgs.opensc}/lib/opensc-pkcs11.so
     '';
   };
 
