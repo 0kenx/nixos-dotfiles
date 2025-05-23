@@ -1,8 +1,7 @@
 { ... }:
 
 {
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
+  # nixpkgs configuration moved to flake.nix
  
   # Override packages
   # nixpkgs.config.packageOverrides = pkgs: {

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   # Linux Kernel - Hardened Configuration with SELinux
@@ -17,6 +17,9 @@
 
     # User namespace restrictions
     unprivilegedUsernsClone = false; # More restrictive
+
+    # Linux Security Modules - use mkForce to override default AppArmor LSM setting
+    lsm = lib.mkForce [ "landlock" "lockdown" "yama" "integrity" "apparmor" "bpf" "tomoyo" "selinux" ];
   };
 
   # Use hardened or latest Linux kernel
@@ -45,10 +48,6 @@
     "vsyscall=none"                 # Disable vsyscall
     "mce=0"                         # Limit Machine Check Exception attack surface
     # "kernel.modules_disabled=1"   # Disabled to allow dm-crypt loading
-
-    # Linux Security Modules
-    "lsm=landlock,lockdown,yama,integrity,apparmor,bpf,tomoyo,selinux"
-    "security=selinux"              # Use SELinux as primary security module
 
     # Hardware settings
     "usbcore.autosuspend=-1"

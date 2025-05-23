@@ -10,19 +10,19 @@
   };
 
   # Web UI for Ollama
-  services.open-webui = {
-    enable = true;
-    port = 18888;
-    host = "127.0.0.1";
-  };
+  #services.open-webui = {
+  #  enable = true;
+  #  port = 18888;
+  #  host = "127.0.0.1";
+  #};
 
   # Add proper shutdown timeout for open-webui service
-  systemd.services.open-webui = {
-    serviceConfig = {
-      TimeoutStopSec = "10s";
-    };
-  };
-  
+  #systemd.services.open-webui = {
+  #  serviceConfig = {
+  #    TimeoutStopSec = "10s";
+  #  };
+  #};
+
   # Local LLM tools and clients
   environment.systemPackages = [
     pkgs.oterm

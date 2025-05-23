@@ -91,8 +91,5 @@ in {
     (lib.optional (moduleEnabled "printing") ./applications/printing.nix)
   ];
 
-  # This enables CUDA for the entire system if the host has it enabled
-  nixpkgs.config = lib.mkIf (moduleEnabled "cuda") {
-    cudaSupport = true;
-  };
+  # CUDA configuration moved to flake.nix
 }
