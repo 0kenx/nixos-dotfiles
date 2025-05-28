@@ -100,7 +100,7 @@ in {
         # Import environment variables for systemd
         "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
         # Ensure cursor theme is set
-        "hyprctl setcursor Catppuccin-Macchiato-Sapphire-Cursors 24"
+        "hyprctl setcursor catppuccin-macchiato-sapphire-cursors 24"
         # Set up monitors first
         "${monitorSetupScript}"
         # Start Hyprland components explicitly (no systemd)
