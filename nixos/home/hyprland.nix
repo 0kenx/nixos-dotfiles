@@ -99,6 +99,8 @@ in {
       exec-once = [
         # Import environment variables for systemd
         "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
+        # Ensure cursor theme is set
+        "hyprctl setcursor catppuccin-macchiato-sapphire-cursors 24"
         # Set up monitors first
         "${monitorSetupScript}"
         # Start Hyprland components explicitly (no systemd)
@@ -195,10 +197,6 @@ in {
       # Environment variables
       env = [
         "GDK_SCALE,1.6"
-        "HYPRCURSOR_THEME,Catppuccin-Macchiato-Sapphire"
-        "HYPRCURSOR_SIZE,24"
-        "XCURSOR_THEME,Catppuccin-Macchiato-Sapphire"
-        "XCURSOR_SIZE,24"
       ];
 
       # General settings
@@ -538,6 +536,7 @@ in {
     hyprlock
     hypridle
     hyprpaper
+    catppuccin-cursors.macchiatoSapphire
   ];
 
   # Configure Hyprlock
@@ -598,7 +597,7 @@ in {
         monitor = "";
         path = "$HOME/.face";
         size = 350;
-        border_color = "0xb38bd5ca";
+        border_color = "0xb37dc4e4";
         rounding = -1;
         position = "0, 75";
         halign = "center";
@@ -613,7 +612,7 @@ in {
         dots_size = 0.2;
         dots_spacing = 0.2;
         dots_center = true;
-        outer_color = "0xb38bd5ca";
+        outer_color = "0xb37dc4e4";
         inner_color = "$surface0";
         font_color = "$text";
         font_size = 20;

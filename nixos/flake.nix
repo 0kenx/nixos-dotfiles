@@ -2,11 +2,11 @@
   description = "NixOS Configuration";
 
   inputs = {
-      nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+      nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
       nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
       rust-overlay.url = "github:oxalica/rust-overlay";
       home-manager = {
-        url = "github:nix-community/home-manager/release-24.11";
+        url = "github:nix-community/home-manager/release-25.05";
         inputs.nixpkgs.follows = "nixpkgs";
       };
 
@@ -36,26 +36,47 @@
   let
     username = "dev";
     system = "x86_64-linux";
-    channel = "24.11";
-    
+    channel = "25.05";
+
     # Define a common nixpkgs configuration
     commonNixpkgsConfig = {
       allowUnfree = true;
-      # You can add other shared configurations like overlays here if needed
+      # Package overrides from various modules
+      packageOverrides = pkgs: {
+        # From theme.nix
+        colloid-icon-theme = pkgs.colloid-icon-theme.override { colorVariants = ["teal"]; };
+        catppuccin-gtk = pkgs.catppuccin-gtk.override {
+          accents = [ "sapphire" ];
+          size = "standard";
+          variant = "macchiato";
+        };
+        discord = pkgs.discord.override {
+          withOpenASAR = true;
+          withTTS = true;
+        };
+        # From opengl.nix
+        intel-vaapi-driver = pkgs.intel-vaapi-driver.override { enableHybridCodec = true; };
+        # From cad.nix - Fix CUDA build issue for orca-slicer
+        orca-slicer = pkgs.orca-slicer.overrideAttrs (oldAttrs: {
+          cmakeFlags = oldAttrs.cmakeFlags ++ [
+            (pkgs.lib.cmakeFeature "CUDA_TOOLKIT_ROOT_DIR" "${pkgs.cudaPackages.cudatoolkit}")
+          ];
+        });
+      };
     };
-    
+
     pkgs = import nixpkgs {
       inherit system;
       config = commonNixpkgsConfig; # Apply the common config
     };
-    
+
     pkgsUnstable = import nixpkgs-unstable {
       inherit system;
       config = commonNixpkgsConfig; # Apply the common config here too
     };
-    
+
     lib = pkgs.lib;
-    
+
     # Function to generate a NixOS system for a specific host
     mkNixosSystem = { hostname }:
       let
@@ -74,17 +95,33 @@
         resolvedHostDotfilesConfig = hostInfoSystem.config.system.nixos-dotfiles.host;
         # Extract display configuration from the pre-evaluated system
         hostDisplayConfig = resolvedHostDotfilesConfig.displays;
+        
+        # Create nixpkgs config with conditional CUDA support
+        nixpkgsConfigWithCuda = commonNixpkgsConfig // 
+          (if resolvedHostDotfilesConfig.modules.enable.cuda or false 
+           then { cudaSupport = true; } 
+           else {});
+           
+        # Create pkgs with the host-specific configuration
+        hostPkgs = import nixpkgs {
+          inherit system;
+          config = nixpkgsConfigWithCuda;
+        };
       in
       nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = {
           host = hostname;
           pkgs-unstable = pkgsUnstable;
-          inherit self inputs username channel pkgs system;
+          inherit self inputs username channel system;
           # Pass the pre-resolved configurations
           inherit resolvedHostDotfilesConfig hostDisplayConfig;
         };
         modules = [
+          # Configure nixpkgs with conditional CUDA support
+          {
+            nixpkgs.config = nixpkgs.lib.mkForce nixpkgsConfigWithCuda;
+          }
           # 1. First load hardware configuration (needed by other modules)
           ./hardware-configuration.nix
 
@@ -130,7 +167,7 @@
     nixosConfigurations = {
       # Main development machine configuration (generic default for development)
       dev = mkNixosSystem { hostname = "workstation"; };
-      
+
       # Specific host configurations
       laptop = mkNixosSystem { hostname = "laptop"; };
       workstation = mkNixosSystem { hostname = "workstation"; };

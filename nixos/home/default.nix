@@ -40,6 +40,14 @@
   home.stateVersion = "${channel}";
   programs.home-manager.enable = true;
 
+  # Set cursor theme environment variables globally
+  home.sessionVariables = {
+    XCURSOR_THEME = "Catppuccin-Macchiato-Sapphire-Cursors";
+    XCURSOR_SIZE = "24";
+    HYPRCURSOR_THEME = "Catppuccin-Macchiato-Sapphire-Cursors";
+    HYPRCURSOR_SIZE = "24";
+  };
+
   # IMPORTANT: Removed circular reference to NixOS configuration
   # The 'host' variable is already available to all imported home/ modules
   # from home-manager.extraSpecialArgs in flake.nix

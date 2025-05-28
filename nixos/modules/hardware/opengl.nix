@@ -2,9 +2,7 @@
 
 {
 
-  nixpkgs.config.packageOverrides = pkgs: {
-    intel-vaapi-driver = pkgs.intel-vaapi-driver.override { enableHybridCodec = true; };
-  };
+  # Package overrides moved to flake.nix
 
   # Enable OpenGL
   hardware.graphics = {

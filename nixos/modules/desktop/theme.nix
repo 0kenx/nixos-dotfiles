@@ -2,14 +2,10 @@
 
 {
   # Enable Theme
-  environment.variables.GTK_THEME = "catppuccin-macchiato-teal-standard";
-  environment.variables.XCURSOR_THEME = "Catppuccin-Macchiato-Teal";
-  environment.variables.XCURSOR_SIZE = "24";
-  environment.variables.HYPRCURSOR_THEME = "Catppuccin-Macchiato-Teal";
-  environment.variables.HYPRCURSOR_SIZE = "24";
+  environment.variables.GTK_THEME = "catppuccin-macchiato-sapphire-standard";
   qt = {
     enable = true;
-    platformTheme = "gtk2"; # Keep the old format for system-wide setting
+    platformTheme = "gtk2";
     style = "gtk2";
   };
   console = {
@@ -34,26 +30,14 @@
     ];
   };
 
-  # Override packages
-  nixpkgs.config.packageOverrides = pkgs: {
-    colloid-icon-theme = pkgs.colloid-icon-theme.override { colorVariants = ["teal"]; };
-    catppuccin-gtk = pkgs.catppuccin-gtk.override {
-      accents = [ "teal" ]; # You can specify multiple accents here to output multiple themes
-      size = "standard";
-      variant = "macchiato";
-    };
-    discord = pkgs.discord.override {
-      withOpenASAR = true;
-      withTTS = true;
-    };
-  };
+  # Package overrides moved to flake.nix
 
   environment.systemPackages = with pkgs; [
     numix-icon-theme-circle
     colloid-icon-theme
     catppuccin-gtk
     catppuccin-kvantum
-    catppuccin-cursors.macchiatoTeal
+    catppuccin-cursors.macchiatoSapphire
 
     # gnome.gnome-tweaks
     # gnome.gnome-shell
