@@ -30,7 +30,7 @@
     fzf
     skim # fzf alternative
     rmtrash
-    jump
+    fishPlugins.z
     # prettier tools
     lsd # ls
     gping # ping
