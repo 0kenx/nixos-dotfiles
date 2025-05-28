@@ -2,11 +2,7 @@
 
 {
   # Enable Theme
-  environment.variables.GTK_THEME = "catppuccin-macchiato-teal-standard";
-  environment.variables.XCURSOR_THEME = "Catppuccin-Macchiato-Teal";
-  environment.variables.XCURSOR_SIZE = "24";
-  environment.variables.HYPRCURSOR_THEME = "Catppuccin-Macchiato-Teal";
-  environment.variables.HYPRCURSOR_SIZE = "24";
+  environment.variables.GTK_THEME = "catppuccin-macchiato-sapphire-standard";
   qt = {
     enable = true;
     platformTheme = "gtk2";
@@ -41,7 +37,7 @@
     colloid-icon-theme
     catppuccin-gtk
     catppuccin-kvantum
-    catppuccin-cursors.macchiatoTeal
+    catppuccin-cursors.macchiatoSapphire
 
     # gnome.gnome-tweaks
     # gnome.gnome-shell

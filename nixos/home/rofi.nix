@@ -12,7 +12,7 @@
       fg-col: #cad3f5aa;
       fg-col2: #ed8796aa;
       grey: #6e738daa;
-      teal: #8bd5caaa;
+      sapphire: #7dc4e4aa;
 
       width: 600;
       border-radius: 15px;
@@ -49,7 +49,7 @@
       spacing: 0em;
       padding: 0em;
       border: 2px;
-      border-color: @teal;
+      border-color: @sapphire;
       background-color: @bg-col;
     }
 
@@ -137,7 +137,7 @@
 
     element selected {
       background-color:  @selected-col ;
-      text-color: @teal  ;
+      text-color: @sapphire  ;
     }
 
     mode-switcher {

@@ -46,7 +46,7 @@
         # From theme.nix
         colloid-icon-theme = pkgs.colloid-icon-theme.override { colorVariants = ["teal"]; };
         catppuccin-gtk = pkgs.catppuccin-gtk.override {
-          accents = [ "teal" ];
+          accents = [ "sapphire" ];
           size = "standard";
           variant = "macchiato";
         };

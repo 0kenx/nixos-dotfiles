@@ -4,9 +4,9 @@
     enable = true;
     
     theme = {
-      name = "Catppuccin-Macchiato-Standard-Teal-dark";
+      name = "Catppuccin-Macchiato-Standard-Sapphire-dark";
       package = pkgs.catppuccin-gtk.override {
-        accents = [ "teal" ];
+        accents = [ "sapphire" ];
         variant = "macchiato";
       };
     };
@@ -19,8 +19,8 @@
     };
     
     cursorTheme = {
-      name = "Catppuccin-Macchiato-Teal-Cursors";
-      package = pkgs.catppuccin-cursors.macchiatoTeal;
+      name = "Catppuccin-Macchiato-Sapphire-Cursors";
+      package = pkgs.catppuccin-cursors.macchiatoSapphire;
       size = 24;
     };
     
@@ -85,16 +85,26 @@
   xdg.configFile = {
     "Kvantum/kvantum.kvconfig".text = ''
       [General]
-      theme=Catppuccin-Macchiato-Teal
+      theme=Catppuccin-Macchiato-Sapphire
     '';
     
     # Link the Catppuccin-Macchiato-Teal theme for Kvantum
-    "Kvantum/Catppuccin-Macchiato-Teal" = {
+    "Kvantum/Catppuccin-Macchiato-Sapphire" = {
       source = "${pkgs.catppuccin-kvantum.override {
-        accent = "teal";
+        accent = "sapphire";
         variant = "macchiato";
-      }}/share/Kvantum/Catppuccin-Macchiato-Teal";
+      }}/share/Kvantum/Catppuccin-Macchiato-Sapphire";
       recursive = true;
     };
+  };
+
+  # Create cursor theme symlinks for better compatibility
+  home.file = {
+    ".icons/default/index.theme".text = ''
+      [Icon Theme]
+      Name=Default
+      Comment=Default cursor theme
+      Inherits=Catppuccin-Macchiato-Sapphire-Cursors
+    '';
   };
 }

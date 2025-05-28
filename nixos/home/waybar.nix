@@ -723,7 +723,7 @@
       }
 
       #network.wifi {
-        color: @teal;
+        color: @sapphire;
       }
 
       #idle_inhibitor {
@@ -910,7 +910,7 @@
       }
 
       #battery {
-        color: @teal;
+        color: @sapphire;
       }
 
       #battery.low {
