@@ -69,7 +69,7 @@
   # Qt theme to match GTK
   qt = {
     enable = true;
-    platformTheme = "gtk"; # Keep the old format for home-manager setting
+    platformTheme.name = "gtk"; # Updated to new format
     style = {
       name = "kvantum";
       package = pkgs.libsForQt5.qtstyleplugin-kvantum;

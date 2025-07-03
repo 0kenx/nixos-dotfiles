@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, pkgs-unstable, ... }:
 
 {
   environment.systemPackages = with pkgs; [
@@ -23,7 +23,7 @@
     
     # Other tools
     numbat
-    devenv
+    pkgs-unstable.devenv
   ];
   
   # Configure devenv and its cachix
