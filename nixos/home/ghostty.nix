@@ -67,6 +67,16 @@
     
     # Performance settings
     working-directory = current
+    
+    # GPU acceleration and rendering optimizations
+    gtk-single-instance = true
+    window-vsync = false
+    
+    # Fix input buffering issues
+    gtk-adwaita = false
+    
+    # Reduce input latency
+    mouse-hide-while-typing = true
 
     # Exit confirmation
     confirm-close-surface = false

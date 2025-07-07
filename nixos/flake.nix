@@ -42,7 +42,15 @@
     commonNixpkgsConfig = {
       allowUnfree = true;
       # Package overrides from various modules
-      packageOverrides = pkgs: {
+      packageOverrides = pkgs: let
+        pkgsUnstable = import nixpkgs-unstable {
+          inherit system;
+          config.allowUnfree = true;
+        };
+      in {
+        # Ghostty from unstable channel
+        ghostty = pkgsUnstable.ghostty;
+        
         # From theme.nix
         colloid-icon-theme = pkgs.colloid-icon-theme.override { colorVariants = ["teal"]; };
         catppuccin-gtk = pkgs.catppuccin-gtk.override {
