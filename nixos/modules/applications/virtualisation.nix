@@ -39,6 +39,21 @@
   environment.variables.DBX_CONTAINER_MANAGER = "podman";
   users.extraGroups.podman.members = [ "dev" ];
 
+  # Enable libvirtd for QEMU/KVM virtualization
+  virtualisation.libvirtd = {
+    enable = true;
+    qemu = {
+      package = pkgs.qemu_kvm;
+      runAsRoot = true;
+      swtpm.enable = true;
+      ovmf = {
+        enable = true;
+        packages = [ pkgs.OVMFFull.fd ];
+      };
+    };
+  };
+  users.extraGroups.libvirtd.members = [ "dev" ];
+
   environment.systemPackages = with pkgs; [
     # nvidia-docker
     nerdctl
@@ -50,6 +65,7 @@
     distrobox
     qemu
     lima
+    virt-manager
 
     podman-compose
     podman-tui
