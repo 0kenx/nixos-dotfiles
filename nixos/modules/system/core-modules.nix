@@ -13,6 +13,7 @@
     ./time.nix
     ./internationalisation.nix
     ./man-cache.nix
+    ./home-manager-fix.nix
 
     # Hardware modules that are required for all systems
     ../hardware/opengl.nix

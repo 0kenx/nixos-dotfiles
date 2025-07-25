@@ -153,6 +153,12 @@ with lib;
           description = "Enable printing support";
         };
         
+        wacom = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Enable Wacom tablet support with OpenTabletDriver";
+        };
+        
         # Security features
         clamav = mkOption {
           type = types.bool;

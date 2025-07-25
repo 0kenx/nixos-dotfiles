@@ -36,6 +36,7 @@ in {
     (lib.optional (!(hardwareHas "hasNvidia")) ./hardware/disable-nvidia.nix)
     (lib.optional (hardwareHas "hasBluetooth") ./hardware/bluetooth.nix)
     (lib.optional (hardwareHas "hasFingerprint") ./hardware/fingerprint-scanner.nix)
+    (lib.optional (moduleEnabled "wacom") ./hardware/wacom.nix)
 
     # Desktop environment modules - conditionally imported based on host preferences
     (lib.optional (moduleEnabled "hyprland") ./desktop/hyprland.nix)
