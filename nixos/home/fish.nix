@@ -835,6 +835,9 @@
 
     # Fish config
     interactiveShellInit = ''
+      # Set default libvirt URI for virt-manager
+      set -x LIBVIRT_DEFAULT_URI "qemu:///system"
+      
       # Set fish_greeting to empty to disable greeting
       set -U fish_greeting
 
