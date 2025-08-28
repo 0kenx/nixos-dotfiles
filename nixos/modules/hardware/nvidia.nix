@@ -51,7 +51,17 @@ in
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
     # package = config.boot.kernelPackages.nvidiaPackages.latest;
     # Using the latest stable driver package from nixpkgs
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    # package = config.boot.kernelPackages.nvidiaPackages.stable;
+    
+    # Override to use specific NVIDIA driver version 575.64.03
+    package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
+      version = "575.64.03";
+      sha256_64bit = "sha256-S7eqhgBLLtKZx9QwoGIsXJAyfOOspPbppTHUxB06DKA=";
+      sha256_aarch64 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; # Not needed for x86_64
+      openSha256 = "sha256-SAl1+XH4ghz8iix95hcuJ/EVqt6ylyzFAao0mLeMmMI=";
+      settingsSha256 = "sha256-o8rPAi/tohvHXcBV+ZwiApEQoq+ZLhCMyHzMxIADauI=";
+      persistencedSha256 = "sha256-QUa7T58+kfMbfWY/fnyaRtBhzsVhe8qNOSaF8/KRLa0=";
+    };
 
     # Nvidia Optimus PRIME. It is a technology developed by Nvidia to optimize
     # the power consumption and performance of laptops equipped with their GPUs.
