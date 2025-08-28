@@ -7,7 +7,7 @@ This repository contains NixOS configuration files for my system, managed with H
 The keybinding scheme follows a consistent philosophy across applications:
 
 - **SUPER** (Windows key) is the primary modifier for window management in Hyprland
-- **ALT** is used for application-specific commands (like in Ghostty)
+- **ALT** is used for application-specific commands (like in Kitty)
 - **CTRL** is used for common operations like copy/paste and combined with other keys for advanced functionality
 - **Space** is the leader key in Neovim for plugin commands
 
@@ -19,7 +19,7 @@ The keybinding scheme follows a consistent philosophy across applications:
 
 | Keybinding | Action |
 |------------|--------|
-| `SUPER + T` | Launch Ghostty terminal |
+| `SUPER + T` | Launch Kitty terminal |
 | `SUPER + D` | Open application launcher (Rofi) |
 | `SUPER + W` | Toggle WiFi |
 | `SUPER + Y` | Toggle Bluetooth |
@@ -73,14 +73,14 @@ The keybinding scheme follows a consistent philosophy across applications:
 | `SUPER + SHIFT + R` | Record screen (GIF) |
 | `SUPER + R` | Record screen (MP4) |
 
-### Ghostty (Terminal)
+### Kitty (Terminal)
 
 | Keybinding | Action |
 |------------|--------|
 | `ALT + SHIFT + T` | New tab |
 | `ALT + SHIFT + N` | New window |
 | `ALT + SHIFT + W` | Close tab/window |
-| `ALT + SHIFT + Q` | Quit Ghostty |
+| `ALT + SHIFT + Q` | Quit Kitty |
 | `ALT + SHIFT + F` | Toggle fullscreen |
 | `ALT + 1-9` | Switch to tab 1-9 |
 | `ALT + h/l` | Previous/next tab |
@@ -161,10 +161,10 @@ The keybinding scheme follows a consistent philosophy across applications:
 
 To maintain consistency across applications, similar actions use similar keybindings:
 
-- **Tab navigation**: `ALT + h/l` in Ghostty, `SHIFT + h/l` in Neovim
+- **Tab navigation**: `ALT + h/l` in Kitty, `SHIFT + h/l` in Neovim
 - **Window navigation**: `SUPER + h/j/k/l` in Hyprland, `CTRL + h/j/k/l` in Neovim
-- **Leader keys**: `SUPER` in Hyprland, `SPACE` in Neovim, `ALT` in Ghostty
-- **Terminal**: `SUPER + T` to open Ghostty, `SPACE + t` to toggle terminal in Neovim
+- **Leader keys**: `SUPER` in Hyprland, `SPACE` in Neovim, `ALT` in Kitty
+- **Terminal**: `SUPER + T` to open Kitty, `SPACE + t` to toggle terminal in Neovim
 - **File operations**: `SPACE + e/o` in Neovim to toggle/focus file explorer, `SUPER + F` in Hyprland to open file manager
-- **Quitting**: `SUPER + SHIFT + Q` to close window in Hyprland, `ALT + SHIFT + Q` to quit Ghostty
+- **Quitting**: `SUPER + SHIFT + Q` to close window in Hyprland, `ALT + SHIFT + Q` to quit Kitty
 - **Movement**: `hjkl` keys for directional movement in both Hyprland and Neovim

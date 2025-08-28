@@ -26,15 +26,14 @@ let
 in
 buildPythonApplication rec {
   pname = "framepack";
-  version = "1b371ad"; # Corresponds to the commit used, or a chosen version string
+  version = "d2d4dfe"; # Latest commit from main branch
 
   src = fetchFromGitHub {
     owner = "lllyasviel";
     repo = "FramePack";
-    # Using a specific commit for reproducibility. Replace with a desired tag or commit.
-    # This commit corresponds to the "Windows" release mentioned in [18] (1b371ad).
-    rev = "1b371ad7923355f85bac5d904a138961fb19ea30";
-    hash = "sha256-nLfbt9qiCaEcfrOya7mGEjPeetGD0koYWOV2XjQvT9w=";
+    # Using latest commit from main branch
+    rev = "d2d4dfebd678652f4296c1c0d530f9d924121b28";
+    hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; # Will need to be updated
   };
 
   # Propagate the Python interpreter to ensure scripts use it

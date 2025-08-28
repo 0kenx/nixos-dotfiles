@@ -25,7 +25,7 @@
       icon-theme: "Numix-Circle";
       font: "JetBrains Mono Regular 13";
       show-icons: true;
-      terminal: "ghostty";
+      terminal: "kitty";
       drun-display-format: "{name}";
       location: 0;
       disable-history: false;
