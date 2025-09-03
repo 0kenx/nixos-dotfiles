@@ -6,5 +6,6 @@
     nsxiv
     mpv
     gimp
+    rhythmbox
   ];
 }
