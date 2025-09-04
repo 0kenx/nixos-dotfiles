@@ -159,6 +159,12 @@ with lib;
           description = "Enable Wacom tablet support with OpenTabletDriver";
         };
         
+        winboat = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Enable WinBoat - Windows apps on Linux with seamless integration";
+        };
+        
         # Security features
         clamav = mkOption {
           type = types.bool;

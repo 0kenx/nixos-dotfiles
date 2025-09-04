@@ -23,7 +23,7 @@
     users.users.${username} = {
       isNormalUser = true;
       description = "${username}";
-      extraGroups = [ "networkmanager" "input" "wheel" "video" "audio" "tss" "storage" "plugdev" "bluetooth" ];
+      extraGroups = [ "networkmanager" "input" "wheel" "video" "audio" "tss" "storage" "plugdev" "bluetooth" "docker" "libvirtd" "podman" ];
       shell = pkgs.fish;
       openssh.authorizedKeys.keyFiles = [
         ../../hosts/common/keys/id_yubidef.pub

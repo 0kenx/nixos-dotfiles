@@ -90,6 +90,7 @@ in {
 
     # Conditional application modules
     (lib.optional (moduleEnabled "printing") ./applications/printing.nix)
+    (lib.optional (moduleEnabled "winboat") ./applications/winboat.nix)
   ];
 
   # CUDA configuration moved to flake.nix
