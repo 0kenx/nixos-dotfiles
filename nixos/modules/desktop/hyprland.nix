@@ -22,6 +22,15 @@
   programs.hyprlock.enable = true;
   services.hypridle.enable = true;
 
+  # Enable xdg-desktop-portal for screen sharing/window capture (needed for OBS Studio)
+  xdg.portal = {
+    enable = true;
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-hyprland
+    ];
+    config.common.default = "*";
+  };
+
   # System-wide packages needed for Hyprland
   environment.systemPackages = with pkgs; [
     # Essential terminal applications

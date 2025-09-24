@@ -7,5 +7,7 @@
     mpv
     gimp
     rhythmbox
+    obs-studio
+    audacity
   ];
 }
