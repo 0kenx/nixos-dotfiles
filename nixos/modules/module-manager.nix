@@ -45,6 +45,7 @@ in {
       ./desktop/display-manager.nix
       ./desktop/theme.nix
       ./desktop/fonts.nix
+      ./desktop/input-method.nix
     ]
 
     # Networking modules - additional networking modules not in core-modules.nix
@@ -86,11 +87,11 @@ in {
     [
       ./applications/multimedia.nix
       ./applications/virtualisation.nix
+      ./applications/gaming.nix
     ]
 
     # Conditional application modules
     (lib.optional (moduleEnabled "printing") ./applications/printing.nix)
-    (lib.optional (moduleEnabled "winboat") ./applications/winboat.nix)
   ];
 
   # CUDA configuration moved to flake.nix

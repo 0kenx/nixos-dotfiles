@@ -1,6 +1,9 @@
-{ pkgs, ... }:
+{ pkgs, inputs, system, ... }:
 
 {
+  # Load kernel modules for container networking
+  boot.kernelModules = [ "iptable_nat" ];
+
   # Enable Kasm
   # services.kasmweb = {
   #   enable = true;
@@ -73,5 +76,10 @@
     docker-compose
     # lazydocker
     # docker-credential-helpers
+
+    # WinBoat - Windows app runner
+    inputs.winboat.packages.${system}.winboat
+    freerdp3
+    iptables
   ];
 }

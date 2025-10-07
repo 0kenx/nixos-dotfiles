@@ -37,6 +37,7 @@
     procs # ps
     # git
     git
+    git-lfs
     gh
     lazygit
     delta

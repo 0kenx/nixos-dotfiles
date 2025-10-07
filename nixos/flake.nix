@@ -28,6 +28,12 @@
         inputs.nixpkgs.follows = "nixpkgs";
       };
 
+      # WinBoat - Windows app runner
+      winboat = {
+        url = "github:TibixDev/winboat";
+        inputs.nixpkgs.follows = "nixpkgs";
+      };
+
       # No need to reference nixos-secrets as git repo
       # We assume that /etc/nixos/nixos-secrets exists
   };

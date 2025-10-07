@@ -9,5 +9,6 @@
     rhythmbox
     obs-studio
     audacity
+    kdePackages.kdenlive
   ];
 }
