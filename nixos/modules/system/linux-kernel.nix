@@ -92,7 +92,7 @@
                SECURITY_YAMA y
                SECURITY_SAFESETID y
                RANDOMIZE_MEMORY y
-               GCC_PLUGIN_STACKLEAK y
+               # GCC_PLUGIN_STACKLEAK y  # Removed in kernel 6.17+
 
                # Rust options
                RUST_DEBUG_ASSERTIONS n
