@@ -89,4 +89,15 @@
     light
     zoom-us
   ];
+
+  # Laptop-specific bootloader configuration for dual-booting with Windows
+  boot.loader.grub.extraEntries = ''
+    menuentry "Windows" {
+      insmod part_gpt
+      insmod fat
+      insmod chain
+      set root='hd0,gpt3'
+      chainloader /EFI/Microsoft/Boot/bootmgfw.efi
+    }
+  '';
 }
