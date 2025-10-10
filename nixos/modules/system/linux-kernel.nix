@@ -23,7 +23,8 @@
   };
 
   # Use hardened or latest Linux kernel
-  boot.kernelPackages = pkgs.linuxPackages_latest; # pkgs.linuxPackages_hardened;
+  # Using 6.16 for NVIDIA compatibility - 6.17+ breaks NVIDIA 575.64.03
+  boot.kernelPackages = pkgs.linuxPackages_6_16; # pkgs.linuxPackages_latest;
 
   # Kernel command line parameters
   boot.kernelParams = [
