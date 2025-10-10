@@ -63,7 +63,6 @@ in {
       ./development/toolchain.nix
       ./development/lsp.nix
       ./development/wasm.nix
-      ./development/llm.nix
       ./development/work.nix
       ./development/cad.nix
       ./development/ide.nix
@@ -71,8 +70,21 @@ in {
       ./development/db.nix
     ]
 
-    # Conditional development modules
-    (lib.optional (moduleEnabled "localLLM") ./development/llm-local.nix)
+    # AI modules - organized by use case for future expansion
+    # Base AI tools (coding assistants and chat interfaces) always imported
+    [
+      ./ai/coding.nix      # AI coding assistants (aider, claude-code, etc.)
+      ./ai/chat.nix        # General AI chat clients (aichat, oterm, alpaca)
+      ./ai/multimedia.nix  # Image/video generation (ComfyUI with GPU auto-detection)
+    ]
+
+    # Conditional AI modules
+    (lib.optional (moduleEnabled "localLLM") ./ai/inference.nix)  # Local inference with Ollama
+
+    # Future AI module categories:
+    # - ./ai/audio.nix         # Speech processing (Whisper, XTTS, etc.)
+    # - ./ai/vision.nix        # Computer vision models
+    # - ./ai/translation.nix   # Language translation models
 
     # Security modules - base security always imported
     [
@@ -88,6 +100,7 @@ in {
       ./applications/multimedia.nix
       ./applications/virtualisation.nix
       ./applications/gaming.nix
+      ./applications/text-editing.nix
     ]
 
     # Conditional application modules

@@ -11,6 +11,11 @@
 
   # Enable Security Services
   users.users.root.hashedPassword = "!";
+
+  # GNOME Keyring for password storage (works with Hyprland)
+  services.gnome.gnome-keyring.enable = true;
+  programs.seahorse.enable = true;  # GUI for managing keys
+
   security.tpm2 = {
     enable = true;
     pkcs11.enable = true;
@@ -47,7 +52,7 @@
   # ClamAV moved to dedicated clamav-scanner.nix module
   programs.firejail = {
     enable = true;
-    wrappedBinaries = { 
+    wrappedBinaries = {
       mpv = {
         executable = "${lib.getBin pkgs.mpv}/bin/mpv";
         profile = "${pkgs.firejail}/etc/firejail/mpv.profile";
@@ -110,5 +115,66 @@
     tomb
     pwgen
     pwgen-secure
+
+    # Network scanning and enumeration
+    nmap
+    masscan
+    arp-scan
+
+    # Vulnerability scanning
+    nikto
+    nuclei
+    sqlmap
+
+    # Web application testing
+    burpsuite
+    gobuster
+    ffuf
+    wfuzz
+
+    # Wireless tools
+    aircrack-ng
+
+    # Network analysis and sniffing
+    wireshark
+    tcpdump
+    ettercap
+
+    # Password cracking
+    john
+    hashcat
+    hashcat-utils
+    hydra
+
+    # Exploitation and enumeration
+    metasploit
+    exploitdb
+
+    # Forensics
+    sleuthkit
+    binwalk
+
+    # Reverse engineering
+    radare2
+    ghidra
+
+    # Network utilities
+    netcat-gnu
+    socat
+
+    # OSINT tools
+    theharvester
+    sherlock
+    recon-ng
+    maltego
+    photon
+    amass
+    whatweb
+    wafw00f
+    dnsenum
+    dnsrecon
+    fierce
+    exiftool
+    socialscan
   ];
 }
