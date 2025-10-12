@@ -137,6 +137,7 @@ let
 
     # List of essential custom node repositories
     declare -A NODES=(
+      ["ComfyUI-Manager"]="https://github.com/Comfy-Org/ComfyUI-Manager.git"
       ["rgthree-comfy"]="https://github.com/rgthree/rgthree-comfy.git"
       ["ComfyUI-KJNodes"]="https://github.com/kijai/ComfyUI-KJNodes.git"
       ["Comfyui-QwenEditUtils"]="https://github.com/lrzjason/Comfyui-QwenEditUtils.git"
