@@ -224,9 +224,9 @@ in {
           color = "$sapphire";
           color_inactive = "0xff$baseAlpha";
         };
-        active_opacity = 0.8;
-        inactive_opacity = 0.8;
-        fullscreen_opacity = 0.8;
+        active_opacity = 0.85;
+        inactive_opacity = 0.7;
+        fullscreen_opacity = 1.0;
       };
 
       # Animation settings

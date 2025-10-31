@@ -23,6 +23,14 @@
     "sd_mod"       # SCSI disk support
     "sr_mod"       # SCSI CD-ROM support
     "scsi_mod"     # Core SCSI support
+
+    # USB Serial device support
+    "usbserial"    # Generic USB serial driver
+    "ftdi_sio"     # FTDI USB serial adapters
+    "pl2303"       # Prolific PL2303 USB serial adapters
+    "cp210x"       # Silicon Labs CP210x USB to UART Bridge
+    "ch341"        # WinChipHead CH341 USB serial adapters
+    "cdc_acm"      # USB Abstract Control Model for modems and serial adapters
   ];
 
   # Add early module loading for USB storage
@@ -94,5 +102,23 @@
     # Using lower priority to reduce impact on system performance
     ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="08", ATTR{bInterfaceSubClass}=="06", \
       ATTR{authorized}=="1", RUN+="${pkgs.systemd}/bin/systemd-run --no-block --property=Nice=10 ${pkgs.kmod}/bin/modprobe -a sd_mod"
+
+    # USB serial device permissions
+    KERNEL=="ttyUSB[0-9]*", MODE="0666", GROUP="serial"
+    KERNEL=="ttyACM[0-9]*", MODE="0666", GROUP="serial"
+    KERNEL=="ttyS[0-9]*", MODE="0666", GROUP="serial"
+
+    # Common USB serial adapters: FTDI
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="0403", MODE="0666", GROUP="serial"
+    # Prolific
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="067b", MODE="0666", GROUP="serial"
+    # Silicon Labs
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="10c4", MODE="0666", GROUP="serial"
+    # CH340/CH341
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="1a86", MODE="0666", GROUP="serial"
   '';
+
+  # Add serial group for serial port access
+  # Users should be added to this group manually in their user configuration
+  users.groups.serial = {};
 }
