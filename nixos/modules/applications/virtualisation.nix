@@ -1,4 +1,4 @@
-{ pkgs, inputs, system, ... }:
+{ pkgs, pkgs-unstable, inputs, system, ... }:
 
 {
   # Load kernel modules for container networking
@@ -77,9 +77,10 @@
     # lazydocker
     # docker-credential-helpers
 
-    # WinBoat - Windows app runner
-    inputs.winboat.packages.${system}.winboat
     freerdp3
     iptables
-  ];
+  ] ++ (with pkgs-unstable; [
+    # WinBoat - Windows app runner (from unstable)
+    winboat
+  ]);
 }

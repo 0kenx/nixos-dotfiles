@@ -48,7 +48,7 @@
         printing = true;
         clamav = true; # Enable antivirus
         macRandomize = false; # Not needed for stationary machine
-        autoUpgrade = false; # Manual control for workstation
+        autoUpgrade = true; # Automatic flake updates and rebuilds
         wacom = true; # Enable Wacom tablet support
         winboat = true; # Enable WinBoat for Windows apps
       };
