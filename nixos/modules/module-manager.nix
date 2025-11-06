@@ -68,6 +68,7 @@ in {
       ./development/ide.nix
       ./development/devops.nix
       ./development/db.nix
+      ./development/hardware.nix
     ]
 
     # AI modules - organized by use case for future expansion

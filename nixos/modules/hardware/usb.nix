@@ -95,6 +95,9 @@
   # Core USB hardware support
   hardware.enableRedistributableFirmware = true;
 
+  # Enable Ledger hardware wallet support
+  hardware.ledger.enable = true;
+
   # Use a more efficient udev rule that only loads modules when needed
   # and doesn't trigger on every USB event
   services.udev.extraRules = ''
@@ -116,6 +119,9 @@
     SUBSYSTEM=="usb", ATTRS{idVendor}=="10c4", MODE="0666", GROUP="serial"
     # CH340/CH341
     SUBSYSTEM=="usb", ATTRS{idVendor}=="1a86", MODE="0666", GROUP="serial"
+
+    # STMicroelectronics STM32 DFU Mode for WebUSB access
+    SUBSYSTEM=="usb", ATTR{idVendor}=="0483", ATTR{idProduct}=="df11", MODE="0666", GROUP="plugdev", TAG+="uaccess"
   '';
 
   # Add serial group for serial port access

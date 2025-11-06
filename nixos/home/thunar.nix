@@ -6,6 +6,7 @@
     xfce.thunar-volman
     xfce.exo # Required for custom actions
     xfce.tumbler # For thumbnails
+    file-roller # Archive manager for extract actions
   ];
   
   # Configure Thunar
@@ -137,15 +138,55 @@
       <actions>
       <action>
         <icon>utilities-terminal</icon>
-        <n>Open Terminal Here</n>
+        <name>Open Terminal Here</name>
         <unique-id>1673101737831851-1</unique-id>
         <command>exo-open --working-directory %f --launch TerminalEmulator</command>
-        <description>Example for a custom action</description>
+        <description>Open terminal in current directory</description>
         <patterns>*</patterns>
         <startup-notify/>
         <directories/>
       </action>
+      <action>
+        <icon>package-x-generic</icon>
+        <name>Extract Here</name>
+        <unique-id>1673101737831851-2</unique-id>
+        <command>${pkgs.file-roller}/bin/file-roller --extract-to=%f %F</command>
+        <description>Extract archive to current directory</description>
+        <patterns>*.7z;*.bz2;*.gz;*.tar;*.tar.bz2;*.tar.gz;*.tar.xz;*.tgz;*.xz;*.zip;*.rar;*.tar.zst</patterns>
+        <audio-files/>
+        <image-files/>
+        <other-files/>
+        <text-files/>
+        <video-files/>
+      </action>
+      <action>
+        <icon>package-x-generic</icon>
+        <name>Extract To...</name>
+        <unique-id>1673101737831851-3</unique-id>
+        <command>${pkgs.file-roller}/bin/file-roller --extract %F</command>
+        <description>Extract archive with dialog</description>
+        <patterns>*.7z;*.bz2;*.gz;*.tar;*.tar.bz2;*.tar.gz;*.tar.xz;*.tgz;*.xz;*.zip;*.rar;*.tar.zst</patterns>
+        <audio-files/>
+        <image-files/>
+        <other-files/>
+        <text-files/>
+        <video-files/>
+      </action>
       </actions>
+    '';
+
+    # Thunar preferences - enable per-folder view settings
+    "xfce4/xfconf/xfce-perchannel-xml/thunar.xml".text = ''
+      <?xml version="1.0" encoding="UTF-8"?>
+      <channel name="thunar" version="1.0">
+        <property name="misc-single-click" type="bool" value="false"/>
+        <property name="misc-text-beside-icons" type="bool" value="false"/>
+        <property name="misc-folders-first" type="bool" value="true"/>
+        <property name="misc-remember-geometry" type="bool" value="true"/>
+        <property name="misc-directory-specific-settings" type="bool" value="true"/>
+        <property name="last-show-hidden" type="bool" value="true"/>
+        <property name="last-separator-position" type="int" value="170"/>
+      </channel>
     '';
   };
   

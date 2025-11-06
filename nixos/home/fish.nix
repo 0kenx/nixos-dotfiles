@@ -217,6 +217,8 @@
               rar x $argv[1]
             case '*.gz'
               gunzip $argv[1]
+            case '*.xz'
+              unxz $argv[1]
             case '*.tar'
               tar xvf $argv[1]
             case '*.tbz2'

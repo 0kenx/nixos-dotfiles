@@ -10,7 +10,7 @@
   nix.optimise.automatic = true;
   nix.gc = {
     automatic = true;
-    dates = "weekly";
+    dates = "Tue 04:00";
     options = "--delete-older-than 14d";
   };
 }

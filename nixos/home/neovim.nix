@@ -1,4 +1,9 @@
 {pkgs, ...}: {
+  # Install neovide GUI
+  home.packages = with pkgs; [
+    neovide
+  ];
+
   programs.neovim = {
     enable = true;
     viAlias = true;
@@ -106,6 +111,26 @@
       vim.opt.undofile = true
       vim.opt.pumheight = 10
       vim.opt.completeopt = 'menu,menuone,noselect'
+
+      -- Neovide-specific settings
+      if vim.g.neovide then
+        vim.g.neovide_window_blurred = true
+        vim.g.neovide_floating_blur_amount_x = 2.0
+        vim.g.neovide_floating_blur_amount_y = 2.0
+        vim.g.neovide_floating_shadow = true
+        vim.g.neovide_floating_z_height = 10
+        vim.g.neovide_light_angle_degrees = 45
+        vim.g.neovide_light_radius = 5
+        vim.g.neovide_background_color = "#24273a" .. string.format("%x", math.floor(255 * 0.85))
+        vim.g.neovide_scroll_animation_length = 0.3
+        vim.g.neovide_cursor_animation_length = 0.13
+        vim.g.neovide_cursor_trail_size = 0.8
+        vim.g.neovide_cursor_vfx_mode = "railgun"
+        vim.g.neovide_hide_mouse_when_typing = true
+        vim.g.neovide_refresh_rate = 60
+        vim.g.neovide_remember_window_size = true
+        vim.o.guifont = "JetBrainsMono NF:h11"
+      end
     '';
     
     # Keymaps
