@@ -284,7 +284,7 @@ in {
 
       # Cursor settings
       cursor = {
-        default_monitor = ["eDP-1" "HDMI-A-1"];
+        default_monitor = lib.filter (m: m != null) [primaryDisplayOutput secondaryDisplayOutput];
       };
 
       # Window rules

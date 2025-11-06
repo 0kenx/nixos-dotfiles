@@ -26,7 +26,7 @@
     # Display setup for multi-monitor workstation with explicit positioning
     displays = {
       primary = "HDMI-A-1"; # Main display
-      secondary = "DP-5"; # Secondary display
+      secondary = "DP-8"; # Secondary display (changed from DP-5 after reboot)
       tertiary = null;
       primaryScale = 1.6;
       secondaryScale = 1.6;
