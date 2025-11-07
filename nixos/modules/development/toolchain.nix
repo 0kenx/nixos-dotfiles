@@ -10,7 +10,12 @@
     musl
     gnumake
     cmake
-    
+
+    # USB/HID device libraries
+    libusb1
+    hidapi
+    systemd.dev  # provides libudev
+
     # Language runtimes
     go
     (python312Full.withPackages(ps: with ps; [ pygobject3 gobject-introspection pyqt6-sip]))
@@ -20,7 +25,7 @@
     lua
     zig
     jdk11
-    
+
     # Other tools
     numbat
     pkgs-unstable.devenv

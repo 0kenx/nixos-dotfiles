@@ -17,7 +17,7 @@
     hardware = {
       hasBluetooth = true;
       hasNvidia = true; # NVIDIA GPU available
-      hasFingerprint = false;
+      hasFingerprint = true; # Synaptics FS7605
       hasTouchpad = false;
       hasWebcam = true;
       isBattery = false; # Desktop computer
