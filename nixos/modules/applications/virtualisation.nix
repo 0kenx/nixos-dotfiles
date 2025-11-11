@@ -67,7 +67,6 @@
 
     distrobox
     qemu
-    lima
     virt-manager
 
     podman-compose

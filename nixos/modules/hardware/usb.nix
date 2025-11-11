@@ -3,7 +3,7 @@
 {
   # Use a single, consistent USB automounting solution
   # Disable autofs and devmon which conflict with udiskie
-  services.gvfs.enable = true;  # Keep GVFS for Thunar integration
+  services.gvfs.enable = true;  # Keep GVFS for Nemo file manager integration
 
   # Disable autofs - conflicting with udiskie
   services.autofs.enable = false;
@@ -77,8 +77,7 @@
   # Ensure filesystems are supported
   boot.supportedFilesystems = [ "ntfs" "exfat" "vfat" ];
 
-  # Enable USB auto-mounting in file manager if Thunar is enabled
-  programs.thunar.plugins = lib.mkIf (config.programs.thunar.enable or false) [ pkgs.xfce.thunar-volman ];
+  # USB auto-mounting is handled by udiskie (see hyprland.nix exec-once)
 
   # Optimize USB storage driver options
   boot.extraModprobeConfig = ''

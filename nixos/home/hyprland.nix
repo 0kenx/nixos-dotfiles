@@ -196,7 +196,8 @@ in {
 
       # Environment variables
       env = [
-        "GDK_SCALE,1.6"
+        "GDK_SCALE,2"
+        "QT_SCALE_FACTOR,2"
       ];
 
       # General settings
@@ -353,7 +354,8 @@ in {
         #"$mainMod SHIFT, T, exec, uwsm app -- telegram-desktop"
         "$mainMod SHIFT, B, exec, uwsm app -- qutebrowser"
         "$mainMod, B, exec, uwsm app -- google-chrome-stable"
-        "$mainMod, F, exec, uwsm app -- thunar"
+        "$mainMod, F, exec, uwsm app -- kitty yazi"
+        "$mainMod SHIFT, F, exec, uwsm app -- nemo"
         #"$mainMod, S, exec, uwsm app -- spotify"
         #"$mainMod, Y, exec, uwsm app -- youtube-music"
         "$mainMod, D, exec, rofi -show drun"

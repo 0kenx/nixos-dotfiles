@@ -85,9 +85,9 @@
         executable = "${lib.getBin pkgs.qutebrowser}/bin/qutebrowser";
         profile = "${pkgs.firejail}/etc/firejail/qutebrowser.profile";
       };
-      thunar = {
-        executable = "${lib.getBin pkgs.xfce.thunar}/bin/thunar";
-        profile = "${pkgs.firejail}/etc/firejail/thunar.profile";
+      nemo = {
+        executable = "${lib.getBin pkgs.nemo}/bin/nemo";
+        profile = "${pkgs.firejail}/etc/firejail/nemo.profile";
       };
       vscodium = {
         executable = "${lib.getBin pkgs.vscodium}/bin/vscodium";
