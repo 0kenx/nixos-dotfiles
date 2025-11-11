@@ -1,7 +1,8 @@
 {pkgs, ...}: {
-  # Install neovide GUI
+  # Install neovide GUI and AI dependencies
   home.packages = with pkgs; [
     neovide
+    nodejs  # Required for GitHub Copilot
   ];
 
   programs.neovim = {
@@ -25,18 +26,25 @@
       cmp_luasnip
       friendly-snippets
 
+      # AI/LLM Features
+      copilot-lua
+      copilot-cmp
+      CopilotChat-nvim
+      plenary-nvim  # Required for telescope
+      render-markdown-nvim # Markdown rendering for AI chat
+
       # Tree-sitter
       nvim-treesitter.withAllGrammars
       nvim-treesitter-textobjects
-      
+
       # Telescope
       telescope-nvim
       telescope-fzf-native-nvim
-      
+
       # Git
       vim-fugitive
       gitsigns-nvim
-      
+
       # Visual
       catppuccin-nvim
       lualine-nvim
@@ -44,10 +52,10 @@
       bufferline-nvim
       indent-blankline-nvim
       nvim-colorizer-lua
-      
+
       # File explorer
       nvim-tree-lua
-      
+
       # Utilities
       which-key-nvim
       auto-pairs
@@ -55,7 +63,7 @@
       toggleterm-nvim
       trouble-nvim
       nvim-autopairs
-      
+
       # Languages/filetype support
       rust-tools-nvim
       neodev-nvim
@@ -174,8 +182,9 @@
       
       -- Terminal
       map('n', '<leader>t', ':ToggleTerm<CR>', opts)
+      map('n', '<leader>cc', '<cmd>lua require("toggleterm.terminal").Terminal:new({cmd="claude", direction="vertical"}):toggle()<CR>', opts)  -- Open Claude Code CLI
       map('t', '<Esc>', '<C-\\><C-n>', opts)
-      
+
       -- Buffer navigation
       map('n', '<S-l>', ':bnext<CR>', opts)
       map('n', '<S-h>', ':bprevious<CR>', opts)
@@ -216,6 +225,16 @@
       map('n', '<leader>gs', ':Gitsigns stage_hunk<CR>', opts)
       map('n', '<leader>gu', ':Gitsigns undo_stage_hunk<CR>', opts)
       map('n', '<leader>gd', ':Gitsigns diffthis<CR>', opts)
+
+      -- AI/Copilot keybindings
+      map('n', '<leader>ai', ':CopilotChatToggle<CR>', opts)  -- Toggle Copilot Chat
+      map('v', '<leader>ae', ':CopilotChatExplain<CR>', opts) -- Explain selected code
+      map('v', '<leader>ar', ':CopilotChatReview<CR>', opts)  -- Review selected code
+      map('v', '<leader>af', ':CopilotChatFix<CR>', opts)     -- Fix selected code
+      map('v', '<leader>ao', ':CopilotChatOptimize<CR>', opts) -- Optimize selected code
+      map('v', '<leader>ad', ':CopilotChatDocs<CR>', opts)    -- Generate docs
+      map('v', '<leader>at', ':CopilotChatTests<CR>', opts)   -- Generate tests
+      map('n', '<leader>ac', ':CopilotChatCommit<CR>', opts)  -- Generate commit message
     '';
     
     # Autocommands
@@ -306,22 +325,199 @@
     
     # Plugin configuration
     "nvim/lua/config/plugins.lua".text = ''
+      -- Configure AI/LLM features
+      require('config.plugins.ai')
+
       -- Configure LSP with Mason
       require('config.plugins.lsp')
-      
+
       -- Configure Treesitter
       require('config.plugins.treesitter')
-      
+
       -- Configure Telescope
       require('config.plugins.telescope')
-      
+
       -- Configure UI elements
       require('config.plugins.ui')
-      
+
       -- Configure utilities
       require('config.plugins.utilities')
     '';
     
+    # AI/LLM Configuration
+    "nvim/lua/config/plugins/ai.lua".text = ''
+      -- Configure GitHub Copilot
+      require('copilot').setup({
+        suggestion = {
+          enabled = true,
+          auto_trigger = true,
+          debounce = 75,
+          keymap = {
+            accept = "<M-l>",      -- Alt+l to accept suggestion
+            accept_word = "<M-w>", -- Alt+w to accept word
+            accept_line = "<M-j>", -- Alt+j to accept line
+            next = "<M-]>",        -- Alt+] for next suggestion
+            prev = "<M-[>",        -- Alt+[ for previous suggestion
+            dismiss = "<C-]>",     -- Ctrl+] to dismiss
+          },
+        },
+        panel = {
+          enabled = true,
+          auto_refresh = false,
+          keymap = {
+            jump_prev = "[[",
+            jump_next = "]]",
+            accept = "<CR>",
+            refresh = "gr",
+            open = "<M-CR>"  -- Alt+Enter to open panel
+          },
+          layout = {
+            position = "bottom",
+            ratio = 0.4
+          },
+        },
+        filetypes = {
+          ["*"] = true,  -- Enable for all filetypes by default
+          help = false,  -- Disable for help files
+          gitrebase = false,
+          hgcommit = false,
+          svn = false,
+          cvs = false,
+        },
+        copilot_node_command = 'node',
+        server_opts_overrides = {},
+      })
+
+      -- Configure Copilot completion source
+      require('copilot_cmp').setup()
+
+      -- Configure CopilotChat
+      require('CopilotChat').setup({
+        debug = false,
+        model = 'copilot:claude-sonnet-4.5',  -- Use Claude Sonnet 4.5
+        temperature = 0.1,
+        question_header = '## User ',
+        answer_header = '## Copilot ',
+        error_header = '## Error ',
+        separator = ' ',
+        show_folds = true,
+        show_help = true,
+        auto_follow_cursor = true,
+        auto_insert_mode = false,
+        clear_chat_on_new_prompt = false,
+        context = 'buffers', -- Use 'buffers' or 'buffer'
+        history_path = vim.fn.stdpath('data') .. '/copilotchat_history',
+        callback = nil,
+        selection = function(source)
+          local select = require('CopilotChat.select')
+          return select.visual(source) or select.buffer(source)
+        end,
+        prompts = {
+          Explain = {
+            prompt = '/COPILOT_EXPLAIN Write an explanation for the active selection as paragraphs of text.',
+          },
+          Review = {
+            prompt = '/COPILOT_REVIEW Review the selected code.',
+            callback = function(response, source)
+              -- Custom callback for review
+            end,
+          },
+          Fix = {
+            prompt = '/COPILOT_FIX There is a problem in this code. Rewrite the code to show it with the bug fixed.',
+          },
+          Optimize = {
+            prompt = '/COPILOT_REFACTOR Optimize the selected code to improve performance and readability.',
+          },
+          Docs = {
+            prompt = '/COPILOT_DOCS Please add documentation comments to the selected code.',
+          },
+          Tests = {
+            prompt = '/COPILOT_TESTS Please generate tests for my code.',
+          },
+          Commit = {
+            prompt = 'Write commit message for the change with commitizen convention. Make sure the title has maximum 50 characters and message is wrapped at 72 characters. Wrap the whole message in code block with language gitcommit.',
+          },
+        },
+        window = {
+          layout = 'vertical',  -- 'vertical', 'horizontal', 'float'
+          width = 0.4,
+          height = 0.6,
+          relative = 'editor',
+          border = 'single',
+          title = 'Copilot Chat',
+          footer = nil,
+          zindex = 1,
+        },
+        mappings = {
+          complete = {
+            detail = 'Use @<Tab> or /<Tab> for options.',
+            insert ='<Tab>',
+          },
+          close = {
+            normal = 'q',
+            insert = '<C-c>'
+          },
+          reset = {
+            normal ='<C-r>',
+            insert = '<C-r>'
+          },
+          submit_prompt = {
+            normal = '<CR>',
+            insert = '<C-s>'
+          },
+          accept_diff = {
+            normal = '<C-y>',
+            insert = '<C-y>'
+          },
+          yank_diff = {
+            normal = 'gy',
+          },
+          show_diff = {
+            normal = 'gd'
+          },
+          show_system_prompt = {
+            normal = 'gp'
+          },
+          show_user_selection = {
+            normal = 'gs'
+          },
+        },
+      })
+
+      -- Configure render-markdown for better AI chat display
+      require('render-markdown').setup({
+        enabled = true,
+        max_file_size = 1.5,
+        log_level = 'error',
+        file_types = { 'markdown', 'copilot-chat' },
+        render_modes = { 'n', 'c' },
+        anti_conceal = {
+          enabled = true,
+        },
+        heading = {
+          enabled = true,
+          sign = true,
+          icons = { '◉ ', '○ ', '✸ ', '✿ ' },
+        },
+        code = {
+          enabled = true,
+          sign = true,
+          style = 'full',
+          left_pad = 0,
+          right_pad = 0,
+          width = 'full',
+          border = 'thin',
+          highlight = 'RenderMarkdownCode',
+        },
+        bullet = {
+          enabled = true,
+          icons = { '●', '○', '◆', '◇' },
+          right_pad = 0,
+          highlight = 'RenderMarkdownBullet',
+        },
+      })
+    '';
+
     # LSP Configuration
     "nvim/lua/config/plugins/lsp.lua".text = ''
       local lsp_zero = require('lsp-zero')
@@ -364,6 +560,7 @@
       
       cmp.setup({
         sources = {
+          {name = 'copilot', group_index = 2},
           {name = 'path'},
           {name = 'nvim_lsp'},
           {name = 'luasnip', keyword_length = 2},

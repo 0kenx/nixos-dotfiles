@@ -1,13 +1,5 @@
 { config, lib, pkgs, ... }:
-  let
-  # https://github.com/NVIDIA/open-gpu-kernel-modules/issues/840
-  gpl_symbols_linux_615_patch = pkgs.fetchpatch {
-    url = "https://github.com/CachyOS/kernel-patches/raw/914aea4298e3744beddad09f3d2773d71839b182/6.15/misc/nvidia/0003-Workaround-nv_vm_flags_-calling-GPL-only-code.patch";
-    hash = "sha256-YOTAvONchPPSVDP9eJ9236pAPtxYK5nAePNtm2dlvb4=";
-    stripLen = 1;
-    extraPrefix = "kernel/";
-  };
-in
+
 {
   # Load nvidia driver for Xorg and Wayland
   services.xserver.videoDrivers = ["nvidia"];
@@ -48,20 +40,9 @@ in
   	# accessible via `nvidia-settings`.
     nvidiaSettings = true;
 
-    # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    # package = config.boot.kernelPackages.nvidiaPackages.latest;
-    # Using the latest stable driver package from nixpkgs
-    # package = config.boot.kernelPackages.nvidiaPackages.stable;
-    
-    # Override to use specific NVIDIA driver version 575.64.03
-    package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
-      version = "575.64.03";
-      sha256_64bit = "sha256-S7eqhgBLLtKZx9QwoGIsXJAyfOOspPbppTHUxB06DKA=";
-      sha256_aarch64 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; # Not needed for x86_64
-      openSha256 = "sha256-SAl1+XH4ghz8iix95hcuJ/EVqt6ylyzFAao0mLeMmMI=";
-      settingsSha256 = "sha256-o8rPAi/tohvHXcBV+ZwiApEQoq+ZLhCMyHzMxIADauI=";
-      persistencedSha256 = "sha256-QUa7T58+kfMbfWY/fnyaRtBhzsVhe8qNOSaF8/KRLa0=";
-    };
+    # Use the latest production driver (currently 570.195.03)
+    # This is compatible with kernel 6.17 and more stable than beta drivers
+    package = config.boot.kernelPackages.nvidiaPackages.production;
 
     # Nvidia Optimus PRIME. It is a technology developed by Nvidia to optimize
     # the power consumption and performance of laptops equipped with their GPUs.

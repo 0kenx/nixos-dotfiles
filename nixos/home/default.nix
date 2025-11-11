@@ -39,12 +39,14 @@
   home.stateVersion = "${channel}";
   programs.home-manager.enable = true;
 
-  # Set cursor theme environment variables globally
+  # Set cursor theme and editor environment variables globally
   home.sessionVariables = {
     XCURSOR_THEME = "Catppuccin-Macchiato-Sapphire-Cursors";
     XCURSOR_SIZE = "24";
     HYPRCURSOR_THEME = "Catppuccin-Macchiato-Sapphire-Cursors";
     HYPRCURSOR_SIZE = "24";
+    EDITOR = "nvim";
+    VISUAL = "nvim";
   };
 
   # IMPORTANT: Removed circular reference to NixOS configuration
