@@ -196,8 +196,8 @@ in {
 
       # Environment variables
       env = [
-        "GDK_SCALE,2"
-        "QT_SCALE_FACTOR,2"
+        "GDK_SCALE,1.6"
+        "QT_SCALE_FACTOR,1.6"
       ];
 
       # General settings

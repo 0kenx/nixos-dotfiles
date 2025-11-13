@@ -328,28 +328,41 @@
           end
         end
 
-        # Select file listing command based on git repo presence
-        set -l file_cmd
-        if git rev-parse --is-inside-work-tree 2>/dev/null
-          set file_cmd "git ls-files | grep -E \"\.($filter_exts)\$\""
-        else
-          set file_cmd "find . -type f | grep -E \"\.($filter_exts)\$\""
-        end
-
         # Display included extensions
         set -l display_exts (string replace -a "|" ", " $filter_exts)
         echo "Included extensions: $display_exts"
 
+        # Get file list based on git repo presence
+        set -l files
+        if git rev-parse --is-inside-work-tree 2>/dev/null
+          # Include both tracked and untracked files (but respect .gitignore)
+          for file in (git ls-files; git ls-files --others --exclude-standard)
+            if string match -qr "\\.($filter_exts)\$" -- $file
+              set -a files $file
+            end
+          end
+        else
+          for file in (find . -type f)
+            if string match -qr "\\.($filter_exts)\$" -- $file
+              set -a files $file
+            end
+          end
+        end
+
         # Count total lines
         echo "Total SLOC:"
-        eval $file_cmd | xargs cat 2>/dev/null | \
-          grep -v "^[[:space:]]*\$" | \
-          grep -v "^[[:space:]]*[{}\\\\[\\\\]()]*[[:space:]]*\$" | \
-          grep -v "^[[:space:]]*//" | \
-          grep -v "^[[:space:]]*--" | \
-          grep -v "^[[:space:]]*#" | \
-          grep -v "^[[:space:]]*'" | \
-          wc -l
+        if test (count $files) -gt 0
+          cat $files 2>/dev/null | \
+            grep -v "^[[:space:]]*\$" | \
+            grep -v "^[[:space:]]*[{}\\\\[\\\\]()]*[[:space:]]*\$" | \
+            grep -v "^[[:space:]]*//" | \
+            grep -v "^[[:space:]]*--" | \
+            grep -v "^[[:space:]]*#" | \
+            grep -v "^[[:space:]]*'" | \
+            wc -l
+        else
+          echo "0"
+        end
 
         # Show detailed file listing if not in summary mode
         if not set -q _flag_summary
@@ -369,7 +382,7 @@
           end
 
           # Get max count length for proper alignment
-          for file in (eval $file_cmd)
+          for file in $files
             set -l count (count_lines $file)
             if test (string length $count) -gt $max_count
               set max_count (string length $count)
@@ -397,18 +410,31 @@
 
         # Always show the summary by file type
         echo -e "\\nSummary by file type:"
-        for ext in (eval $file_cmd | sed -E 's/.*\\.([^.]+)$/\\1/' | sort | uniq)
-          set -l ext_cmd "$file_cmd | grep \"\\.$ext\$\""
-          set -l count (eval $ext_cmd | xargs cat 2>/dev/null | \
-            grep -v "^[[:space:]]*\$" | \
-            grep -v "^[[:space:]]*[{}\\\\[\\\\]()]*[[:space:]]*\$" | \
-            grep -v "^[[:space:]]*//" | \
-            grep -v "^[[:space:]]*--" | \
-            grep -v "^[[:space:]]*#" | \
-            grep -v "^[[:space:]]*'" | \
-            wc -l)
-          printf "%6d  .%s\\n" $count $ext
-        end | if set -q _flag_descending; sort -nr; else sort -k2; end
+        if test (count $files) -gt 0
+          for ext in (printf "%s\\n" $files | sed -E 's/.*\\.([^.]+)$/\\1/' | sort | uniq)
+            set -l ext_files
+            for f in $files
+              if string match -qr "\\.$ext\$" -- $f
+                set -a ext_files $f
+              end
+            end
+            set -l count (cat $ext_files 2>/dev/null | \
+              grep -v "^[[:space:]]*\$" | \
+              grep -v "^[[:space:]]*[{}\\\\[\\\\]()]*[[:space:]]*\$" | \
+              grep -v "^[[:space:]]*//" | \
+              grep -v "^[[:space:]]*--" | \
+              grep -v "^[[:space:]]*#" | \
+              grep -v "^[[:space:]]*'" | \
+              wc -l)
+            printf "%6d  .%s\\n" $count $ext
+          end | begin
+            if set -q _flag_descending
+              sort -nr
+            else
+              sort -k2
+            end
+          end
+        end
       '';
 
       # Migrated functions from ~/.config/fish/functions

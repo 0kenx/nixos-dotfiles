@@ -37,7 +37,7 @@
         gtk-xft-hinting = 1;
         gtk-xft-hintstyle = "hintslight";
         gtk-xft-rgba = "none";
-        gtk-xft-dpi = 196608;
+        gtk-xft-dpi = 157286;
         gtk-overlay-scrolling = true;
         gtk-key-theme-name = "Default";
         gtk-menu-images = false;
@@ -56,7 +56,7 @@
         gtk-xft-hinting = 1;
         gtk-xft-hintstyle = "hintslight";
         gtk-xft-rgba = "none";
-        gtk-xft-dpi = 196608;
+        gtk-xft-dpi = 157286;
         gtk-overlay-scrolling = true;
       };
       
