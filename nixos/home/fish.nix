@@ -349,10 +349,9 @@
           end
         end
 
-        # Count total lines
-        echo "Total SLOC:"
-        if test (count $files) -gt 0
-          cat $files 2>/dev/null | \
+        # Count lines function
+        function count_lines
+          cat $argv[1] 2>/dev/null | \
             grep -v "^[[:space:]]*\$" | \
             grep -v "^[[:space:]]*[{}\\\\[\\\\]()]*[[:space:]]*\$" | \
             grep -v "^[[:space:]]*//" | \
@@ -360,51 +359,114 @@
             grep -v "^[[:space:]]*#" | \
             grep -v "^[[:space:]]*'" | \
             wc -l
-        else
-          echo "0"
+        end
+
+        # Count total lines
+        set -l total_sloc 0
+        if test (count $files) -gt 0
+          set total_sloc (cat $files 2>/dev/null | \
+            grep -v "^[[:space:]]*\$" | \
+            grep -v "^[[:space:]]*[{}\\\\[\\\\]()]*[[:space:]]*\$" | \
+            grep -v "^[[:space:]]*//" | \
+            grep -v "^[[:space:]]*--" | \
+            grep -v "^[[:space:]]*#" | \
+            grep -v "^[[:space:]]*'" | \
+            wc -l)
+        end
+
+        # Print total SLOC header if in summary mode
+        if set -q _flag_summary
+          echo "Total SLOC: $total_sloc"
         end
 
         # Show detailed file listing if not in summary mode
         if not set -q _flag_summary
+          # Build file data with counts
           set -l file_data
-          set -l max_count 0
 
-          # Count lines function
-          function count_lines
-            cat $argv[1] 2>/dev/null | \
-              grep -v "^[[:space:]]*\$" | \
-              grep -v "^[[:space:]]*[{}\\\\[\\\\]()]*[[:space:]]*\$" | \
-              grep -v "^[[:space:]]*//" | \
-              grep -v "^[[:space:]]*--" | \
-              grep -v "^[[:space:]]*#" | \
-              grep -v "^[[:space:]]*'" | \
-              wc -l
-          end
-
-          # Get max count length for proper alignment
           for file in $files
             set -l count (count_lines $file)
+            set -a file_data "$file:$count"
+          end
+
+          # Calculate max count length for alignment (minimum 6)
+          set -l max_count 6
+          # Also check total_sloc length
+          if test (string length $total_sloc) -gt $max_count
+            set max_count (string length $total_sloc)
+          end
+          for item in $file_data
+            set -l count (string split -m1 ":" $item)[2]
             if test (string length $count) -gt $max_count
               set max_count (string length $count)
             end
-            set -a file_data "$count:$file"
           end
 
-          # Sort and display results
+          # Check if descending mode (sort by line count)
           if set -q _flag_descending
-            # Sort by line count (descending)
-            for item in $file_data
-              set -l count (string split ":" $item)[1]
-              set -l file (string split ":" $item)[2]
-              printf "%"$max_count"d  %s\\n" $count $file
-            end | sort -nr
+            # Sort by line count (descending) - just print files without tree
+            for item in (printf "%s\\n" $file_data | sort -t: -k2 -nr)
+              set -l parts (string split -m1 ":" $item)
+              set -l filepath $parts[1]
+              set -l count $parts[2]
+              printf "%"$max_count"d  %s\\n" $count $filepath
+            end
           else
-            # Sort by filename (default)
+            # Sort by path (tree view)
+            set file_data (printf "%s\\n" $file_data | sort)
+
+            # Print total SLOC as root
+            printf "%"$max_count"d  .\\n" $total_sloc
+
+            # Simple approach: just print with basic tree chars
+            set -l last_dir ""
+
             for item in $file_data
-              set -l count (string split ":" $item)[1]
-              set -l file (string split ":" $item)[2]
-              printf "%"$max_count"d  %s\\n" $count $file
-            end | sort -k2
+              set -l parts (string split -m1 ":" $item)
+              set -l filepath $parts[1]
+              set -l count $parts[2]
+              set -l dir (dirname $filepath)
+              set -l filename (basename $filepath)
+
+              # Calculate depth
+              set -l depth 0
+              if test "$dir" != "."
+                set depth (string split "/" $dir | count)
+              end
+
+              # Print directory header when entering new directory
+              if test "$dir" != "$last_dir"; and test "$dir" != "."
+                # Calculate directory total
+                set -l dir_total 0
+                for di in $file_data
+                  set -l di_parts (string split -m1 ":" $di)
+                  set -l di_path $di_parts[1]
+                  set -l di_count $di_parts[2]
+                  if string match -q "$dir/*" $di_path
+                    set dir_total (math $dir_total + $di_count)
+                  end
+                end
+
+                # Build indent
+                set -l dir_depth (math $depth - 1)
+                set -l dir_indent ""
+                for d in (seq 1 $dir_depth)
+                  set dir_indent "$dir_indent│   "
+                end
+
+                set -l dir_name (basename $dir)
+                printf "%"$max_count"d  %s├──%s/\\n" $dir_total $dir_indent $dir_name
+              end
+
+              # Print file with indent
+              set -l file_indent ""
+              for d in (seq 1 $depth)
+                set file_indent "$file_indent│   "
+              end
+
+              printf "%"$max_count"d  %s├──%s\\n" $count $file_indent $filename
+              set last_dir $dir
+            end
           end
         end
 
