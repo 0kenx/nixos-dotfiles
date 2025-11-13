@@ -418,8 +418,8 @@
             # Print total SLOC as root
             printf "%"$max_count"d  .\\n" $total_sloc
 
-            # Simple approach: just print with basic tree chars
-            set -l last_dir ""
+            # Track printed directories
+            set -l printed_dirs
 
             for item in $file_data
               set -l parts (string split -m1 ":" $item)
@@ -434,28 +434,36 @@
                 set depth (string split "/" $dir | count)
               end
 
-              # Print directory header when entering new directory
-              if test "$dir" != "$last_dir"; and test "$dir" != "."
-                # Calculate directory total
-                set -l dir_total 0
-                for di in $file_data
-                  set -l di_parts (string split -m1 ":" $di)
-                  set -l di_path $di_parts[1]
-                  set -l di_count $di_parts[2]
-                  if string match -q "$dir/*" $di_path
-                    set dir_total (math $dir_total + $di_count)
+              # Print all parent directories that haven't been printed yet
+              if test "$dir" != "."
+                set -l dir_parts (string split "/" $dir)
+                for d in (seq 1 (count $dir_parts))
+                  set -l current_dir (string join "/" $dir_parts[1..$d])
+
+                  if not contains $current_dir $printed_dirs
+                    # Calculate directory total
+                    set -l dir_total 0
+                    for di in $file_data
+                      set -l di_parts (string split -m1 ":" $di)
+                      set -l di_path $di_parts[1]
+                      set -l di_count $di_parts[2]
+                      if string match -q "$current_dir/*" $di_path
+                        set dir_total (math $dir_total + $di_count)
+                      end
+                    end
+
+                    # Build indent
+                    set -l dir_depth (math $d - 1)
+                    set -l dir_indent ""
+                    for i in (seq 1 $dir_depth)
+                      set dir_indent "$dir_indent│   "
+                    end
+
+                    set -l dir_name (basename $current_dir)
+                    printf "%"$max_count"d  %s├──%s/\\n" $dir_total $dir_indent $dir_name
+                    set -a printed_dirs $current_dir
                   end
                 end
-
-                # Build indent
-                set -l dir_depth (math $depth - 1)
-                set -l dir_indent ""
-                for d in (seq 1 $dir_depth)
-                  set dir_indent "$dir_indent│   "
-                end
-
-                set -l dir_name (basename $dir)
-                printf "%"$max_count"d  %s├──%s/\\n" $dir_total $dir_indent $dir_name
               end
 
               # Print file with indent
@@ -465,7 +473,6 @@
               end
 
               printf "%"$max_count"d  %s├──%s\\n" $count $file_indent $filename
-              set last_dir $dir
             end
           end
         end
