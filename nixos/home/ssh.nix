@@ -25,7 +25,22 @@
         };
       };
 
+      # Personal GitHub (default)
       "github.com" = {
+        hostname = "github.com";
+        user = "git";
+        identityFile = "~/.ssh/id_ed25519_personal";
+        extraOptions = {
+          "AddKeysToAgent" = "yes";
+          "ControlMaster" = "no";
+        };
+      };
+
+      # Work GitHub (use git@work:org/repo.git)
+      "work" = {
+        hostname = "github.com";
+        user = "git";
+        identityFile = "~/.ssh/id_ed25519_work";
         extraOptions = {
           "AddKeysToAgent" = "yes";
           "ControlMaster" = "no";

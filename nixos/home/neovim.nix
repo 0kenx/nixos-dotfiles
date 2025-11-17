@@ -147,17 +147,49 @@
       local map = vim.keymap.set
       local opts = { noremap = true, silent = true }
 
-      -- Better window movement
+      -- Cursor navigation: Long jumps with Ctrl and Shift
+      -- Ctrl+arrows: Jump by word/paragraph
+      map('n', '<C-Left>', 'b', opts)        -- Jump word backward
+      map('n', '<C-Right>', 'w', opts)       -- Jump word forward
+      map('n', '<C-Up>', '{', opts)          -- Jump paragraph up
+      map('n', '<C-Down>', '}', opts)        -- Jump paragraph down
+      map('i', '<C-Left>', '<C-o>b', opts)   -- Jump word backward (insert mode)
+      map('i', '<C-Right>', '<C-o>w', opts)  -- Jump word forward (insert mode)
+      map('i', '<C-Up>', '<C-o>{', opts)     -- Jump paragraph up (insert mode)
+      map('i', '<C-Down>', '<C-o>}', opts)   -- Jump paragraph down (insert mode)
+
+      -- Shift+arrows: Visual selection
+      map('n', '<S-Left>', 'vh', opts)       -- Select left
+      map('n', '<S-Right>', 'vl', opts)      -- Select right
+      map('n', '<S-Up>', 'vk', opts)         -- Select up
+      map('n', '<S-Down>', 'vj', opts)       -- Select down
+      map('v', '<S-Left>', 'h', opts)        -- Extend selection left
+      map('v', '<S-Right>', 'l', opts)       -- Extend selection right
+      map('v', '<S-Up>', 'k', opts)          -- Extend selection up
+      map('v', '<S-Down>', 'j', opts)        -- Extend selection down
+
+      -- Window navigation (hjkl for compatibility, arrows for primary use)
+      -- Consistent with OS: Alt=base, Alt+Shift=swap, Alt+Ctrl=resize
       map('n', '<C-h>', '<C-w>h', opts)
       map('n', '<C-j>', '<C-w>j', opts)
       map('n', '<C-k>', '<C-w>k', opts)
       map('n', '<C-l>', '<C-w>l', opts)
-      
-      -- Resize windows with arrows
-      map('n', '<C-Up>', ':resize -2<CR>', opts)
-      map('n', '<C-Down>', ':resize +2<CR>', opts)
-      map('n', '<C-Left>', ':vertical resize -2<CR>', opts)
-      map('n', '<C-Right>', ':vertical resize +2<CR>', opts)
+      map('n', '<A-Left>', '<C-w>h', opts)
+      map('n', '<A-Down>', '<C-w>j', opts)
+      map('n', '<A-Up>', '<C-w>k', opts)
+      map('n', '<A-Right>', '<C-w>l', opts)
+
+      -- Window swapping (matches OS: Super+Shift → Alt+Shift)
+      map('n', '<A-S-Left>', '<C-w>H', opts)
+      map('n', '<A-S-Down>', '<C-w>J', opts)
+      map('n', '<A-S-Up>', '<C-w>K', opts)
+      map('n', '<A-S-Right>', '<C-w>L', opts)
+
+      -- Window resizing (matches OS: Super+Ctrl → Alt+Ctrl)
+      map('n', '<A-C-Up>', ':resize -2<CR>', opts)
+      map('n', '<A-C-Down>', ':resize +2<CR>', opts)
+      map('n', '<A-C-Left>', ':vertical resize -2<CR>', opts)
+      map('n', '<A-C-Right>', ':vertical resize +2<CR>', opts)
       
       -- Move text up and down
       map('n', '<A-j>', '<Esc>:m .+1<CR>==', opts)
@@ -189,6 +221,17 @@
       map('n', '<S-l>', ':bnext<CR>', opts)
       map('n', '<S-h>', ':bprevious<CR>', opts)
       map('n', '<leader>c', ':Bdelete!<CR>', opts)
+
+      -- Quick buffer switching with Alt+number
+      map('n', '<A-1>', '<cmd>lua vim.cmd("buffer " .. vim.fn.getbufinfo({buflisted=1})[1].bufnr)<CR>', opts)
+      map('n', '<A-2>', '<cmd>lua vim.cmd("buffer " .. vim.fn.getbufinfo({buflisted=1})[2].bufnr)<CR>', opts)
+      map('n', '<A-3>', '<cmd>lua vim.cmd("buffer " .. vim.fn.getbufinfo({buflisted=1})[3].bufnr)<CR>', opts)
+      map('n', '<A-4>', '<cmd>lua vim.cmd("buffer " .. vim.fn.getbufinfo({buflisted=1})[4].bufnr)<CR>', opts)
+      map('n', '<A-5>', '<cmd>lua vim.cmd("buffer " .. vim.fn.getbufinfo({buflisted=1})[5].bufnr)<CR>', opts)
+      map('n', '<A-6>', '<cmd>lua vim.cmd("buffer " .. vim.fn.getbufinfo({buflisted=1})[6].bufnr)<CR>', opts)
+      map('n', '<A-7>', '<cmd>lua vim.cmd("buffer " .. vim.fn.getbufinfo({buflisted=1})[7].bufnr)<CR>', opts)
+      map('n', '<A-8>', '<cmd>lua vim.cmd("buffer " .. vim.fn.getbufinfo({buflisted=1})[8].bufnr)<CR>', opts)
+      map('n', '<A-9>', '<cmd>lua vim.cmd("buffer " .. vim.fn.getbufinfo({buflisted=1})[9].bufnr)<CR>', opts)
       
       -- Telescope
       map('n', '<leader>ff', ':Telescope find_files<CR>', opts)
@@ -709,6 +752,10 @@
       require('bufferline').setup {
         options = {
           mode = 'buffers',
+          -- Show buffer numbers (ordinal position) for Alt+number navigation
+          numbers = function(opts)
+            return string.format('%s', opts.ordinal)
+          end,
           separator_style = 'slant',
           always_show_bufferline = false,
           show_buffer_close_icons = true,

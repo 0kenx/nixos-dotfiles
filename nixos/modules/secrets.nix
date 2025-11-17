@@ -32,8 +32,8 @@ in
     #           - age1y3ysrwdnhvxtavfsxarr4l7qnweqcc0ttkhkfk3qpcavkzs73fnqlfwfp7
     
     # Host-specific secrets file from the private submodule
-    # Use "desktop" as fallback since we know it exists
-    defaultSopsFile = ../nixos-secrets/hosts/desktop/secrets.yaml;
+    # Dynamically select the secrets file based on hostname
+    defaultSopsFile = ../nixos-secrets/hosts/${hostname}/secrets.yaml;
     
     # Secrets for Git configuration
     secrets = {
@@ -59,7 +59,7 @@ in
       "git/personal_email" = {
         owner = username;
       };
-      
+
       # API keys from common secrets file (shared across all hosts)
       "api_keys/github" = {
         owner = username;
@@ -83,7 +83,7 @@ in
     GIT_WORK_EMAIL = config.sops.secrets."git/work_email".path;
     GIT_PERSONAL_NAME = config.sops.secrets."git/personal_name".path;
     GIT_PERSONAL_EMAIL = config.sops.secrets."git/personal_email".path;
-    
+
     # API keys
     GITHUB_TOKEN = config.sops.secrets."api_keys/github".path;
     OPENAI_API_KEY = config.sops.secrets."api_keys/openai".path;
