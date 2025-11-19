@@ -13,24 +13,44 @@ with lib;
     
     # Display configuration
     displays = {
+      # Serial numbers for automatic detection
+      primarySerial = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Primary display serial number for auto-detection";
+      };
+
+      secondarySerial = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Secondary display serial number for auto-detection";
+      };
+
+      tertiarySerial = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Tertiary display serial number for auto-detection";
+      };
+
+      # Fallback port names
       primary = mkOption {
         type = types.str;
         default = "eDP-1";
-        description = "Primary display output name";
+        description = "Primary display output name (fallback if serial detection fails)";
       };
-      
+
       secondary = mkOption {
         type = types.nullOr types.str;
         default = null;
-        description = "Secondary display output name";
+        description = "Secondary display output name (fallback if serial detection fails)";
       };
-      
+
       tertiary = mkOption {
         type = types.nullOr types.str;
         default = null;
-        description = "Tertiary display output name";
+        description = "Tertiary display output name (fallback if serial detection fails)";
       };
-      
+
       # Scale factors for each display
       primaryScale = mkOption {
         type = types.float;

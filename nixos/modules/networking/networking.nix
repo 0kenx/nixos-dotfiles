@@ -9,6 +9,9 @@
   networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
   # networking.networkmanager.wifi.backend = "iwd";
 
+  # Disable wait-online service to speed up boot
+  systemd.services.NetworkManager-wait-online.enable = false;
+
   networking.wireless.iwd = {
     enable = true;
     settings = {

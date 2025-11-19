@@ -1,8 +1,12 @@
 {inputs, pkgs, config, lib, nixosConfig, hostDisplayConfig, username, host, channel, ...}:
 
 let
-  # Use pre-resolved display configuration directly
-  # This avoids circular dependencies with module-manager.nix
+  # Serial number configuration for automatic detection
+  primarySerial = hostDisplayConfig.primarySerial or null;
+  secondarySerial = hostDisplayConfig.secondarySerial or null;
+  tertiarySerial = hostDisplayConfig.tertiarySerial or null;
+
+  # Fallback to port names if serial detection is not configured
   primaryDisplayOutput = hostDisplayConfig.primary or "eDP-1";
   secondaryDisplayOutput = hostDisplayConfig.secondary or null;
   tertiaryDisplayOutput = hostDisplayConfig.tertiary or null;
@@ -31,6 +35,54 @@ let
   secondaryPositionValue = hostDisplayConfig.secondaryPosition or "auto-right";
   tertiaryPositionValue = hostDisplayConfig.tertiaryPosition or "auto-right";
 
+  # Monitor detection script that uses serial numbers if available
+  monitorDetectionScript = pkgs.writeShellScript "hyprland-detect-monitors" ''
+    #!/usr/bin/env bash
+
+    # Function to get monitor name by serial number
+    get_monitor_by_serial() {
+      local serial="$1"
+      hyprctl monitors -j | jq -r ".[] | select(.serial==\"$serial\") | .name"
+    }
+
+    # Detect monitors by serial number or fall back to configured names
+    ${if primarySerial != null then ''
+    PRIMARY=$(get_monitor_by_serial "${primarySerial}")
+    if [ -z "$PRIMARY" ]; then
+      PRIMARY="${primaryDisplayOutput}"
+    fi
+    '' else ''
+    PRIMARY="${primaryDisplayOutput}"
+    ''}
+
+    ${if secondarySerial != null && secondaryDisplayOutput != null then ''
+    SECONDARY=$(get_monitor_by_serial "${secondarySerial}")
+    if [ -z "$SECONDARY" ]; then
+      SECONDARY="${secondaryDisplayOutput}"
+    fi
+    '' else if secondaryDisplayOutput != null then ''
+    SECONDARY="${secondaryDisplayOutput}"
+    '' else ''
+    SECONDARY=""
+    ''}
+
+    ${if tertiarySerial != null && tertiaryDisplayOutput != null then ''
+    TERTIARY=$(get_monitor_by_serial "${tertiarySerial}")
+    if [ -z "$TERTIARY" ]; then
+      TERTIARY="${tertiaryDisplayOutput}"
+    fi
+    '' else if tertiaryDisplayOutput != null then ''
+    TERTIARY="${tertiaryDisplayOutput}"
+    '' else ''
+    TERTIARY=""
+    ''}
+
+    # Output the detected monitor names
+    echo "PRIMARY=$PRIMARY"
+    echo "SECONDARY=$SECONDARY"
+    echo "TERTIARY=$TERTIARY"
+  '';
+
   primaryMonitorLine = "${primaryDisplayOutput},preferred,auto,${primaryScaleFactor}";
   secondaryMonitorLine = if secondaryDisplayOutput != null
     then "${secondaryDisplayOutput},preferred,${secondaryPositionValue},${secondaryScaleFactor}${secondaryTransformValue}"
@@ -54,32 +106,38 @@ let
       (map (i: "${toString i},monitor:${tertiaryDisplayOutput}") (lib.range 21 30))
     else []);
 
-  # Create a separate monitor setup script instead of embedding bash in the config
+  # Create a separate monitor setup script that uses serial number detection
   monitorSetupScript = pkgs.writeShellScript "hyprland-monitor-setup" ''
     #!/usr/bin/env bash
-    # Detect monitors and configure them appropriately
+
+    # Detect monitors by serial number
+    eval $(${monitorDetectionScript})
+
+    # Configure monitors if detected
     if hyprctl monitors -j | jq -e '. | length > 0' > /dev/null; then
       # Primary monitor is always set up first
-      hyprctl keyword monitor "${primaryMonitorLine}"
+      if [ -n "$PRIMARY" ]; then
+        hyprctl keyword monitor "$PRIMARY,preferred,auto,${primaryScaleFactor}"
+      fi
 
       # If we have secondary monitor and it's detected
-      ${if secondaryDisplayOutput != null then ''
-      if hyprctl monitors -j | jq -e '. | length > 1' > /dev/null; then
+      ${if secondaryDisplayOutput != null || secondarySerial != null then ''
+      if [ -n "$SECONDARY" ] && hyprctl monitors -j | jq -e ".[] | select(.name==\"$SECONDARY\")" > /dev/null; then
         ${if secondaryPositionValue != "auto-right" then ''
         # Use predefined position
-        hyprctl keyword monitor "${secondaryMonitorLine}"
+        hyprctl keyword monitor "$SECONDARY,preferred,${secondaryPositionValue},${secondaryScaleFactor}${secondaryTransformValue}"
         '' else ''
         # Calculate position based on primary monitor
-        PWIDTH=$(hyprctl monitors -j | jq -r '.[] | select(.name=="'"${primaryDisplayOutput}"'") | .width')
-        hyprctl keyword monitor "${secondaryDisplayOutput},preferred,$PWIDTH\x0,${secondaryScaleFactor}${secondaryTransformValue}"
+        PWIDTH=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"$PRIMARY\") | .width")
+        hyprctl keyword monitor "$SECONDARY,preferred,$PWIDTH\x0,${secondaryScaleFactor}${secondaryTransformValue}"
         ''}
       fi
       '' else ""}
 
       # If we have tertiary monitor and it's detected
-      ${if tertiaryDisplayOutput != null then ''
-      if hyprctl monitors -j | jq -e '. | length > 2' > /dev/null; then
-        hyprctl keyword monitor "${tertiaryMonitorLine}"
+      ${if tertiaryDisplayOutput != null || tertiarySerial != null then ''
+      if [ -n "$TERTIARY" ] && hyprctl monitors -j | jq -e ".[] | select(.name==\"$TERTIARY\")" > /dev/null; then
+        hyprctl keyword monitor "$TERTIARY,preferred,${tertiaryPositionValue},${tertiaryScaleFactor}${tertiaryTransformValue}"
       fi
       '' else ""}
     fi
@@ -101,10 +159,8 @@ in {
         "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
         # Ensure cursor theme is set
         "hyprctl setcursor catppuccin-macchiato-sapphire-cursors 24"
-        # Set up monitors first
-        "${monitorSetupScript}"
-        # Start Hyprland components explicitly (no systemd)
-        "hyprpaper"
+        # Set up monitors first, then configure and start hyprpaper
+        "${monitorSetupScript} && hyprpaper-setup && hyprpaper"
         "waybar"
         "pypr"
         # Start automounter
@@ -539,6 +595,41 @@ in {
     hypridle
     hyprpaper
     catppuccin-cursors.macchiatoSapphire
+    # Dynamic hyprpaper setup script
+    (pkgs.writeShellScriptBin "hyprpaper-setup" ''
+      #!/usr/bin/env bash
+
+      # Detect monitors by serial number
+      eval $(${monitorDetectionScript})
+
+      # Determine wallpaper orientation based on rotation
+      ${if secondaryRotationSetting == "left" || secondaryRotationSetting == "right" then ''
+      SECONDARY_WALLPAPER="/etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg"
+      '' else ''
+      SECONDARY_WALLPAPER="/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg"
+      ''}
+
+      ${if tertiaryRotationSetting == "left" || tertiaryRotationSetting == "right" then ''
+      TERTIARY_WALLPAPER="/etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg"
+      '' else ''
+      TERTIARY_WALLPAPER="/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg"
+      ''}
+
+      # Generate hyprpaper.conf
+      cat > ~/.config/hypr/hyprpaper.conf <<EOF
+# Preload all wallpapers
+preload = /etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg
+preload = /etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg
+
+# Assign wallpapers to each monitor (auto-detected)
+wallpaper = $PRIMARY,/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg
+$([ -n "$SECONDARY" ] && echo "wallpaper = $SECONDARY,$SECONDARY_WALLPAPER")
+$([ -n "$TERTIARY" ] && echo "wallpaper = $TERTIARY,$TERTIARY_WALLPAPER")
+
+ipc = off
+splash = false
+EOF
+    '')
   ];
 
   # Configure Hyprlock
@@ -674,42 +765,6 @@ in {
   # We're using exec-once to start hyprpaper and pyprland directly
   # No need for systemd services
 
-  # Dynamic wallpaper configuration based on pre-resolved host display configuration
-  xdg.configFile."hypr/hyprpaper.conf" = {
-    text = let
-      primary = primaryDisplayOutput;
-      secondary = secondaryDisplayOutput;
-      tertiary = tertiaryDisplayOutput;
-
-      # Determine wallpaper orientation based on rotation
-      secondaryOrientation = if secondaryRotationSetting == "left"
-                             || secondaryRotationSetting == "right"
-                             then "vertical" else "horizontal";
-
-      tertiaryOrientation = if tertiaryRotationSetting == "left"
-                            || tertiaryRotationSetting == "right"
-                            then "vertical" else "horizontal";
-
-      # Select appropriate wallpapers based on orientation
-      primaryWallpaper = "/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg";
-      secondaryWallpaper = if secondaryOrientation == "vertical"
-                          then "/etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg"
-                          else "/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg";
-      tertiaryWallpaper = if tertiaryOrientation == "vertical"
-                          then "/etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg"
-                          else "/etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg";
-    in ''
-      # Preload all wallpapers
-      preload = /etc/nixos/assets/wallpaper/wallpaper_3840x2160.jpg
-      preload = /etc/nixos/assets/wallpaper/wallpaper_2160x3840.jpg
-
-      # Assign wallpapers to each monitor
-      wallpaper = ${primary},${primaryWallpaper}
-      ${if secondary != null then "wallpaper = ${secondary},${secondaryWallpaper}" else ""}
-      ${if tertiary != null then "wallpaper = ${tertiary},${tertiaryWallpaper}" else ""}
-
-      ipc = off
-      splash = false
-    '';
-  };
+  # Don't create a static config file - let hyprpaper-setup create it at runtime
+  # This allows the script to write wallpaper assignments for detected monitors
 }

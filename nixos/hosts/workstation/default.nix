@@ -25,9 +25,16 @@
 
     # Display setup for multi-monitor workstation with explicit positioning
     displays = {
-      primary = "HDMI-A-1"; # Main display
-      secondary = "DP-5"; # Secondary display (changed from DP-5 after reboot)
+      # Use serial numbers for automatic detection
+      primarySerial = "VNA6R2XB"; # Main display (Lenovo S28u-10)
+      secondarySerial = "VNA6R2XA"; # Secondary display (Lenovo S28u-10)
+      tertiarySerial = null;
+
+      # Fallback to port names if serial detection fails
+      primary = "HDMI-A-1";
+      secondary = "DP-5";
       tertiary = null;
+
       primaryScale = 1.6;
       secondaryScale = 1.6;
       tertiaryScale = 1.0;
