@@ -80,6 +80,6 @@
     iptables
   ] ++ (with pkgs-unstable; [
     # WinBoat - Windows app runner (from unstable)
-    winboat
+    # winboat
   ]);
 }
