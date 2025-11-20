@@ -4,23 +4,19 @@
 
 {
   # LUKS configuration for both root and data volumes
-  # Both volumes share the same passphrase, entered only once at boot
+  # Both devices will prompt for passphrase at boot
   boot.initrd.luks.devices = {
     # Root volume (existing encrypted volume)
     crypted = {
       device = "/dev/disk/by-uuid/2d772f4b-6f40-4b94-b1d0-93962172a863";
       preLVM = true;
-      # Generate a keyfile after unlocking this device
-      postOpenCommands = ''
-        mkdir -p /run/cryptsetup-keys.d
-        echo -n "$passphrase" > /run/cryptsetup-keys.d/data.key
-      '';
+      allowDiscards = true;
     };
 
-    # Data volume (/media/data) - unlocked using keyfile from root unlock
+    # Data volume (/media/data)
     cryptdata = {
       device = "/dev/disk/by-uuid/2bd91d3a-85b2-4d50-ac64-1bc6e667d131";
-      keyFile = "/run/cryptsetup-keys.d/data.key";
+      allowDiscards = true;
     };
   };
 

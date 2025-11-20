@@ -149,7 +149,7 @@
             cargo-bloat
             cargo-unused-features
             bacon
-            helix
+            neovim
             just
           ];
         };
