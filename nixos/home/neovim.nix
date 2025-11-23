@@ -63,6 +63,21 @@
       toggleterm-nvim
       trouble-nvim
       nvim-autopairs
+      conform-nvim
+
+      # Debugging (DAP)
+      nvim-dap
+      nvim-dap-ui
+      nvim-dap-virtual-text
+      nvim-dap-python
+      nvim-dap-go
+
+      # Testing
+      neotest
+      neotest-python
+      neotest-rust
+      neotest-go
+      neotest-jest
 
       # Languages/filetype support
       rust-tools-nvim
@@ -213,13 +228,10 @@
       map('n', '<leader>-', ':split<CR>', opts)
       
       -- Terminal
-      map('n', '<leader>t', ':ToggleTerm<CR>', opts)
       map('n', '<leader>cc', '<cmd>lua require("toggleterm.terminal").Terminal:new({cmd="claude", direction="vertical"}):toggle()<CR>', opts)  -- Open Claude Code CLI
       map('t', '<Esc>', '<C-\\><C-n>', opts)
 
       -- Buffer navigation
-      map('n', '<S-l>', ':bnext<CR>', opts)
-      map('n', '<S-h>', ':bprevious<CR>', opts)
       map('n', '<leader>c', ':Bdelete!<CR>', opts)
 
       -- Quick buffer switching with Alt+number
@@ -269,6 +281,10 @@
       map('n', '<leader>gu', ':Gitsigns undo_stage_hunk<CR>', opts)
       map('n', '<leader>gd', ':Gitsigns diffthis<CR>', opts)
 
+      -- Custom motion remaps
+      map({'n', 'v', 'o'}, 'B', '^', opts)  -- B to start of first char
+      map({'n', 'v', 'o'}, 'E', '$', opts)  -- E to end of line
+
       -- AI/Copilot keybindings
       map('n', '<leader>ai', ':CopilotChatToggle<CR>', opts)  -- Toggle Copilot Chat
       map('v', '<leader>ae', ':CopilotChatExplain<CR>', opts) -- Explain selected code
@@ -278,6 +294,25 @@
       map('v', '<leader>ad', ':CopilotChatDocs<CR>', opts)    -- Generate docs
       map('v', '<leader>at', ':CopilotChatTests<CR>', opts)   -- Generate tests
       map('n', '<leader>ac', ':CopilotChatCommit<CR>', opts)  -- Generate commit message
+
+      -- Debugging (DAP) keybindings
+      map('n', '<leader>db', '<cmd>lua require("dap").toggle_breakpoint()<CR>', opts)  -- Toggle breakpoint
+      map('n', '<leader>dc', '<cmd>lua require("dap").continue()<CR>', opts)  -- Continue/Start debugging
+      map('n', '<leader>di', '<cmd>lua require("dap").step_into()<CR>', opts)  -- Step into
+      map('n', '<leader>do', '<cmd>lua require("dap").step_over()<CR>', opts)  -- Step over
+      map('n', '<leader>dO', '<cmd>lua require("dap").step_out()<CR>', opts)  -- Step out
+      map('n', '<leader>dr', '<cmd>lua require("dap").repl.toggle()<CR>', opts)  -- Toggle REPL
+      map('n', '<leader>dl', '<cmd>lua require("dap").run_last()<CR>', opts)  -- Run last
+      map('n', '<leader>dt', '<cmd>lua require("dapui").toggle()<CR>', opts)  -- Toggle DAP UI
+      map('n', '<leader>dx', '<cmd>lua require("dap").terminate()<CR>', opts)  -- Terminate session
+
+      -- Testing (Neotest) keybindings
+      map('n', '<leader>tn', '<cmd>lua require("neotest").run.run()<CR>', opts)  -- Run nearest test
+      map('n', '<leader>tf', '<cmd>lua require("neotest").run.run(vim.fn.expand("%"))<CR>', opts)  -- Run file
+      map('n', '<leader>td', '<cmd>lua require("neotest").run.run({strategy = "dap"})<CR>', opts)  -- Debug nearest test
+      map('n', '<leader>ts', '<cmd>lua require("neotest").summary.toggle()<CR>', opts)  -- Toggle summary
+      map('n', '<leader>to', '<cmd>lua require("neotest").output.open({enter = true})<CR>', opts)  -- Open output
+      map('n', '<leader>tS', '<cmd>lua require("neotest").run.stop()<CR>', opts)  -- Stop test
     '';
     
     # Autocommands
@@ -385,6 +420,15 @@
 
       -- Configure utilities
       require('config.plugins.utilities')
+
+      -- Configure formatting
+      require('config.plugins.conform')
+
+      -- Configure debugging
+      require('config.plugins.dap')
+
+      -- Configure testing
+      require('config.plugins.neotest')
     '';
     
     # AI/LLM Configuration
@@ -574,6 +618,7 @@
       require('mason').setup({})
       require('mason-lspconfig').setup({
         ensure_installed = {
+          -- Existing
           'lua_ls',
           'rust_analyzer',
           'pyright',
@@ -582,6 +627,22 @@
           'jsonls',
           'bashls',
           'marksman',
+          -- C/C++
+          'clangd',
+          -- JavaScript/TypeScript
+          'ts_ls',
+          -- Zig
+          'zls',
+          -- Solidity
+          'solidity',
+          -- YAML
+          'yamlls',
+          -- Go
+          'gopls',
+          -- Ruby
+          'ruby_lsp',
+          -- XML
+          'lemminx',
         },
         handlers = {
           lsp_zero.default_setup,
@@ -958,6 +1019,160 @@
           internal = true,
         },
       }
+    '';
+
+    # Conform Configuration (Formatting)
+    "nvim/lua/config/plugins/conform.lua".text = ''
+      require('conform').setup({
+        formatters_by_ft = {
+          lua = { 'stylua' },
+          python = { 'black', 'isort' },
+          rust = { 'rustfmt' },
+          javascript = { 'prettier' },
+          typescript = { 'prettier' },
+          javascriptreact = { 'prettier' },
+          typescriptreact = { 'prettier' },
+          json = { 'prettier' },
+          yaml = { 'prettier' },
+          markdown = { 'prettier' },
+          html = { 'prettier' },
+          css = { 'prettier' },
+          go = { 'gofmt', 'goimports' },
+          c = { 'clang-format' },
+          cpp = { 'clang-format' },
+          zig = { 'zigfmt' },
+          solidity = { 'forge-fmt' },
+          haskell = { 'ormolu' },
+          ruby = { 'rubocop' },
+          xml = { 'xmlformat' },
+        },
+        format_on_save = {
+          timeout_ms = 500,
+          lsp_fallback = true,
+        },
+      })
+    '';
+
+    # DAP Configuration (Debugging)
+    "nvim/lua/config/plugins/dap.lua".text = ''
+      local dap = require('dap')
+      local dapui = require('dapui')
+
+      -- Setup DAP UI
+      dapui.setup({
+        icons = { expanded = "▾", collapsed = "▸", current_frame = "▸" },
+        mappings = {
+          expand = { "<CR>", "<2-LeftMouse>" },
+          open = "o",
+          remove = "d",
+          edit = "e",
+          repl = "r",
+          toggle = "t",
+        },
+        layouts = {
+          {
+            elements = {
+              { id = "scopes", size = 0.25 },
+              "breakpoints",
+              "stacks",
+              "watches",
+            },
+            size = 40,
+            position = "left",
+          },
+          {
+            elements = {
+              "repl",
+              "console",
+            },
+            size = 0.25,
+            position = "bottom",
+          },
+        },
+      })
+
+      -- Setup virtual text
+      require('nvim-dap-virtual-text').setup()
+
+      -- Auto open/close DAP UI
+      dap.listeners.after.event_initialized["dapui_config"] = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated["dapui_config"] = function()
+        dapui.close()
+      end
+      dap.listeners.before.event_exited["dapui_config"] = function()
+        dapui.close()
+      end
+
+      -- Python configuration
+      require('dap-python').setup('python')
+
+      -- Go configuration
+      require('dap-go').setup()
+
+      -- C/C++ configuration (via lldb)
+      dap.adapters.lldb = {
+        type = 'executable',
+        command = 'lldb-vscode',
+        name = 'lldb'
+      }
+      dap.configurations.cpp = {
+        {
+          name = 'Launch',
+          type = 'lldb',
+          request = 'launch',
+          program = function()
+            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+          end,
+          cwd = "''${workspaceFolder}",
+          stopOnEntry = false,
+          args = {},
+        },
+      }
+      dap.configurations.c = dap.configurations.cpp
+      dap.configurations.rust = dap.configurations.cpp
+    '';
+
+    # Neotest Configuration (Testing)
+    "nvim/lua/config/plugins/neotest.lua".text = ''
+      require('neotest').setup({
+        adapters = {
+          require('neotest-python')({
+            dap = { justMyCode = false },
+            runner = 'pytest',
+            python = 'python',
+            pytest_discover_instances = true,
+          }),
+          require('neotest-rust')({
+            args = { '--no-capture' },
+          }),
+          require('neotest-go'),
+          require('neotest-jest')({
+            jestCommand = 'npm test --',
+            env = { CI = true },
+            cwd = function()
+              return vim.fn.getcwd()
+            end,
+          }),
+        },
+        quickfix = {
+          enabled = true,
+          open = false,
+        },
+        status = {
+          enabled = true,
+          virtual_text = true,
+          signs = true,
+        },
+        icons = {
+          passed = "✓",
+          running = "⟳",
+          failed = "✗",
+          skipped = "⊘",
+          unknown = "?",
+        },
+      })
     '';
   };
 }

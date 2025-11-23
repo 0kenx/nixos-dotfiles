@@ -13,6 +13,8 @@ Arrow-based navigation system optimized for split keyboard layouts. Consistent m
   - [LSP (Language Server)](#lsp-language-server)
   - [Git Operations](#git-operations)
   - [AI / Copilot](#ai--copilot)
+  - [Debugging (DAP)](#debugging-dap)
+  - [Testing (Neotest)](#testing-neotest)
 - [Hyprland (OS Window Manager)](#hyprland-os-window-manager)
 - [Navigation Pattern Consistency](#navigation-pattern-consistency)
 
@@ -40,6 +42,10 @@ Arrow-based navigation system optimized for split keyboard layouts. Consistent m
 - `Alt+j` - Move current line down
 - `Alt+k` - Move current line up
 - Works with visual selections to move multiple lines
+
+**Custom Motions**
+- `B` - Jump to start of first non-blank character (equivalent to `^`)
+- `E` - Jump to end of line (equivalent to `$`)
 
 ### Window Management
 
@@ -74,10 +80,6 @@ Arrow-based navigation system optimized for split keyboard layouts. Consistent m
 - `Alt+3` - Jump to buffer 3
 - `Alt+4` through `Alt+9` - Jump to buffers 4-9
 
-**Sequential Navigation**
-- `Shift+l` - Next buffer
-- `Shift+h` - Previous buffer
-
 **Buffer Management**
 - `<leader>c` - Close/delete current buffer
 
@@ -88,9 +90,8 @@ Arrow-based navigation system optimized for split keyboard layouts. Consistent m
 
 ### Terminal
 
-- `<leader>t` - Toggle terminal
+- `Ctrl+\` - Toggle terminal
 - `<leader>cc` - Open Claude Code CLI in vertical terminal
-- `Ctrl+\` - Toggle terminal (alternative)
 - `Esc` (in terminal) - Exit terminal insert mode
 
 ### Telescope (Fuzzy Finder)
@@ -171,6 +172,41 @@ Arrow-based navigation system optimized for split keyboard layouts. Consistent m
 - `gd` - Show diff
 - `gp` - Show system prompt
 - `gs` - Show user selection
+
+### Debugging (DAP)
+
+**Breakpoints & Control**
+- `<leader>db` - Toggle breakpoint
+- `<leader>dc` - Continue/Start debugging
+- `<leader>di` - Step into
+- `<leader>do` - Step over
+- `<leader>dO` - Step out (capital O)
+- `<leader>dx` - Terminate debug session
+
+**Debug UI**
+- `<leader>dt` - Toggle DAP UI
+- `<leader>dr` - Toggle REPL
+- `<leader>dl` - Run last debug configuration
+
+**Inside DAP UI**
+- `Enter` / `Double-click` - Expand
+- `o` - Open
+- `d` - Remove
+- `e` - Edit
+- `r` - REPL
+- `t` - Toggle
+
+### Testing (Neotest)
+
+**Run Tests**
+- `<leader>tn` - Run nearest test
+- `<leader>tf` - Run all tests in file
+- `<leader>td` - Debug nearest test (with DAP)
+- `<leader>tS` - Stop running test
+
+**Test UI**
+- `<leader>ts` - Toggle test summary
+- `<leader>to` - Open test output
 
 ### Other Keybindings
 
@@ -282,7 +318,7 @@ Resize panes   │ Alt+Ctrl       │ ← → width         │ ↑ ↓ height
 ```
 Application    │ Quick Jump         │ Sequential
 ───────────────┼────────────────────┼────────────────
-Neovim buffers │ Alt+1-9            │ Shift+h/l
+Neovim buffers │ Alt+1-9            │ (use Alt+1-9)
 Hyprland       │ Super+1-0          │ Super+Tab
 Kitty tabs     │ Alt+1-9            │ Alt+h/l
 ```

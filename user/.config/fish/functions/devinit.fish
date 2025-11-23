@@ -86,7 +86,7 @@ function devinit --description 'Initialize development environment from template
 
     switch $language
         case rust
-            echo "  1. forge init               # Initialize Rust project"
+            echo "  1. cargo init               # Initialize Rust project"
             echo "  2. just build               # Build project"
             echo "  3. just test                # Run tests"
             echo "  4. just help                # See all commands"

@@ -55,6 +55,12 @@
     "video4linux"
     "acpi_rev_override=5"
 
+    # Intel WiFi BE200 - Firmware stability workaround
+    # The BE200 WiFi 7 card has known firmware crashes causing CPU soft lockups
+    # Disabling WiFi 7 (802.11be) and power saving improves stability significantly
+    "iwlwifi.disable_11be=1"        # Disable WiFi 7, fall back to WiFi 6E
+    "iwlwifi.power_save=0"          # Disable power management
+
     # SELinux settings
     "selinux=1"                     # Enable SELinux
     "enforcing=1"                   # Set SELinux to enforcing mode

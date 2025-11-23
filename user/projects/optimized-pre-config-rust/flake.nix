@@ -38,7 +38,11 @@
         rustCustomToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
 
         craneLib = (crane.mkLib pkgs).overrideToolchain rustCustomToolchain;
-        src = craneLib.cleanCargoSource (craneLib.path ./.);
+
+        # Check if Cargo.lock exists to determine if we can build
+        cargoLockExists = builtins.pathExists ./Cargo.lock;
+
+        src = if cargoLockExists then craneLib.cleanCargoSource (craneLib.path ./.) else ./.;
 
         # Common arguments can be set here to avoid repeating them later
         commonArgs = {
@@ -64,16 +68,17 @@
 
         # Build *just* the cargo dependencies, so we can reuse
         # all of that work (e.g. via cachix) when running in CI
-        cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+        # Only build if Cargo.lock exists
+        cargoArtifacts = if cargoLockExists then craneLib.buildDepsOnly commonArgs else null;
 
         # Build the actual crate itself, reusing the dependency
-        # artifacts from above.
-        my-crate = craneLib.buildPackage (commonArgs // {
+        # artifacts from above. Only build if Cargo.lock exists
+        my-crate = if cargoLockExists then craneLib.buildPackage (commonArgs // {
           inherit cargoArtifacts;
-        });
+        }) else null;
       in
       {
-        checks = {
+        checks = lib.optionalAttrs cargoLockExists {
           # Build the crate as part of `nix flake check` for convenience
           inherit my-crate;
 
@@ -117,12 +122,14 @@
           });
         };
 
-        packages = {
+        packages = lib.optionalAttrs cargoLockExists {
           default = my-crate;
         };
 
-        apps.default = flake-utils.lib.mkApp {
-          drv = my-crate;
+        apps = lib.optionalAttrs cargoLockExists {
+          default = flake-utils.lib.mkApp {
+            drv = my-crate;
+          };
         };
 
         devShells.default = craneLib.devShell {

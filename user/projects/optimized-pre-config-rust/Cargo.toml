@@ -4,6 +4,14 @@
 # Work only with the nightly version of Rust by the time it was written; it is recommended NOT to use it in production for now
 cargo-features = [ "codegen-backend", "profile-rustflags" ]
 # Important: It provides less useful error messages during compilation
+
+[package]
+name = "my-crate"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
 [profile.dev]
 opt-level = 1
 codegen-backend = "cranelift"

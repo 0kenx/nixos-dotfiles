@@ -1,16 +1,52 @@
-{pkgs, hostDisplayConfig, ...}: {
+{pkgs, lib, hostDisplayConfig, ...}:
+let
+  # Create a dynamic Waybar wrapper that generates config at runtime
+  waybarWrapper = pkgs.writeShellScriptBin "waybar" ''
+    #!/usr/bin/env bash
+
+    # Read cached monitor detection
+    CACHE_FILE="$HOME/.cache/hypr/monitor-detection"
+    if [ -f "$CACHE_FILE" ]; then
+      source "$CACHE_FILE"
+    else
+      # Fallback to configured values
+      PRIMARY="${hostDisplayConfig.primary}"
+      SECONDARY="${if hostDisplayConfig.secondary != null then hostDisplayConfig.secondary else ""}"
+      TERTIARY="${if hostDisplayConfig.tertiary != null then hostDisplayConfig.tertiary else ""}"
+    fi
+
+    # Generate Waybar config with detected monitors
+    WAYBAR_CONFIG_DIR="$HOME/.config/waybar"
+    WAYBAR_CONFIG_TEMPLATE="$WAYBAR_CONFIG_DIR/config"
+    WAYBAR_CONFIG_OUTPUT="$WAYBAR_CONFIG_DIR/config-runtime"
+
+    # Process the template (resolves symlink and processes)
+    if [ -e "$WAYBAR_CONFIG_TEMPLATE" ]; then
+      sed -e "s|@PRIMARY@|$PRIMARY|g" \
+          -e "s|@SECONDARY@|$SECONDARY|g" \
+          -e "s|@TERTIARY@|$TERTIARY|g" \
+          "$WAYBAR_CONFIG_TEMPLATE" > "$WAYBAR_CONFIG_OUTPUT"
+
+      # Launch Waybar with the processed config
+      exec ${pkgs.waybar}/bin/waybar -c "$WAYBAR_CONFIG_OUTPUT" "$@"
+    else
+      # No template, launch normally
+      exec ${pkgs.waybar}/bin/waybar "$@"
+    fi
+  '';
+in {
   programs.waybar = {
     enable = true;
 
-    # Use the system-installed Waybar
-    package = pkgs.waybar;
+    # Use our wrapper instead of the direct package
+    package = waybarWrapper;
 
     # Configuration
     settings = [
       # Secondary Monitor Top Bar (simple layout with workspaces and taskbar)
       {
         name = "secondary_top_bar";
-        output = "${hostDisplayConfig.secondary}";
+        output = "@SECONDARY@"; # Will be replaced at runtime with detected monitor
         layer = "top";
         position = "top";
         height = 39;
@@ -66,7 +102,7 @@
       # Top Bar Config for Primary Monitor
       {
         name = "top_bar";
-        output = "${hostDisplayConfig.primary}";
+        output = "@PRIMARY@"; # Will be replaced at runtime with detected monitor
         layer = "top";
         position = "top";
         height = 39;
@@ -303,7 +339,7 @@
       # Bottom Bar Config for Primary Monitor
       {
         name = "bottom_bar";
-        output = "${hostDisplayConfig.primary}";
+        output = "@PRIMARY@"; # Will be replaced at runtime with detected monitor
         layer = "top";
         position = "bottom";
         height = 36;
@@ -344,7 +380,7 @@
       # Left Bar Config for Primary Monitor
       {
         name = "left_bar";
-        output = "${hostDisplayConfig.primary}";
+        output = "@PRIMARY@"; # Will be replaced at runtime with detected monitor
         layer = "top";
         position = "left";
         spacing = 4;

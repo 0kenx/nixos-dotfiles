@@ -36,8 +36,13 @@ let
   tertiaryPositionValue = hostDisplayConfig.tertiaryPosition or "auto-right";
 
   # Monitor detection script that uses serial numbers if available
+  # This script writes detected monitor names to a cache file and exports them as env vars
   monitorDetectionScript = pkgs.writeShellScript "hyprland-detect-monitors" ''
     #!/usr/bin/env bash
+
+    # Cache file for monitor detection
+    CACHE_FILE="$HOME/.cache/hypr/monitor-detection"
+    mkdir -p "$(dirname "$CACHE_FILE")"
 
     # Function to get monitor name by serial number
     get_monitor_by_serial() {
@@ -77,7 +82,14 @@ let
     TERTIARY=""
     ''}
 
-    # Output the detected monitor names
+    # Write to cache file
+    cat > "$CACHE_FILE" <<EOF
+PRIMARY=$PRIMARY
+SECONDARY=$SECONDARY
+TERTIARY=$TERTIARY
+EOF
+
+    # Also export for current shell
     echo "PRIMARY=$PRIMARY"
     echo "SECONDARY=$SECONDARY"
     echo "TERTIARY=$TERTIARY"
@@ -110,7 +122,7 @@ let
   monitorSetupScript = pkgs.writeShellScript "hyprland-monitor-setup" ''
     #!/usr/bin/env bash
 
-    # Detect monitors by serial number
+    # Detect monitors by serial number and cache results
     eval $(${monitorDetectionScript})
 
     # Configure monitors if detected
@@ -140,6 +152,11 @@ let
         hyprctl keyword monitor "$TERTIARY,preferred,${tertiaryPositionValue},${tertiaryScaleFactor}${tertiaryTransformValue}"
       fi
       '' else ""}
+    fi
+
+    # Reload Waybar to apply new monitor configuration
+    if pgrep -x waybar > /dev/null; then
+      pkill -USR2 waybar || (pkill waybar && sleep 0.5 && waybar &)
     fi
   '';
 in {
@@ -595,6 +612,11 @@ in {
     hypridle
     hyprpaper
     catppuccin-cursors.macchiatoSapphire
+    # Monitor setup script (can be called manually after nixos-rebuild)
+    (pkgs.writeShellScriptBin "hypr-monitor-setup" ''
+      #!/usr/bin/env bash
+      ${monitorSetupScript}
+    '')
     # Dynamic hyprpaper setup script
     (pkgs.writeShellScriptBin "hyprpaper-setup" ''
       #!/usr/bin/env bash
