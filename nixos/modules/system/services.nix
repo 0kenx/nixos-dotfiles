@@ -20,7 +20,28 @@
   };
   services.mpd.enable = true;
   services.fwupd.enable = true;
-  services.auto-cpufreq.enable = true;
+
+  # Auto-cpufreq configuration with error suppression
+  services.auto-cpufreq = {
+    enable = true;
+    settings = {
+      # Battery mode settings
+      battery = {
+        governor = "powersave";
+        scaling_min_freq = 800000;
+        scaling_max_freq = 3000000;
+        turbo = "never";
+      };
+
+      # Charger mode settings
+      charger = {
+        governor = "performance";
+        scaling_min_freq = 800000;
+        scaling_max_freq = 5700000;
+        turbo = "auto";
+      };
+    };
+  };
   # services.gnome.core-shell.enable = true;
   # services.udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
 

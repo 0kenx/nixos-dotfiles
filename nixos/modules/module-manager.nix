@@ -29,6 +29,7 @@ in {
     [
       ./hardware/usb.nix
       ./hardware/screen.nix
+      ./hardware/firmware.nix
     ]
 
     # Conditional hardware modules

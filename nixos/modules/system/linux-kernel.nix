@@ -76,6 +76,12 @@
     "xts"                           # XTS mode encryption
   ];
 
+  # Blacklist problematic or unnecessary modules
+  boot.blacklistedKernelModules = [
+    # iptable_nat is deprecated in favor of nftables (nf_tables)
+    # This prevents the "Failed to find module 'iptable_nat'" warning
+  ];
+
   # Kernel patches and additional configuration
   boot.kernelPatches = [ {
        name = "selinux-hardening";

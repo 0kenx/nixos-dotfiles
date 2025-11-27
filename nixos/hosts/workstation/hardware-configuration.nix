@@ -20,6 +20,11 @@
     };
   };
 
+  # Ensure /media/data directory exists before mounting
+  systemd.tmpfiles.rules = [
+    "d /media/data 0755 root root -"
+  ];
+
   # Mount the decrypted data volume
   # Use mkForce to override the definition in /etc/nixos/hardware-configuration.nix
   fileSystems."/media/data" = lib.mkForce {
