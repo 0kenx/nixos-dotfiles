@@ -64,6 +64,7 @@
       trouble-nvim
       nvim-autopairs
       conform-nvim
+      direnv-vim
 
       # Debugging (DAP)
       nvim-dap
@@ -618,31 +619,15 @@
       require('mason').setup({})
       require('mason-lspconfig').setup({
         ensure_installed = {
-          -- Existing
-          'lua_ls',
-          'rust_analyzer',
-          'pyright',
-          'html',
-          'cssls',
+          -- Only language-agnostic LSPs here
+          -- All language-specific LSPs are managed per-project via direnv
+          'lua_ls',  -- Keep for Neovim config editing
           'jsonls',
+          'yamlls',
           'bashls',
           'marksman',
-          -- C/C++
-          'clangd',
-          -- JavaScript/TypeScript
-          'ts_ls',
-          -- Zig
-          'zls',
-          -- Solidity
-          'solidity',
-          -- YAML
-          'yamlls',
-          -- Go
-          'gopls',
-          -- Ruby
-          'ruby_lsp',
-          -- XML
-          'lemminx',
+          -- Project-specific LSPs managed via direnv:
+          -- rust_analyzer, pyright, clangd, ts_ls, zls, solidity, gopls, ruby_lsp, lemminx, etc.
         },
         handlers = {
           lsp_zero.default_setup,

@@ -70,7 +70,7 @@
   boot.kernelModules = [
     # Crypto modules - needed for disk encryption
     "dm-crypt"                      # Required for Veracrypt
-    "aes_x86_64"                    # AES encryption
+    # Note: aesni_intel is loaded automatically by the kernel
     "sha256"                        # SHA256 for hashing
     "sha512"                        # SHA512 for hashing
     "xts"                           # XTS mode encryption

@@ -49,23 +49,9 @@
     imv
   ];
 
-  # Memory and resource limits for Hyprland
-  # Prevents OOM situations by limiting memory usage per user session
-  systemd.user.services."wayland-wm@" = {
-    serviceConfig = {
-      # Limit memory to 16GB (prevents the 19.7GB+ memory leak issue)
-      MemoryMax = "16G";
-      MemoryHigh = "14G";  # Start applying pressure at 14GB
-
-      # Limit swap usage
-      MemorySwapMax = "4G";
-
-      # CPU and task limits to prevent runaway processes
-      CPUQuota = "800%";  # Max 8 cores worth on a 20-core system
-      TasksMax = "8192";
-
-      # IO limits to prevent disk thrashing
-      IOWeight = "100";
-    };
-  };
+  # Note: Resource limits for Hyprland cannot be set this way with UWSM.
+  # UWSM manages the wayland-wm@Hyprland.service dynamically.
+  # If you need resource limits, configure them via:
+  # 1. systemd user session limits (/etc/systemd/user.conf)
+  # 2. Or create a systemd drop-in file at runtime
 }

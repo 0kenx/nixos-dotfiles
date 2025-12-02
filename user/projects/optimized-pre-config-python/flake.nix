@@ -48,6 +48,11 @@
             python312Packages.black
             python312Packages.isort
 
+            # Language Server
+            python312Packages.python-lsp-server
+            python312Packages.pylsp-mypy
+            python312Packages.python-lsp-ruff
+
             # Type stubs
             python312Packages.types-requests
             python312Packages.types-setuptools

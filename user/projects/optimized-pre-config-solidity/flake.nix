@@ -30,6 +30,10 @@
             # Solidity compiler
             solc
 
+            # Language Server
+            nodePackages.vscode-langservers-extracted  # HTML/CSS/JSON/ESLint LSP
+            nodejs  # Required for Solidity LSP
+
             # Development tools
             lcov  # Code coverage
             jq    # JSON processing
@@ -42,6 +46,15 @@
           ];
 
           shellHook = ''
+            # Install Solidity LSP if not present
+            if [ ! -d "node_modules/@nomicfoundation/solidity-language-server" ]; then
+              echo "Installing Solidity Language Server..."
+              npm install --save-dev @nomicfoundation/solidity-language-server
+            fi
+
+            # Add node_modules/.bin to PATH for LSP
+            export PATH="$PWD/node_modules/.bin:$PATH"
+
             echo "🔨 Foundry Solidity Development Environment"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "Foundry: $(forge --version | head -n1)"

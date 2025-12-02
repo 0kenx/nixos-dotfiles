@@ -141,6 +141,10 @@
 
           # Extra inputs can be added here; cargo and rustc are provided by default.
           packages = with pkgs; [
+            # Language Server
+            rust-analyzer
+
+            # Cargo tools
             cargo-watch
             cargo-deny
             cargo-audit
