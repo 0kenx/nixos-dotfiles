@@ -41,8 +41,9 @@
       tertiaryScale = 1.0;
       secondaryRotate = "left"; # Vertical orientation
       tertiaryRotate = null;
-      # Explicit secondary monitor position (bottom aligned with primary)
-      secondaryPosition = "0x-1080"; # Place vertical monitor with bottom aligned
+      # Explicit secondary monitor position (to the left, bottom aligned with primary)
+      # Secondary rotated (1350w x 2400h logical), so x=-1350, y=-1050 for bottom alignment
+      secondaryPosition = "-1350x-1050";
       tertiaryPosition = null;
     };
 

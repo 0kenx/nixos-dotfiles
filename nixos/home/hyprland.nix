@@ -95,7 +95,7 @@ EOF
     echo "TERTIARY=$TERTIARY"
   '';
 
-  primaryMonitorLine = "${primaryDisplayOutput},preferred,auto,${primaryScaleFactor}";
+  primaryMonitorLine = "${primaryDisplayOutput},preferred,0x0,${primaryScaleFactor}";
   secondaryMonitorLine = if secondaryDisplayOutput != null
     then "${secondaryDisplayOutput},preferred,${secondaryPositionValue},${secondaryScaleFactor}${secondaryTransformValue}"
     else "";
@@ -122,41 +122,80 @@ EOF
   monitorSetupScript = pkgs.writeShellScript "hyprland-monitor-setup" ''
     #!/usr/bin/env bash
 
+    # Retry logic for monitor detection - wait for monitors to be ready
+    MAX_RETRIES=15
+    RETRY_DELAY=0.3
+
+    wait_for_monitors() {
+      for i in $(seq 1 $MAX_RETRIES); do
+        if hyprctl monitors -j 2>/dev/null | jq -e '. | length > 0' > /dev/null 2>&1; then
+          return 0
+        fi
+        sleep $RETRY_DELAY
+      done
+      return 1
+    }
+
+    # Wait for Hyprland IPC to be ready
+    wait_for_monitors || { echo "Monitors not ready after retries"; exit 1; }
+
+    # Additional delay to ensure monitors are fully initialized
+    sleep 1
+
     # Detect monitors by serial number and cache results
     eval $(${monitorDetectionScript})
 
     # Configure monitors if detected
     if hyprctl monitors -j | jq -e '. | length > 0' > /dev/null; then
-      # Primary monitor is always set up first
+
+      # Step 1: Disable all monitors first to reset state
+      ALL_MONITORS=$(hyprctl monitors -j | jq -r '.[].name')
+      for mon in $ALL_MONITORS; do
+        hyprctl keyword monitor "$mon,disable"
+      done
+      sleep 0.5
+
+      # Step 2: Re-enable primary monitor first
       if [ -n "$PRIMARY" ]; then
-        hyprctl keyword monitor "$PRIMARY,preferred,auto,${primaryScaleFactor}"
+        hyprctl keyword monitor "$PRIMARY,preferred,0x0,${primaryScaleFactor}"
+        sleep 0.5
       fi
 
-      # If we have secondary monitor and it's detected
+      # Step 3: Configure secondary monitor
       ${if secondaryDisplayOutput != null || secondarySerial != null then ''
-      if [ -n "$SECONDARY" ] && hyprctl monitors -j | jq -e ".[] | select(.name==\"$SECONDARY\")" > /dev/null; then
+      if [ -n "$SECONDARY" ]; then
         ${if secondaryPositionValue != "auto-right" then ''
         # Use predefined position
         hyprctl keyword monitor "$SECONDARY,preferred,${secondaryPositionValue},${secondaryScaleFactor}${secondaryTransformValue}"
         '' else ''
-        # Calculate position based on primary monitor
+        # Calculate position based on primary monitor's SCALED width
+        # Hyprland uses logical (scaled) coordinates for positioning
         PWIDTH=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"$PRIMARY\") | .width")
-        hyprctl keyword monitor "$SECONDARY,preferred,$PWIDTH\x0,${secondaryScaleFactor}${secondaryTransformValue}"
+        PSCALE=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"$PRIMARY\") | .scale")
+        LOGICAL_WIDTH=$(echo "$PWIDTH / $PSCALE" | bc)
+        hyprctl keyword monitor "$SECONDARY,preferred,''${LOGICAL_WIDTH}x0,${secondaryScaleFactor}${secondaryTransformValue}"
         ''}
+        sleep 0.5
       fi
       '' else ""}
 
-      # If we have tertiary monitor and it's detected
+      # Step 4: Configure tertiary monitor
       ${if tertiaryDisplayOutput != null || tertiarySerial != null then ''
-      if [ -n "$TERTIARY" ] && hyprctl monitors -j | jq -e ".[] | select(.name==\"$TERTIARY\")" > /dev/null; then
+      if [ -n "$TERTIARY" ]; then
         hyprctl keyword monitor "$TERTIARY,preferred,${tertiaryPositionValue},${tertiaryScaleFactor}${tertiaryTransformValue}"
+        sleep 0.5
       fi
       '' else ""}
     fi
 
+    # Allow everything to stabilize
+    sleep 1
+
     # Reload Waybar to apply new monitor configuration
     if pgrep -x waybar > /dev/null; then
-      pkill -USR2 waybar || (pkill waybar && sleep 0.5 && waybar &)
+      pkill waybar
+      sleep 0.3
+      waybar &
     fi
   '';
 in {
@@ -176,8 +215,8 @@ in {
         "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
         # Ensure cursor theme is set
         "hyprctl setcursor catppuccin-macchiato-sapphire-cursors 24"
-        # Set up monitors first, then configure and start hyprpaper
-        "${monitorSetupScript} && hyprpaper-setup && hyprpaper"
+        # Start hyprpaper with a small delay for monitors to initialize
+        "sleep 1 && hyprpaper-setup && hyprpaper"
         "waybar"
         "pypr"
         # Start automounter
@@ -190,7 +229,7 @@ in {
         "systemctl --user start psi-notify"
       ];
 
-      # Fallback static configuration in case the script fails
+      # Static monitor configuration from host settings
       monitor = monitors;
 
       # Workspace assignment based on host configuration
@@ -358,7 +397,7 @@ in {
 
       # Cursor settings
       cursor = {
-        default_monitor = lib.filter (m: m != null) [primaryDisplayOutput secondaryDisplayOutput];
+        default_monitor = primaryDisplayOutput;
       };
 
       # Window rules
@@ -612,6 +651,7 @@ in {
     hypridle
     hyprpaper
     catppuccin-cursors.macchiatoSapphire
+    bc  # needed for monitor position calculations
     # Monitor setup script (can be called manually after nixos-rebuild)
     (pkgs.writeShellScriptBin "hypr-monitor-setup" ''
       #!/usr/bin/env bash
