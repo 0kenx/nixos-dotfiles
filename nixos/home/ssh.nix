@@ -19,6 +19,7 @@
         hostname = "github.com";
         user = "git";
         identityFile = "~/.ssh/github_nxfi";
+        identitiesOnly = true;
         extraOptions = {
           "AddKeysToAgent" = "yes";
           "ControlMaster" = "no";
@@ -30,6 +31,7 @@
         hostname = "github.com";
         user = "git";
         identityFile = "~/.ssh/id_ed25519_personal";
+        identitiesOnly = true;
         extraOptions = {
           "AddKeysToAgent" = "yes";
           "ControlMaster" = "no";
@@ -41,6 +43,7 @@
         hostname = "github.com";
         user = "git";
         identityFile = "~/.ssh/id_ed25519_work";
+        identitiesOnly = true;
         extraOptions = {
           "AddKeysToAgent" = "yes";
           "ControlMaster" = "no";

@@ -41,9 +41,9 @@
 
   # Set cursor theme and editor environment variables globally
   home.sessionVariables = {
-    XCURSOR_THEME = "Catppuccin-Macchiato-Sapphire-Cursors";
+    XCURSOR_THEME = "catppuccin-macchiato-sapphire-cursors";
     XCURSOR_SIZE = "24";
-    HYPRCURSOR_THEME = "Catppuccin-Macchiato-Sapphire-Cursors";
+    HYPRCURSOR_THEME = "catppuccin-macchiato-sapphire-cursors";
     HYPRCURSOR_SIZE = "24";
     EDITOR = "nvim";
     VISUAL = "nvim";

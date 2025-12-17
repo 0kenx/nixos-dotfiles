@@ -96,10 +96,12 @@ EOF
   '';
 
   primaryMonitorLine = "${primaryDisplayOutput},preferred,0x0,${primaryScaleFactor}";
-  secondaryMonitorLine = if secondaryDisplayOutput != null
+  # Only include secondary/tertiary in static config if NOT using serial detection
+  # When serial detection is configured, the setup script handles these dynamically
+  secondaryMonitorLine = if secondaryDisplayOutput != null && secondarySerial == null
     then "${secondaryDisplayOutput},preferred,${secondaryPositionValue},${secondaryScaleFactor}${secondaryTransformValue}"
     else "";
-  tertiaryMonitorLine = if tertiaryDisplayOutput != null
+  tertiaryMonitorLine = if tertiaryDisplayOutput != null && tertiarySerial == null
     then "${tertiaryDisplayOutput},preferred,${tertiaryPositionValue},${tertiaryScaleFactor}${tertiaryTransformValue}"
     else "";
 
@@ -122,79 +124,72 @@ EOF
   monitorSetupScript = pkgs.writeShellScript "hyprland-monitor-setup" ''
     #!/usr/bin/env bash
 
-    # Retry logic for monitor detection - wait for monitors to be ready
-    MAX_RETRIES=15
-    RETRY_DELAY=0.3
-
-    wait_for_monitors() {
-      for i in $(seq 1 $MAX_RETRIES); do
-        if hyprctl monitors -j 2>/dev/null | jq -e '. | length > 0' > /dev/null 2>&1; then
-          return 0
-        fi
-        sleep $RETRY_DELAY
-      done
-      return 1
-    }
-
     # Wait for Hyprland IPC to be ready
-    wait_for_monitors || { echo "Monitors not ready after retries"; exit 1; }
+    for i in $(seq 1 30); do
+      if hyprctl monitors -j 2>/dev/null | jq -e '. | length > 0' > /dev/null 2>&1; then
+        break
+      fi
+      sleep 0.2
+    done
 
-    # Additional delay to ensure monitors are fully initialized
-    sleep 1
+    sleep 0.5
 
     # Detect monitors by serial number and cache results
     eval $(${monitorDetectionScript})
 
-    # Configure monitors if detected
-    if hyprctl monitors -j | jq -e '. | length > 0' > /dev/null; then
+    # Function to apply monitor config with verification
+    apply_monitor_config() {
+      local name="$1"
+      local config="$2"
+      local expected_transform="$3"
 
-      # Step 1: Disable all monitors first to reset state
-      ALL_MONITORS=$(hyprctl monitors -j | jq -r '.[].name')
-      for mon in $ALL_MONITORS; do
-        hyprctl keyword monitor "$mon,disable"
+      for attempt in 1 2 3; do
+        hyprctl keyword monitor "$name,$config"
+        sleep 0.5
+
+        # Verify transform was applied (most critical setting)
+        current_transform=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"$name\") | .transform")
+
+        if [ "$current_transform" = "$expected_transform" ]; then
+          return 0
+        fi
+        sleep 0.5
       done
-      sleep 0.5
+      return 1
+    }
 
-      # Step 2: Re-enable primary monitor first
-      if [ -n "$PRIMARY" ]; then
-        hyprctl keyword monitor "$PRIMARY,preferred,0x0,${primaryScaleFactor}"
-        sleep 0.5
-      fi
-
-      # Step 3: Configure secondary monitor
-      ${if secondaryDisplayOutput != null || secondarySerial != null then ''
-      if [ -n "$SECONDARY" ]; then
-        ${if secondaryPositionValue != "auto-right" then ''
-        # Use predefined position
-        hyprctl keyword monitor "$SECONDARY,preferred,${secondaryPositionValue},${secondaryScaleFactor}${secondaryTransformValue}"
-        '' else ''
-        # Calculate position based on primary monitor's SCALED width
-        # Hyprland uses logical (scaled) coordinates for positioning
-        PWIDTH=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"$PRIMARY\") | .width")
-        PSCALE=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"$PRIMARY\") | .scale")
-        LOGICAL_WIDTH=$(echo "$PWIDTH / $PSCALE" | bc)
-        hyprctl keyword monitor "$SECONDARY,preferred,''${LOGICAL_WIDTH}x0,${secondaryScaleFactor}${secondaryTransformValue}"
-        ''}
-        sleep 0.5
-      fi
-      '' else ""}
-
-      # Step 4: Configure tertiary monitor
-      ${if tertiaryDisplayOutput != null || tertiarySerial != null then ''
-      if [ -n "$TERTIARY" ]; then
-        hyprctl keyword monitor "$TERTIARY,preferred,${tertiaryPositionValue},${tertiaryScaleFactor}${tertiaryTransformValue}"
-        sleep 0.5
-      fi
-      '' else ""}
+    # Configure primary monitor
+    if [ -n "$PRIMARY" ]; then
+      apply_monitor_config "$PRIMARY" "preferred,0x0,${primaryScaleFactor}" "0"
     fi
 
-    # Allow everything to stabilize
-    sleep 1
+    # Configure secondary monitor
+    ${if secondaryDisplayOutput != null || secondarySerial != null then ''
+    if [ -n "$SECONDARY" ]; then
+      ${if secondaryPositionValue != "auto-right" then ''
+      apply_monitor_config "$SECONDARY" "preferred,${secondaryPositionValue},${secondaryScaleFactor}${secondaryTransformValue}" "${getRotateValue secondaryRotationSetting}"
+      '' else ''
+      PWIDTH=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"$PRIMARY\") | .width")
+      PSCALE=$(hyprctl monitors -j | jq -r ".[] | select(.name==\"$PRIMARY\") | .scale")
+      LOGICAL_WIDTH=$(echo "$PWIDTH / $PSCALE" | bc)
+      apply_monitor_config "$SECONDARY" "preferred,''${LOGICAL_WIDTH}x0,${secondaryScaleFactor}${secondaryTransformValue}" "${getRotateValue secondaryRotationSetting}"
+      ''}
+    fi
+    '' else ""}
 
-    # Reload Waybar to apply new monitor configuration
+    # Configure tertiary monitor
+    ${if tertiaryDisplayOutput != null || tertiarySerial != null then ''
+    if [ -n "$TERTIARY" ]; then
+      apply_monitor_config "$TERTIARY" "preferred,${tertiaryPositionValue},${tertiaryScaleFactor}${tertiaryTransformValue}" "${getRotateValue tertiaryRotationSetting}"
+    fi
+    '' else ""}
+
+    sleep 0.5
+
+    # Reload Waybar
     if pgrep -x waybar > /dev/null; then
       pkill waybar
-      sleep 0.3
+      sleep 0.2
       waybar &
     fi
   '';
@@ -213,6 +208,8 @@ in {
       exec-once = [
         # Import environment variables for systemd
         "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
+        # Run monitor setup script to apply rotation and positioning
+        "sleep 0.5 && hypr-monitor-setup"
         # Ensure cursor theme is set
         "hyprctl setcursor catppuccin-macchiato-sapphire-cursors 24"
         # Start hyprpaper with a small delay for monitors to initialize
@@ -398,6 +395,10 @@ in {
       # Cursor settings
       cursor = {
         default_monitor = primaryDisplayOutput;
+        inactive_timeout = 0;  # Never hide cursor due to inactivity
+        no_hardware_cursors = false;  # Use hardware cursors (better on newer NVIDIA drivers)
+        hide_on_touch = false;  # Don't hide cursor on touch events
+        hide_on_key_press = false;  # Don't hide cursor on key press
       };
 
       # Window rules

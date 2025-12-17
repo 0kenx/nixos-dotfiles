@@ -9,8 +9,6 @@
     settings = {
       General = {
         ControllerMode = "dual";
-        # Prevent bluez from disconnecting devices when suspend
-        Enable = true;
         # Improve compatibility with some devices
         FastConnectable = true;
         # Better input device handling

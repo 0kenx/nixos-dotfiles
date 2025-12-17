@@ -23,17 +23,17 @@
 
   # Set cursor theme for greeter session
   environment.etc."greetd/env".text = ''
-    export XCURSOR_THEME=Catppuccin-Macchiato-Sapphire-Cursors
+    export XCURSOR_THEME=catppuccin-macchiato-sapphire-cursors
     export XCURSOR_SIZE=24
-    export HYPRCURSOR_THEME=Catppuccin-Macchiato-Sapphire-Cursors
+    export HYPRCURSOR_THEME=catppuccin-macchiato-sapphire-cursors
     export HYPRCURSOR_SIZE=24
   '';
 
   # Set environment variables for greetd
   systemd.services.greetd.environment = {
-    XCURSOR_THEME = "Catppuccin-Macchiato-Sapphire-Cursors";
+    XCURSOR_THEME = "catppuccin-macchiato-sapphire-cursors";
     XCURSOR_SIZE = "24";
-    HYPRCURSOR_THEME = "Catppuccin-Macchiato-Sapphire-Cursors";
+    HYPRCURSOR_THEME = "catppuccin-macchiato-sapphire-cursors";
     HYPRCURSOR_SIZE = "24";
   };
 

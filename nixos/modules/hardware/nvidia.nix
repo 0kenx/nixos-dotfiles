@@ -1,31 +1,30 @@
 { config, lib, pkgs, ... }:
 
 {
-  # Load nvidia driver for Xorg and Wayland
-  services.xserver.videoDrivers = ["nvidia"];
+  # Use Intel/modesetting for display output
+  # NVIDIA is available for compute only when GPU is present
+  services.xserver.videoDrivers = ["modesetting"];
 
   # Enable access to nvidia from containers (Docker, Podman)
+  # This handles GPU presence gracefully - works with or without GPU
   hardware.nvidia-container-toolkit.enable = true;
+  # Suppress assertion since we're using modesetting for display, not nvidia
+  hardware.nvidia-container-toolkit.mount-nvidia-executables = true;
+  hardware.nvidia-container-toolkit.suppressNvidiaDriverAssertion = true;
 
+  # Make NVIDIA driver packages available for compute
+  # These load on-demand when hardware is detected
   hardware.nvidia = {
 
-    # Modesetting is required.
+    # Modesetting for kernel module
     modesetting.enable = true;
 
-    # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
-    # Enable this if you have graphical corruption issues or application crashes after waking
-    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead
-    # of just the bare essentials.
-    powerManagement.enable = true;
+    # Don't enable nvidiaPersistenced - it fails without GPU present
+    # nvidiaPersistenced = true;
 
-    # Fine-grained power management. Turns off GPU when not in use.
-    # Experimental and only works on modern Nvidia GPUs (Turing or newer).
+    # Disable power management features that require GPU presence
+    powerManagement.enable = false;
     powerManagement.finegrained = false;
-
-    # Dynamic Boost. It is a technology found in NVIDIA Max-Q design laptops with RTX GPUs.
-    # It intelligently and automatically shifts power between
-    # the CPU and GPU in real-time based on the workload of your game or application.
-    # dynamicBoost.enable = lib.mkForce true;
     dynamicBoost.enable = false;
 
     # Use the NVidia open source kernel module (not to be confused with the
@@ -36,8 +35,7 @@
     # Only available from driver 515.43.04+
     open = true;
 
-    # Enable the Nvidia settings menu,
-  	# accessible via `nvidia-settings`.
+    # Enable the Nvidia settings menu (only useful when GPU present)
     nvidiaSettings = true;
 
     # Use the latest production driver (currently 570.195.03)

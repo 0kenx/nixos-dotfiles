@@ -19,7 +19,7 @@
     };
     
     cursorTheme = {
-      name = "Catppuccin-Macchiato-Sapphire-Cursors";
+      name = "catppuccin-macchiato-sapphire-cursors";
       package = pkgs.catppuccin-cursors.macchiatoSapphire;
       size = 24;
     };
@@ -104,7 +104,7 @@
       [Icon Theme]
       Name=Default
       Comment=Default cursor theme
-      Inherits=Catppuccin-Macchiato-Sapphire-Cursors
+      Inherits=catppuccin-macchiato-sapphire-cursors
     '';
   };
 }
