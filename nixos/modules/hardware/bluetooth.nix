@@ -1,6 +1,32 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
+  # Intel BE200 Bluetooth firmware fix
+  # The btintel driver fails to load zstd-compressed firmware at boot
+  # This service copies uncompressed firmware and reloads the module
+  systemd.services.intel-bt-firmware-reload = {
+    description = "Reload Intel Bluetooth firmware";
+    wantedBy = [ "bluetooth.target" ];
+    before = [ "bluetooth.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      # Create firmware directory if needed
+      mkdir -p /lib/firmware/intel
+
+      # Copy uncompressed firmware
+      cp ${pkgs.linux-firmware}/lib/firmware/intel/ibt-0291-0291.sfi /lib/firmware/intel/
+      cp ${pkgs.linux-firmware}/lib/firmware/intel/ibt-0291-0291.ddc /lib/firmware/intel/
+
+      # Reload bluetooth modules to pick up firmware
+      ${pkgs.kmod}/bin/modprobe -r btusb btintel 2>/dev/null || true
+      sleep 0.5
+      ${pkgs.kmod}/bin/modprobe btusb
+    '';
+  };
+
   # Enable Bluetooth
   hardware.bluetooth = {
     enable = true;
