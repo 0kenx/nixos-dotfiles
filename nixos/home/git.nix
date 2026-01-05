@@ -1,19 +1,20 @@
 {pkgs, username, host, config, lib, ...}: {
   programs.git = {
     enable = true;
-    
-    # Use shell expansion to read from the secret files
-    userName = "$(cat $GIT_DEFAULT_NAME 2>/dev/null || echo 'Default User')";
-    userEmail = "$(cat $GIT_DEFAULT_EMAIL 2>/dev/null || echo 'default@example.com')";
-    
+
     # Signing configuration (uses secret files)
     signing = {
       key = "$(cat $GIT_SIGNING_KEY 2>/dev/null || echo '0000000000000000')";
       signByDefault = true;
     };
-    
+
     # Core settings
-    extraConfig = {
+    settings = {
+      # User configuration
+      user = {
+        name = "$(cat $GIT_DEFAULT_NAME 2>/dev/null || echo 'Default User')";
+        email = "$(cat $GIT_DEFAULT_EMAIL 2>/dev/null || echo 'default@example.com')";
+      };
       # Interactive mode
       interactive = {
         diffFilter = "delta --color-only";
@@ -112,7 +113,7 @@
   # Delta is now handled by the delta.nix module
 
   # Configure git extra settings
-  programs.git.extraConfig = {
+  programs.git.settings = {
     # SSH credentials helper for submodules
     credential.helper = "cache --timeout=3600";
 

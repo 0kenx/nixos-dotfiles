@@ -18,7 +18,7 @@
 
     # Language runtimes
     go
-    (python312Full.withPackages(ps: with ps; [ pygobject3 gobject-introspection pyqt6-sip]))
+    (python312.withPackages(ps: with ps; [ pygobject3 gobject-introspection pyqt6-sip tkinter]))
     python312Packages.uv
     nodejs_22
     bun

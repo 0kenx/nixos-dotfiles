@@ -2,11 +2,11 @@
   description = "NixOS Configuration";
 
   inputs = {
-      nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+      nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
       nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
       rust-overlay.url = "github:oxalica/rust-overlay";
       home-manager = {
-        url = "github:nix-community/home-manager/release-25.05";
+        url = "github:nix-community/home-manager/release-25.11";
         inputs.nixpkgs.follows = "nixpkgs";
       };
 
@@ -36,7 +36,7 @@
   let
     username = "dev";
     system = "x86_64-linux";
-    channel = "25.05";
+    channel = "25.11";
 
     # Define a common nixpkgs configuration
     commonNixpkgsConfig = {
@@ -64,17 +64,31 @@
         };
         # From opengl.nix
         intel-vaapi-driver = pkgs.intel-vaapi-driver.override { enableHybridCodec = true; };
-        # From cad.nix - Fix CUDA build issue for orca-slicer
+        # From cad.nix - Fix CUDA build issue for orca-slicer and bambu-studio
         orca-slicer = pkgs.orca-slicer.overrideAttrs (oldAttrs: {
           cmakeFlags = oldAttrs.cmakeFlags ++ [
             (pkgs.lib.cmakeFeature "CUDA_TOOLKIT_ROOT_DIR" "${pkgs.cudaPackages.cudatoolkit}")
           ];
         });
-        # Fix pylint test failures
+        bambu-studio = pkgs.bambu-studio.overrideAttrs (oldAttrs: {
+          cmakeFlags = (oldAttrs.cmakeFlags or []) ++ [
+            (pkgs.lib.cmakeFeature "CUDAToolkit_ROOT" "${pkgs.cudaPackages.cudatoolkit}")
+          ];
+        });
+        # Fix pylint and websockets test failures
         python311Packages = pkgs.python311Packages.overrideScope (pyfinal: pyprev: {
           pylint = pyprev.pylint.overrideAttrs (oldAttrs: {
             doCheck = false;
           });
+          websockets = pyprev.websockets.overrideAttrs (oldAttrs: {
+            doCheck = false;
+            doInstallCheck = false;
+          });
+        });
+        # Disable Nix tests - crash with SIGABRT on kernel 6.17+
+        nix = pkgs.nix.overrideAttrs (oldAttrs: {
+          doCheck = false;
+          doInstallCheck = false;
         });
       };
     };

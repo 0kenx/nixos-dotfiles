@@ -9,8 +9,8 @@
       interval = "Sat *-*-* 04:00:00"; # Run every Saturday at 4 AM
     };
 
-    # Disable daemon - we only want weekly scheduled scanning
-    daemon.enable = false;
+    # Enable daemon - required for scanner to operate
+    daemon.enable = true;
 
     # Keep updater enabled to get fresh virus definitions
     updater = {

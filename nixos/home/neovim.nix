@@ -81,7 +81,7 @@
       neotest-jest
 
       # Languages/filetype support
-      rust-tools-nvim
+      rustaceanvim
       neodev-nvim
       crates-nvim
       markdown-preview-nvim
@@ -634,9 +634,7 @@
           lua_ls = function()
             require('lspconfig').lua_ls.setup(lsp_zero.nvim_lua_ls())
           end,
-          rust_analyzer = function()
-            require('rust-tools').setup({})
-          end,
+          rust_analyzer = lsp_zero.noop,
         }
       })
       
@@ -682,7 +680,7 @@
       -- Setup neodev for Lua development
       require('neodev').setup()
       
-      -- Set up rust-tools
+      -- Set up crates.nvim for Cargo.toml support
       require('crates').setup()
     '';
     

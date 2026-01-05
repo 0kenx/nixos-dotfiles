@@ -1,4 +1,4 @@
-{ pkgs, pkgs-unstable, config, inputs, system, ... }:
+{ pkgs, pkgs-unstable, config, inputs, ... }:
 
 {
   # AI-powered coding assistants and development tools
@@ -8,7 +8,7 @@
     pkgs-unstable.claude-code # Claude's official CLI for development
 
     # Claude Desktop temporarily disabled due to hash mismatch 0.12.29
-    # inputs.claude-desktop.packages.${system}.claude-desktop-with-fhs
+    # inputs.claude-desktop.packages.${pkgs.stdenv.hostPlatform.system}.claude-desktop-with-fhs
   ];
 
   # Future expansion possibilities:

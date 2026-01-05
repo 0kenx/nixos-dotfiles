@@ -23,8 +23,8 @@
   };
 
   # Use hardened or latest Linux kernel
-  # Using 6.17 - NVIDIA driver issues resolved
-  boot.kernelPackages = pkgs.linuxPackages_6_17;
+  # Using 6.18
+  boot.kernelPackages = pkgs.linuxPackages_6_18;
 
   # Kernel command line parameters
   boot.kernelParams = [

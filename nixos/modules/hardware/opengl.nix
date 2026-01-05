@@ -12,7 +12,7 @@
       intel-compute-runtime
       intel-media-driver    # LIBVA_DRIVER_NAME=iHD
       intel-vaapi-driver    # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
-      vaapiVdpau
+      libva-vdpau-driver
       libvdpau-va-gl
       mesa
       # nvidia-vaapi-driver
@@ -21,7 +21,7 @@
     extraPackages32 = with pkgs.pkgsi686Linux; [
       intel-media-driver
       intel-vaapi-driver
-      vaapiVdpau
+      libva-vdpau-driver
       mesa
       libvdpau-va-gl
     ];

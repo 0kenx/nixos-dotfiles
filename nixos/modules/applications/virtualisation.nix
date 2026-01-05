@@ -1,4 +1,4 @@
-{ pkgs, pkgs-unstable, inputs, system, ... }:
+{ pkgs, pkgs-unstable, inputs, ... }:
 
 {
   # Load kernel modules for container networking
@@ -43,16 +43,13 @@
   users.extraGroups.podman.members = [ "dev" ];
 
   # Enable libvirtd for QEMU/KVM virtualization
+  # Note: OVMF images are now available by default in NixOS 25.11+
   virtualisation.libvirtd = {
     enable = true;
     qemu = {
       package = pkgs.qemu_kvm;
       runAsRoot = true;
       swtpm.enable = true;
-      ovmf = {
-        enable = true;
-        packages = [ pkgs.OVMFFull.fd ];
-      };
     };
   };
   users.extraGroups.libvirtd.members = [ "dev" ];
@@ -76,7 +73,7 @@
     # lazydocker
     # docker-credential-helpers
 
-    freerdp3
+    freerdp
     iptables
   ] ++ (with pkgs-unstable; [
     # WinBoat - Windows app runner (from unstable)

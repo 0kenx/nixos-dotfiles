@@ -10,8 +10,8 @@
   programs.ssh = {
     enable = true;
 
-    # Enable SSH agent integration
-    forwardAgent = true;
+    # Disable default config values (deprecated in newer home-manager)
+    enableDefaultConfig = false;
 
     # Matches and extends your existing SSH config
     matchBlocks = {
@@ -51,6 +51,7 @@
       };
 
       "*" = {
+        forwardAgent = true;
         extraOptions = {
           # Comment out PKCS11Provider to prevent it from being used globally
           # "PKCS11Provider" = "${pkgs.opensc}/lib/opensc-pkcs11.so";

@@ -31,7 +31,7 @@
       packages = with pkgs; [
         youtube-music
         discord
-        tdesktop
+        telegram-desktop
         vscodium
         brave
         chromium
@@ -42,6 +42,6 @@
     nix.settings.allowed-users = [ "${username}" ];
 
     # Change runtime directory size
-    services.logind.extraConfig = "RuntimeDirectorySize=32G";
+    services.logind.settings.Login.RuntimeDirectorySize = "32G";
   };
 }

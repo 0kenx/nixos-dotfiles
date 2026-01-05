@@ -64,8 +64,8 @@
     rewrk
     wrk2
     tealdeer
-    aria
-    du-dust
+    aria2
+    dust
     trash-cli
     zoxide
     tokei

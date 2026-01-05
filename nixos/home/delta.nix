@@ -8,7 +8,7 @@
   ];
 
   # Configure delta through git config
-  programs.git.extraConfig = {
+  programs.git.settings = {
     # Set core pager to delta with higher priority to avoid conflicts
     core.pager = lib.mkForce "delta";
 

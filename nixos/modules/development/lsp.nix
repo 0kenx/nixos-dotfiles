@@ -8,11 +8,11 @@
     nodePackages_latest.typescript-language-server
     nodePackages_latest.vscode-langservers-extracted
     nodePackages_latest.yaml-language-server
-    nodePackages_latest.dockerfile-language-server-nodejs
+    dockerfile-language-server
     nodePackages_latest.bash-language-server
     nodePackages_latest.graphql-language-service-cli
     vue-language-server
-    sumneko-lua-language-server
+    lua-language-server
     marksman
     markdown-oxide
     nil
@@ -26,7 +26,6 @@
     vscode-extensions.vadimcn.vscode-lldb
     slint-lsp
     terraform-ls
-    ansible-language-server
     hyprls
     helix-gpt
   ];  
