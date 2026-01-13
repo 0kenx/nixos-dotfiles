@@ -1234,7 +1234,7 @@
       # Start keychain to manage SSH keys persistently without auto-adding keys
       if command -v keychain >/dev/null
         # Use keychain but don't automatically add keys
-        keychain --quiet --noask --agents ssh
+        keychain --quiet --noask
 
         # Load keychain environment variables
         if test -f ~/.keychain/(hostname)-fish

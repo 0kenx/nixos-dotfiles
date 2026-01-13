@@ -96,7 +96,7 @@
   # Use data drive for Nix builds (more space than root partition)
   nix.settings.build-dir = "/media/data/nix-build";
   systemd.tmpfiles.rules = [
-    "d /media/data/nix-build 1777 root root -"
+    "d /media/data/nix-build 0755 root root -"
   ];
 
   # Additional workstation-specific packages

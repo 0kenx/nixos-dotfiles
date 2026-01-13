@@ -27,8 +27,13 @@
     enable = true;
     extraPortals = with pkgs; [
       xdg-desktop-portal-hyprland
+      xdg-desktop-portal-gtk  # Needed for Print, FileChooser, etc.
     ];
-    config.common.default = "*";
+    config.common = {
+      default = [ "hyprland" "gtk" ];
+      "org.freedesktop.impl.portal.Print" = [ "gtk" ];
+      "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
+    };
   };
 
   # System-wide packages needed for Hyprland
