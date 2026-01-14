@@ -22,6 +22,9 @@
     lsm = lib.mkForce [ "landlock" "lockdown" "yama" "integrity" "apparmor" "bpf" "tomoyo" "selinux" ];
   };
 
+  # RAS Daemon - captures MCE (Machine Check Exception) events for hardware error monitoring
+  hardware.rasdaemon.enable = true;
+
   # Use hardened or latest Linux kernel
   # Using 6.18
   boot.kernelPackages = pkgs.linuxPackages_6_18;
@@ -47,13 +50,13 @@
     "pti=on"                        # Force Page Table Isolation
     "randomize_kstack_offset=on"    # Randomize kernel stack offset
     "vsyscall=none"                 # Disable vsyscall
-    "mce=0"                         # Limit Machine Check Exception attack surface
     # "kernel.modules_disabled=1"   # Disabled to allow dm-crypt loading
 
     # Hardware settings
     "usbcore.autosuspend=-1"
     "video4linux"
     "acpi_rev_override=5"
+    "acpi_osi=Linux"                # Improve ACPI compatibility, fixes DPTF symbol errors
 
     # Intel WiFi BE200 - Firmware stability workaround
     # The BE200 WiFi 7 card has known firmware crashes causing CPU soft lockups
@@ -74,6 +77,11 @@
     "sha256"                        # SHA256 for hashing
     "sha512"                        # SHA512 for hashing
     "xts"                           # XTS mode encryption
+
+    # Intel DPTF thermal modules - fixes DPTF.FCHG symbol errors
+    "int3400_thermal"               # Intel DPTF main thermal driver
+    "int3403_thermal"               # Intel DPTF sensor driver
+    "processor_thermal_device"      # Processor thermal interface
   ];
 
   # Blacklist problematic or unnecessary modules
