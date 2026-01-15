@@ -19,7 +19,8 @@
   environment.sessionVariables = {
     GTK_IM_MODULE = "fcitx";
     QT_IM_MODULE = "fcitx";
-    XMODIFIERS = "@im=fcitx";
+    # Note: XMODIFIERS is set via Hyprland's env directive to avoid pam_env parsing issues
+    # (pam_env interprets @im as a variable reference causing warnings)
     SDL_IM_MODULE = "fcitx";
     GLFW_IM_MODULE = "ibus";
   };

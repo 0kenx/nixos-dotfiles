@@ -1,10 +1,11 @@
-{ pkgs, ... }:
+{ pkgs, lib, config, ... }:
 
+let
+  isBattery = config.system.nixos-dotfiles.host.hardware.isBattery;
+in
 {
-  # Systemd services setup
-  systemd.packages = with pkgs; [
-    auto-cpufreq
-  ];
+  # Systemd services setup (auto-cpufreq only on battery-powered devices)
+  systemd.packages = lib.optionals isBattery [ pkgs.auto-cpufreq ];
 
   # Enable Services
   programs.direnv.enable = true;
@@ -21,9 +22,9 @@
   services.mpd.enable = true;
   services.fwupd.enable = true;
 
-  # Auto-cpufreq for automatic CPU frequency scaling
+  # Auto-cpufreq for automatic CPU frequency scaling (only on battery-powered devices)
   # Using default settings - custom settings may conflict with hardware capabilities
-  services.auto-cpufreq.enable = true;
+  services.auto-cpufreq.enable = isBattery;
   # services.gnome.core-shell.enable = true;
   # services.udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
 
@@ -49,7 +50,7 @@
     wlrctl
     waybar
     rofi
-    dunst
+    # dunst is managed by home-manager services.dunst (see home/dunst.nix)
     avizo
     wlogout
     gifsicle

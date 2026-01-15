@@ -1,6 +1,11 @@
 { pkgs, lib, ... }:
 
 {
+  # Note: Bluetooth LE Audio (BAP) requires kernel ISO socket support.
+  # The BT_ISO option is already enabled in kernel 6.18+ by default.
+  # If you see "BAP requires ISO Socket" errors, your Bluetooth adapter
+  # may not support LE Audio, which is fine for regular Bluetooth devices.
+
   # Intel BE200 Bluetooth firmware fix
   # The btintel driver fails to load zstd-compressed firmware at boot
   # This service copies uncompressed firmware and reloads the module

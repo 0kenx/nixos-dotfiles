@@ -82,8 +82,5 @@
     confirm-close-surface = false
   '';
   
-  # Ensure Ghostty is installed
-  home.packages = with pkgs; [
-    ghostty
-  ];
+  # Note: ghostty package is installed system-wide in modules/desktop/hyprland.nix
 }

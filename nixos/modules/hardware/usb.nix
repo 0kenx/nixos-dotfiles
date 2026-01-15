@@ -126,4 +126,7 @@
   # Add serial group for serial port access
   # Users should be added to this group manually in their user configuration
   users.groups.serial = {};
+
+  # Add plugdev group for USB device access (used by STM32 DFU and other USB devices)
+  users.groups.plugdev = {};
 }

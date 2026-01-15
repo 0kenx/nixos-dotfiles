@@ -305,8 +305,10 @@ in {
 
       # Environment variables
       env = [
-        "GDK_SCALE,1.6"
-        "QT_SCALE_FACTOR,1.6"
+        "GDK_SCALE,1.5"
+        "QT_SCALE_FACTOR,1.5"
+        # Set XMODIFIERS here instead of pam environment to avoid pam_env parsing warnings
+        "XMODIFIERS,@im=fcitx"
       ];
 
       # General settings
