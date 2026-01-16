@@ -464,6 +464,10 @@ in {
         "$mainMod CTRL, E, exec, pypr expose"
         "$mainMod, Z, exec, pypr zoom"
 
+        # Speech-to-text: Super+T to start recording, Super+G to stop and transcribe
+        "$mainMod, T, exec, /home/${username}/.local/bin/ptt-start"
+        "$mainMod, G, exec, /home/${username}/.local/bin/ptt-stop"
+
         # Application launchers
         "$mainMod, RETURN, exec, uwsm app -- kitty"
         #"$mainMod SHIFT, T, exec, uwsm app -- telegram-desktop"

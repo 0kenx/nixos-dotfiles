@@ -78,13 +78,13 @@ in {
       ./ai/coding.nix      # AI coding assistants (aider, claude-code, etc.)
       ./ai/chat.nix        # General AI chat clients (aichat, oterm, alpaca)
       ./ai/multimedia.nix  # Image/video generation (ComfyUI with GPU auto-detection)
+      ./ai/audio.nix       # Speech processing (BlahST, whisper.cpp, piper-tts)
     ]
 
     # Conditional AI modules
     (lib.optional (moduleEnabled "localLLM") ./ai/inference.nix)  # Local inference with Ollama
 
     # Future AI module categories:
-    # - ./ai/audio.nix         # Speech processing (Whisper, XTTS, etc.)
     # - ./ai/vision.nix        # Computer vision models
     # - ./ai/translation.nix   # Language translation models
 
