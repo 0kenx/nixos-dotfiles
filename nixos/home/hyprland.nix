@@ -465,8 +465,11 @@ in {
         "$mainMod, Z, exec, pypr zoom"
 
         # Speech-to-text: Super+T to start recording, Super+G to stop and transcribe
+        # Super+S stops and sanitizes (removes stutters/filler words), Super+C stops and rewrites professionally
         "$mainMod, T, exec, /home/${username}/.local/bin/ptt-start"
         "$mainMod, G, exec, /home/${username}/.local/bin/ptt-stop"
+        "$mainMod, S, exec, /home/${username}/.local/bin/ptt-stop-sanitize"
+        "$mainMod, C, exec, /home/${username}/.local/bin/ptt-complete"
 
         # Application launchers
         "$mainMod, RETURN, exec, uwsm app -- kitty"

@@ -112,13 +112,22 @@ let
     export PATH="$HOME/.local/bin:$PATH"
     source $HOME/.local/bin/blahst.cfg
 
-    # Stop recording
+    # Wait for audio buffer to capture final speech
+    sleep 1
+
+    # Stop recording gracefully with SIGINT to allow buffer flush
     if [[ -f /tmp/ptt-rec.pid ]]; then
-        kill $(cat /tmp/ptt-rec.pid) 2>/dev/null
+        pid=$(cat /tmp/ptt-rec.pid)
+        kill -INT $pid 2>/dev/null
+        # Wait for process to exit (max 3 seconds)
+        for i in {1..30}; do
+            kill -0 $pid 2>/dev/null || break
+            sleep 0.1
+        done
         rm -f /tmp/ptt-rec.pid
     fi
-    pkill -f "rec.*$ramf" 2>/dev/null
-    sleep 0.1
+    pkill -INT -f "rec.*$ramf" 2>/dev/null
+    sleep 0.3
 
     # Dismiss recording notification by replacing it
     notify-send -t 1 -h string:x-canonical-private-synchronous:ptt "Processing..."
@@ -152,6 +161,150 @@ let
 
     # Show result notification for 4 seconds
     notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "Voice Input" "$str"
+  '';
+
+  # Push-to-talk: stop recording, transcribe, and sanitize (remove stutters, filler words, etc.)
+  pttStopSanitizeScript = ''
+    #!/usr/bin/env zsh
+    export PATH="$HOME/.local/bin:$PATH"
+    source $HOME/.local/bin/blahst.cfg
+
+    # Wait for audio buffer to capture final speech
+    sleep 1
+
+    # Stop recording gracefully with SIGINT to allow buffer flush
+    if [[ -f /tmp/ptt-rec.pid ]]; then
+        pid=$(cat /tmp/ptt-rec.pid)
+        kill -INT $pid 2>/dev/null
+        # Wait for process to exit (max 3 seconds)
+        for i in {1..30}; do
+            kill -0 $pid 2>/dev/null || break
+            sleep 0.1
+        done
+        rm -f /tmp/ptt-rec.pid
+    fi
+    pkill -INT -f "rec.*$ramf" 2>/dev/null
+    sleep 0.3
+
+    # Dismiss recording notification by replacing it
+    notify-send -t 1 -h string:x-canonical-private-synchronous:ptt "Processing..."
+
+    # Check if we have audio
+    if [[ ! -f "$ramf" ]]; then
+        notify-send -t 2000 "PTT Error" "No audio recorded"
+        exit 1
+    fi
+
+    # Transcribe
+    str="$(transcribe -t $NTHR -nt -m $WMODEL -f $ramf 2>/dev/null)"
+
+    # Clean up audio file for next use
+    rm -f "$ramf"
+
+    # Trim whitespace and remove line breaks
+    str="''${str##[[:space:]]#}"
+    str="''${str%%[[:space:]]#}"
+    str="''${str//$'\n'/ }"
+    str="''${str//$'\r'/}"
+
+    # Skip if empty or just noise markers
+    if [[ -z "$str" || "$str" == *"[BLANK_AUDIO]"* ]]; then
+        notify-send -t 2000 -h string:x-canonical-private-synchronous:ptt "PTT" "(no speech detected)"
+        exit 0
+    fi
+
+    notify-send -t 1 -h string:x-canonical-private-synchronous:ptt "Sanitizing..."
+
+    # Use LLM to clean up verbal stutters, filler words, repetitions
+    cleaned=$(llama-cli -m "$LIGHTLMODEL" -ngl 99 -c 2048 -n 512 --temp 0.1 -p "Clean up this transcribed speech by removing verbal stutters (like 'uh', 'um', 'er'), repeated words, false starts, and filler phrases. Keep the original meaning and wording intact - only remove the speech disfluencies. Output ONLY the cleaned text with no explanation or commentary:
+
+$str" 2>/dev/null | tail -n +2)
+
+    # Fall back to original if LLM fails
+    if [[ -z "$cleaned" ]]; then
+        cleaned="$str"
+    fi
+
+    # Strip leading/trailing whitespace (sed is more reliable than zsh glob)
+    cleaned=$(echo "$cleaned" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+    # Type the text directly (works in both GUI and terminal) - 0ms delay for speed
+    ydotool type --key-delay 0 -- "$cleaned"
+
+    # Show result notification for 4 seconds
+    notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "Voice Input (Sanitized)" "$cleaned"
+  '';
+
+  # Push-to-talk: stop recording, transcribe, and complete (rewrite professionally)
+  pttCompleteScript = ''
+    #!/usr/bin/env zsh
+    export PATH="$HOME/.local/bin:$PATH"
+    source $HOME/.local/bin/blahst.cfg
+
+    # Wait for audio buffer to capture final speech
+    sleep 1
+
+    # Stop recording gracefully with SIGINT to allow buffer flush
+    if [[ -f /tmp/ptt-rec.pid ]]; then
+        pid=$(cat /tmp/ptt-rec.pid)
+        kill -INT $pid 2>/dev/null
+        # Wait for process to exit (max 3 seconds)
+        for i in {1..30}; do
+            kill -0 $pid 2>/dev/null || break
+            sleep 0.1
+        done
+        rm -f /tmp/ptt-rec.pid
+    fi
+    pkill -INT -f "rec.*$ramf" 2>/dev/null
+    sleep 0.3
+
+    # Dismiss recording notification by replacing it
+    notify-send -t 1 -h string:x-canonical-private-synchronous:ptt "Processing..."
+
+    # Check if we have audio
+    if [[ ! -f "$ramf" ]]; then
+        notify-send -t 2000 "PTT Error" "No audio recorded"
+        exit 1
+    fi
+
+    # Transcribe
+    str="$(transcribe -t $NTHR -nt -m $WMODEL -f $ramf 2>/dev/null)"
+
+    # Clean up audio file for next use
+    rm -f "$ramf"
+
+    # Trim whitespace and remove line breaks
+    str="''${str##[[:space:]]#}"
+    str="''${str%%[[:space:]]#}"
+    str="''${str//$'\n'/ }"
+    str="''${str//$'\r'/}"
+
+    # Skip if empty or just noise markers
+    if [[ -z "$str" || "$str" == *"[BLANK_AUDIO]"* ]]; then
+        notify-send -t 2000 -h string:x-canonical-private-synchronous:ptt "PTT" "(no speech detected)"
+        exit 0
+    fi
+
+    notify-send -t 1 -h string:x-canonical-private-synchronous:ptt "Rewriting..."
+
+    # Use LLM to rewrite the text professionally
+    rewritten=$(llama-cli -m "$LLMODEL" -ngl 99 -c 2048 -n 512 --temp 0.3 -p "Rewrite this transcribed speech into clear, professional, and well-structured text. Fix grammar, improve clarity, and make it sound polished while preserving the original meaning and intent. Output ONLY the rewritten text with no explanation or commentary:
+
+$str" 2>/dev/null | tail -n +2)
+
+    # Fall back to original if LLM fails
+    if [[ -z "$rewritten" ]]; then
+        rewritten="$str"
+    fi
+
+    # Strip leading/trailing whitespace (sed is more reliable than zsh glob)
+    rewritten=$(echo "$rewritten" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+    # Type the text directly (works in both GUI and terminal) - 0ms delay for speed
+    ydotool type --key-delay 0 -- "$rewritten"
+
+    # Show result notification for 4 seconds
+    notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "Voice Input (Rewritten)" "$rewritten"
   '';
 
   # Legacy wsi script (silence detection mode)
@@ -270,6 +423,8 @@ in {
     ".local/bin/blahst.cfg".text = blahstConfig;
     ".local/bin/ptt-start" = { text = pttStartScript; executable = true; };
     ".local/bin/ptt-stop" = { text = pttStopScript; executable = true; };
+    ".local/bin/ptt-stop-sanitize" = { text = pttStopSanitizeScript; executable = true; };
+    ".local/bin/ptt-complete" = { text = pttCompleteScript; executable = true; };
     ".local/bin/wsi" = { text = wsiScript; executable = true; };
     ".local/bin/wsiml" = { text = wsimlScript; executable = true; };
     ".local/bin/blooper" = { text = blooperScript; executable = true; };
