@@ -632,14 +632,16 @@
         handlers = {
           lsp_zero.default_setup,
           lua_ls = function()
-            require('lspconfig').lua_ls.setup(lsp_zero.nvim_lua_ls())
+            vim.lsp.config.lua_ls = lsp_zero.nvim_lua_ls()
+            vim.lsp.enable('lua_ls')
           end,
           rust_analyzer = lsp_zero.noop,
         }
       })
-      
+
       -- Setup Nix language server separately
-      require('lspconfig').nil_ls.setup({})
+      vim.lsp.config.nil_ls = {}
+      vim.lsp.enable('nil_ls')
       
       -- Configure completion
       local cmp = require('cmp')

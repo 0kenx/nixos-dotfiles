@@ -21,15 +21,14 @@ let
     WHOST="127.0.0.1"
     WPORT="58080"
 
-    AI="$HOME/AI/Models"
-    WMODEL=''${WHISPER_DMODEL:-"$AI/whisper/ggml-base.en.bin"}
+    AI="$HOME/.ai/models"
+    WMODEL=''${WHISPER_DMODEL:-"$AI/whisper/ggml-large-v3-turbo-q5_0.bin"}
 
     LHOST="127.0.0.1"
     LPORT="58090"
-    LLMODEL="$AI/gemma-3-4b-it-Q6_K_L.gguf"
-    LIGHTLMODEL="$AI/gemma-3-1b-it-Q6_K_L.gguf"
-    HEAVYMODEL="$AI/gemma-3-27b-it-IQ3_XXS.gguf"
-    CODEMODEL="$AI/Qwen2.5-Coder-14B-Instruct-Q5_K_L.gguf"
+    LLMODEL="$AI/Qwen3-4B-IQ4_NL.gguf"
+    LIGHTLMODEL="$AI/Qwen3-0.6B-Q8_0.gguf"
+    REWRITEMODEL="$AI/Qwen3-0.6B-Q8_0.gguf"
     llamf="llam"
 
     BOTMODEL="$AI/Mistral-Small-3.2-24B-Instruct-2506-UD-IQ3_XXS.gguf"
@@ -138,15 +137,23 @@ let
         exit 1
     fi
 
-    # Transcribe
-    str="$(transcribe -t $NTHR -nt -m $WMODEL -f $ramf 2>/dev/null)"
+    # Transcribe via whisper-server
+    if curl -s --connect-timeout 1 "http://$WHOST:$WPORT/health" >/dev/null 2>&1; then
+        str=$(curl -s "http://$WHOST:$WPORT/inference" \
+            -H "Content-Type: multipart/form-data" \
+            -F file="@$ramf" \
+            -F temperature="0.0" \
+            -F response_format="text")
+    else
+        # Fallback to CLI if server not running
+        str="$(transcribe -t $NTHR -nt -m $WMODEL -f $ramf 2>/dev/null)"
+    fi
 
     # Clean up audio file for next use
     rm -f "$ramf"
 
     # Trim whitespace and remove line breaks
-    str="''${str##[[:space:]]#}"
-    str="''${str%%[[:space:]]#}"
+    str=$(echo "$str" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
     str="''${str//$'\n'/ }"
     str="''${str//$'\r'/}"
 
@@ -195,15 +202,23 @@ let
         exit 1
     fi
 
-    # Transcribe
-    str="$(transcribe -t $NTHR -nt -m $WMODEL -f $ramf 2>/dev/null)"
+    # Transcribe via whisper-server
+    if curl -s --connect-timeout 1 "http://$WHOST:$WPORT/health" >/dev/null 2>&1; then
+        str=$(curl -s "http://$WHOST:$WPORT/inference" \
+            -H "Content-Type: multipart/form-data" \
+            -F file="@$ramf" \
+            -F temperature="0.0" \
+            -F response_format="text")
+    else
+        # Fallback to CLI if server not running
+        str="$(transcribe -t $NTHR -nt -m $WMODEL -f $ramf 2>/dev/null)"
+    fi
 
     # Clean up audio file for next use
     rm -f "$ramf"
 
     # Trim whitespace and remove line breaks
-    str="''${str##[[:space:]]#}"
-    str="''${str%%[[:space:]]#}"
+    str=$(echo "$str" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
     str="''${str//$'\n'/ }"
     str="''${str//$'\r'/}"
 
@@ -215,10 +230,29 @@ let
 
     notify-send -t 1 -h string:x-canonical-private-synchronous:ptt "Sanitizing..."
 
-    # Use LLM to clean up verbal stutters, filler words, repetitions
-    cleaned=$(llama-cli -m "$LIGHTLMODEL" -ngl 99 -c 2048 -n 512 --temp 0.1 -p "Clean up this transcribed speech by removing verbal stutters (like 'uh', 'um', 'er'), repeated words, false starts, and filler phrases. Keep the original meaning and wording intact - only remove the speech disfluencies. Output ONLY the cleaned text with no explanation or commentary:
+    # Check if llama-server is running
+    if ! curl -s --connect-timeout 1 "http://$LHOST:$LPORT/health" >/dev/null 2>&1; then
+        notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "PTT Error" "llama-server not running on $LHOST:$LPORT"
+        ydotool type --key-delay 0 -- "$str"
+        exit 1
+    fi
 
-$str" 2>/dev/null | tail -n +2)
+    # Use LLM server to clean up verbal stutters, filler words, repetitions
+    cleaned=$(curl -s "http://$LHOST:$LPORT/v1/chat/completions" \
+        -H "Content-Type: application/json" \
+        -d "$(jq -n --arg text "$str" '{
+            model: "qwen",
+            max_tokens: 256,
+            temperature: 0.3,
+            messages: [
+                {role: "system", content: "You are a text cleaner. Remove filler words (uh, um, er, like, you know), stutters, repeated words, and false starts. Output ONLY the cleaned text. Never add explanations or extra content. /no_think"},
+                {role: "user", content: $text}
+            ]
+        }')" \
+        | jq -r '.choices[0].message.content // empty' \
+        | perl -0777 -pe 's/<think>.*?<\/think>//gs' \
+        | tr '\n' ' ' \
+        | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/  */ /g')
 
     # Fall back to original if LLM fails
     if [[ -z "$cleaned" ]]; then
@@ -267,15 +301,23 @@ $str" 2>/dev/null | tail -n +2)
         exit 1
     fi
 
-    # Transcribe
-    str="$(transcribe -t $NTHR -nt -m $WMODEL -f $ramf 2>/dev/null)"
+    # Transcribe via whisper-server
+    if curl -s --connect-timeout 1 "http://$WHOST:$WPORT/health" >/dev/null 2>&1; then
+        str=$(curl -s "http://$WHOST:$WPORT/inference" \
+            -H "Content-Type: multipart/form-data" \
+            -F file="@$ramf" \
+            -F temperature="0.0" \
+            -F response_format="text")
+    else
+        # Fallback to CLI if server not running
+        str="$(transcribe -t $NTHR -nt -m $WMODEL -f $ramf 2>/dev/null)"
+    fi
 
     # Clean up audio file for next use
     rm -f "$ramf"
 
     # Trim whitespace and remove line breaks
-    str="''${str##[[:space:]]#}"
-    str="''${str%%[[:space:]]#}"
+    str=$(echo "$str" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
     str="''${str//$'\n'/ }"
     str="''${str//$'\r'/}"
 
@@ -287,10 +329,29 @@ $str" 2>/dev/null | tail -n +2)
 
     notify-send -t 1 -h string:x-canonical-private-synchronous:ptt "Rewriting..."
 
-    # Use LLM to rewrite the text professionally
-    rewritten=$(llama-cli -m "$LLMODEL" -ngl 99 -c 2048 -n 512 --temp 0.3 -p "Rewrite this transcribed speech into clear, professional, and well-structured text. Fix grammar, improve clarity, and make it sound polished while preserving the original meaning and intent. Output ONLY the rewritten text with no explanation or commentary:
+    # Check if llama-server is running
+    if ! curl -s --connect-timeout 1 "http://$LHOST:$LPORT/health" >/dev/null 2>&1; then
+        notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "PTT Error" "llama-server not running on $LHOST:$LPORT"
+        ydotool type --key-delay 0 -- "$str"
+        exit 1
+    fi
 
-$str" 2>/dev/null | tail -n +2)
+    # Use LLM server to rewrite the text professionally
+    rewritten=$(curl -s "http://$LHOST:$LPORT/v1/chat/completions" \
+        -H "Content-Type: application/json" \
+        -d "$(jq -n --arg text "$str" '{
+            model: "qwen",
+            max_tokens: 256,
+            temperature: 0.3,
+            messages: [
+                {role: "system", content: "You are a text editor. Rewrite the input to be clear, professional, and grammatically correct. Preserve the original meaning. Output ONLY the rewritten text. Never add explanations or extra content. /no_think"},
+                {role: "user", content: $text}
+            ]
+        }')" \
+        | jq -r '.choices[0].message.content // empty' \
+        | perl -0777 -pe 's/<think>.*?<\/think>//gs' \
+        | tr '\n' ' ' \
+        | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/  */ /g')
 
     # Fall back to original if LLM fails
     if [[ -z "$rewritten" ]]; then
@@ -443,7 +504,45 @@ in {
     Install.WantedBy = [ "default.target" ];
   };
 
+  # whisper-server for fast speech-to-text (keeps model in memory)
+  systemd.user.services.whisper-server = {
+    Unit = {
+      Description = "whisper.cpp server for speech-to-text";
+      After = [ "network.target" ];
+    };
+    Service = {
+      Environment = "HOME=%h";
+      ExecStart = "${pkgs.whisper-cpp}/bin/whisper-server -m %h/.ai/models/whisper/ggml-large-v3-turbo-q5_0.bin --host 127.0.0.1 --port 58080 -t 8";
+      Restart = "always";
+      RestartSec = 5;
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+
+  # llama-server for fast LLM inference (keeps model in memory)
+  systemd.user.services.llama-server = {
+    Unit = {
+      Description = "llama.cpp server for PTT text processing";
+      After = [ "network.target" ];
+    };
+    Service = {
+      Environment = "HOME=%h";
+      ExecStart = "${pkgs.llama-cpp}/bin/llama-server -m %h/.ai/models/Qwen3-0.6B-Q8_0.gguf --host 127.0.0.1 --port 58090 -ngl 99 -c 4096 --jinja --temp 0.7 --top-p 0.8 --top-k 20 --min-p 0 --repeat-penalty 1.5";
+      Restart = "always";
+      RestartSec = 5;
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+
   # Create symlinks to whisper.cpp binaries
   home.file.".local/bin/transcribe".source = "${pkgs.whisper-cpp}/bin/whisper-cli";
   home.file.".local/bin/whserver".source = "${pkgs.whisper-cpp}/bin/whisper-server";
+
+  # Required packages for PTT scripts
+  home.packages = with pkgs; [
+    llama-cpp
+    jq
+    curl
+    perl
+  ];
 }
