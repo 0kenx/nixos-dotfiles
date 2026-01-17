@@ -41,6 +41,6 @@ in {
     pkgs.jq                    # JSON processing
   ];
 
-  # ydotool requires a daemon for Wayland input simulation
-  programs.ydotool.enable = true;
+  # ydotool daemon runs as user service (defined in home/blahst.nix)
+  # to avoid socket permission issues with the system-level service
 }

@@ -1,9 +1,8 @@
 { config, lib, pkgs, ... }:
 
 {
-  # Use Intel/modesetting for display output
-  # NVIDIA is available for compute only when GPU is present
-  services.xserver.videoDrivers = ["modesetting"];
+  # Use modesetting for display, nvidia for compute
+  services.xserver.videoDrivers = ["modesetting" "nvidia"];
 
   # Enable access to nvidia from containers (Docker, Podman)
   # This handles GPU presence gracefully - works with or without GPU

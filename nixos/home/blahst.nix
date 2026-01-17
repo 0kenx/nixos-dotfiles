@@ -1,10 +1,15 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, hostHardwareFlags ? {}, ... }:
 
 # BlahST - Speech-to-Text input tool for Linux
 # https://github.com/QuantiusBenignus/BlahST
 # All scripts embedded directly for fully declarative NixOS setup
 
 let
+  # Detect GPU availability for CUDA-accelerated whisper
+  hasNvidia = hostHardwareFlags.hasNvidia or false;
+  whisperPackage = if hasNvidia
+    then pkgs.whisper-cpp.override { cudaSupport = true; }
+    else pkgs.whisper-cpp;
   # BlahST configuration for NixOS
   blahstConfig = ''
     #X11 or Wayland
@@ -109,6 +114,7 @@ let
   pttStopScript = ''
     #!/usr/bin/env zsh
     export PATH="$HOME/.local/bin:$PATH"
+    export YDOTOOL_SOCKET="/run/user/$(id -u)/.ydotool_socket"
     source $HOME/.local/bin/blahst.cfg
 
     # Wait for audio buffer to capture final speech
@@ -163,7 +169,7 @@ let
         exit 0
     fi
 
-    # Type the text directly (works in both GUI and terminal) - 0ms delay for speed
+    # Type the text directly using wtype (more reliable on Wayland)
     ydotool type --key-delay 0 -- "$str"
 
     # Show result notification for 4 seconds
@@ -174,6 +180,7 @@ let
   pttStopSanitizeScript = ''
     #!/usr/bin/env zsh
     export PATH="$HOME/.local/bin:$PATH"
+    export YDOTOOL_SOCKET="/run/user/$(id -u)/.ydotool_socket"
     source $HOME/.local/bin/blahst.cfg
 
     # Wait for audio buffer to capture final speech
@@ -262,7 +269,7 @@ let
     # Strip leading/trailing whitespace (sed is more reliable than zsh glob)
     cleaned=$(echo "$cleaned" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
-    # Type the text directly (works in both GUI and terminal) - 0ms delay for speed
+    # Type the text directly using wtype (more reliable on Wayland)
     ydotool type --key-delay 0 -- "$cleaned"
 
     # Show result notification for 4 seconds
@@ -273,6 +280,7 @@ let
   pttCompleteScript = ''
     #!/usr/bin/env zsh
     export PATH="$HOME/.local/bin:$PATH"
+    export YDOTOOL_SOCKET="/run/user/$(id -u)/.ydotool_socket"
     source $HOME/.local/bin/blahst.cfg
 
     # Wait for audio buffer to capture final speech
@@ -361,7 +369,7 @@ let
     # Strip leading/trailing whitespace (sed is more reliable than zsh glob)
     rewritten=$(echo "$rewritten" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
-    # Type the text directly (works in both GUI and terminal) - 0ms delay for speed
+    # Type the text directly using wtype (more reliable on Wayland)
     ydotool type --key-delay 0 -- "$rewritten"
 
     # Show result notification for 4 seconds
@@ -505,6 +513,7 @@ in {
   };
 
   # whisper-server for fast speech-to-text (keeps model in memory)
+  # Uses CUDA-accelerated whisper.cpp when Nvidia GPU is available
   systemd.user.services.whisper-server = {
     Unit = {
       Description = "whisper.cpp server for speech-to-text";
@@ -512,7 +521,8 @@ in {
     };
     Service = {
       Environment = "HOME=%h";
-      ExecStart = "${pkgs.whisper-cpp}/bin/whisper-server -m %h/.ai/models/whisper/ggml-large-v3-turbo-q5_0.bin --host 127.0.0.1 --port 58080 -t 8";
+      # GPU is used automatically when whisper-cpp is built with CUDA support
+      ExecStart = "${whisperPackage}/bin/whisper-server -m %h/.ai/models/whisper/ggml-large-v3-turbo-q5_0.bin --host 127.0.0.1 --port 58080 -t 8";
       Restart = "always";
       RestartSec = 5;
     };
@@ -534,9 +544,9 @@ in {
     Install.WantedBy = [ "default.target" ];
   };
 
-  # Create symlinks to whisper.cpp binaries
-  home.file.".local/bin/transcribe".source = "${pkgs.whisper-cpp}/bin/whisper-cli";
-  home.file.".local/bin/whserver".source = "${pkgs.whisper-cpp}/bin/whisper-server";
+  # Create symlinks to whisper.cpp binaries (GPU-accelerated when available)
+  home.file.".local/bin/transcribe".source = "${whisperPackage}/bin/whisper-cli";
+  home.file.".local/bin/whserver".source = "${whisperPackage}/bin/whisper-server";
 
   # Required packages for PTT scripts
   home.packages = with pkgs; [
