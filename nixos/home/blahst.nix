@@ -36,6 +36,14 @@ let
     REWRITEMODEL="$AI/Qwen3-0.6B-Q8_0.gguf"
     llamf="llam"
 
+    # PTT-specific configuration (can be overridden via environment variables)
+    # PTT_BUFFER_WAIT: Time to wait for audio buffer flush after stopping recording (default: 2.0s)
+    # PTT_MAX_WAIT: Maximum time to wait for recording process to exit gracefully (default: 5s)
+    # PTT_MIN_SIZE: Minimum audio file size in bytes to consider valid (default: 8192)
+    # PTT_TRANSCRIBE_TIMEOUT: Timeout for transcription API calls (default: 30s)
+    # PTT_LLM_TIMEOUT: Timeout for LLM API calls (default: 15s)
+    # Audio files are kept in /dev/shm/wfile for debugging - check with: mpv /dev/shm/wfile
+
     BOTMODEL="$AI/Mistral-Small-3.2-24B-Instruct-2506-UD-IQ3_XXS.gguf"
     BMOPTIONS="-ngl 99 -fa -c 8192 -nkvo -ctk q8_0 -ctv q8_0 --min-p 0.01 --top-k 64 --top-p 0.95 --no-webui --no-mmap --mlock --log-file $TEMPD/blahstlog "
 
@@ -96,20 +104,48 @@ let
   pttStartScript = ''
     #!/usr/bin/env zsh
     export PATH="$HOME/.local/bin:$PATH"
+
+    # Source config with error handling
+    if [[ ! -f "$HOME/.local/bin/blahst.cfg" ]]; then
+        notify-send -t 3000 "PTT Error" "Configuration file not found"
+        exit 1
+    fi
     source $HOME/.local/bin/blahst.cfg
 
     # Toggle: if already recording, stop and transcribe
-    if [[ -f /tmp/ptt-rec.pid ]] && kill -0 "$(cat /tmp/ptt-rec.pid)" 2>/dev/null; then
-        exec ptt-stop
+    if [[ -f /tmp/ptt-rec.pid ]]; then
+        pid=$(cat /tmp/ptt-rec.pid 2>/dev/null)
+        if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+            exec ptt-stop
+        fi
     fi
 
-    # Clean up any stale state
-    pkill -f "rec.*$ramf" 2>/dev/null
+    # Clean up any stale state more thoroughly
+    pkill -TERM -f "rec.*$ramf" 2>/dev/null
+    sleep 0.1
+    pkill -KILL -f "rec.*$ramf" 2>/dev/null
     rm -f "$ramf" /tmp/ptt-rec.pid 2>/dev/null
 
+    # Ensure temp directory exists
+    mkdir -p "$TEMPD" 2>/dev/null || {
+        notify-send -t 3000 "PTT Error" "Cannot create temp directory: $TEMPD"
+        exit 1
+    }
+
     # Start recording in background
-    rec -q -t wav "$ramf" rate 16k channels 1 &
-    echo $! > /tmp/ptt-rec.pid
+    rec -q -t wav "$ramf" rate 16k channels 1 2>/dev/null &
+    rec_pid=$!
+
+    # Save PID immediately
+    echo $rec_pid > /tmp/ptt-rec.pid
+
+    # Verify recording process started successfully
+    sleep 0.3
+    if ! kill -0 "$rec_pid" 2>/dev/null; then
+        notify-send -t 3000 "PTT Error" "Failed to start recording (no audio device?)"
+        rm -f /tmp/ptt-rec.pid
+        exit 1
+    fi
 
     # Persistent notification (0 = no timeout, stays until dismissed)
     notify-send -t 0 -h string:x-canonical-private-synchronous:ptt "Recording..." "Press Super+T to stop and transcribe"
@@ -120,48 +156,102 @@ let
     #!/usr/bin/env zsh
     export PATH="$HOME/.local/bin:$PATH"
     export YDOTOOL_SOCKET="/run/user/$(id -u)/.ydotool_socket"
+
+    # Source config with error handling
+    if [[ ! -f "$HOME/.local/bin/blahst.cfg" ]]; then
+        notify-send -t 3000 "PTT Error" "Configuration file not found"
+        exit 1
+    fi
     source $HOME/.local/bin/blahst.cfg
 
-    # Wait for audio buffer to capture final speech
-    sleep 1
+    # Configurable timeouts
+    BUFFER_WAIT_TIME=''${PTT_BUFFER_WAIT:-2.0}  # Increased from 1.2s to 2s for better buffer capture
+    MAX_PROCESS_WAIT=''${PTT_MAX_WAIT:-5}
+    MIN_AUDIO_SIZE=''${PTT_MIN_SIZE:-8192}  # 8KB minimum
 
-    # Stop recording gracefully with SIGINT to allow buffer flush
+    # Stop recording gracefully - send SIGTERM (not SIGINT) to rec process
+    # This gives it time to properly flush audio buffers
+    recording_stopped=false
     if [[ -f /tmp/ptt-rec.pid ]]; then
-        pid=$(cat /tmp/ptt-rec.pid)
-        kill -INT $pid 2>/dev/null
-        # Wait for process to exit (max 3 seconds)
-        for i in {1..30}; do
-            kill -0 $pid 2>/dev/null || break
-            sleep 0.1
-        done
+        pid=$(cat /tmp/ptt-rec.pid 2>/dev/null)
+        if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+            # SIGTERM allows graceful shutdown
+            kill -TERM "$pid" 2>/dev/null
+
+            # Wait for buffer flush BEFORE checking if process exited
+            sleep $BUFFER_WAIT_TIME
+
+            # Now wait for process to exit
+            wait_time=0
+            for i in {1..30}; do
+                if ! kill -0 "$pid" 2>/dev/null; then
+                    recording_stopped=true
+                    break
+                fi
+                sleep 0.1
+                wait_time=$((wait_time + 1))
+                if [[ $wait_time -ge 30 ]]; then
+                    # Force kill if graceful shutdown fails
+                    kill -KILL "$pid" 2>/dev/null
+                    sleep 0.2
+                    break
+                fi
+            done
+        fi
         rm -f /tmp/ptt-rec.pid
     fi
-    pkill -INT -f "rec.*$ramf" 2>/dev/null
-    sleep 0.3
+
+    # Fallback: ensure no stray recording processes
+    pkill -TERM -f "rec.*$ramf" 2>/dev/null
+    sleep 0.5
+    pkill -KILL -f "rec.*$ramf" 2>/dev/null
 
     # Dismiss recording notification by replacing it
     notify-send -t 1 -h string:x-canonical-private-synchronous:ptt "Processing..."
 
-    # Check if we have audio
+    # Check if audio file exists and has content
     if [[ ! -f "$ramf" ]]; then
-        notify-send -t 2000 "PTT Error" "No audio recorded"
+        notify-send -t 2000 "PTT Error" "No audio file created"
         exit 1
     fi
 
-    # Transcribe via whisper-server
-    if curl -s --connect-timeout 1 "http://$WHOST:$WPORT/health" >/dev/null 2>&1; then
-        str=$(curl -s "http://$WHOST:$WPORT/inference" \
+    # Verify audio file size (must be at least MIN_AUDIO_SIZE bytes)
+    audio_size=$(stat -c%s "$ramf" 2>/dev/null || echo "0")
+    if [[ $audio_size -lt $MIN_AUDIO_SIZE ]]; then
+        rm -f "$ramf"
+        notify-send -t 2000 -h string:x-canonical-private-synchronous:ptt "PTT" "(recording too short)"
+        exit 0
+    fi
+
+    # Transcribe via whisper-server with retry logic
+    str=""
+    transcribe_timeout=''${PTT_TRANSCRIBE_TIMEOUT:-30}
+
+    if curl -s --connect-timeout 2 --max-time 5 "http://$WHOST:$WPORT/health" >/dev/null 2>&1; then
+        # Try whisper-server with timeout
+        str=$(curl -s --max-time $transcribe_timeout "http://$WHOST:$WPORT/inference" \
             -H "Content-Type: multipart/form-data" \
             -F file="@$ramf" \
             -F temperature="0.0" \
-            -F response_format="text")
+            -F response_format="text" 2>/dev/null)
+
+        # If server call failed, fall back to CLI
+        if [[ -z "$str" || "$str" == "error"* ]]; then
+            str="$(transcribe -t $NTHR -nt -m $WMODEL -f $ramf 2>/dev/null)"
+        fi
     else
         # Fallback to CLI if server not running
         str="$(transcribe -t $NTHR -nt -m $WMODEL -f $ramf 2>/dev/null)"
     fi
 
-    # Clean up audio file for next use
-    rm -f "$ramf"
+    # Keep audio file in /dev/shm for debugging (check /dev/shm/wfile)
+    # rm -f "$ramf"  # Commented out for debugging
+
+    # Check if transcription failed
+    if [[ -z "$str" ]]; then
+        notify-send -t 2000 "PTT Error" "Transcription failed"
+        exit 1
+    fi
 
     # Trim whitespace and remove line breaks
     str=$(echo "$str" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
@@ -174,11 +264,15 @@ let
         exit 0
     fi
 
-    # Type the text directly using wtype (more reliable on Wayland)
-    ydotool type --key-delay 0 -- "$str"
-
-    # Show result notification for 4 seconds
-    notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "Voice Input" "$str"
+    # Type the text with error handling
+    if ! ydotool type --key-delay 0 -- "$str" 2>/dev/null; then
+        # If ydotool fails, try to copy to clipboard as fallback
+        echo -n "$str" | wl-copy 2>/dev/null || true
+        notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "Voice Input (copied)" "$str"
+    else
+        # Show result notification for 4 seconds
+        notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "Voice Input" "$str"
+    fi
   '';
 
   # Push-to-talk: stop recording, transcribe, and sanitize (remove stutters, filler words, etc.)
@@ -186,48 +280,99 @@ let
     #!/usr/bin/env zsh
     export PATH="$HOME/.local/bin:$PATH"
     export YDOTOOL_SOCKET="/run/user/$(id -u)/.ydotool_socket"
+
+    # Source config with error handling
+    if [[ ! -f "$HOME/.local/bin/blahst.cfg" ]]; then
+        notify-send -t 3000 "PTT Error" "Configuration file not found"
+        exit 1
+    fi
     source $HOME/.local/bin/blahst.cfg
 
-    # Wait for audio buffer to capture final speech
-    sleep 1
+    # Configurable timeouts
+    BUFFER_WAIT_TIME=''${PTT_BUFFER_WAIT:-2.0}  # Increased from 1.2s to 2s for better buffer capture
+    MAX_PROCESS_WAIT=''${PTT_MAX_WAIT:-5}
+    MIN_AUDIO_SIZE=''${PTT_MIN_SIZE:-8192}
+    LLM_TIMEOUT=''${PTT_LLM_TIMEOUT:-15}
 
-    # Stop recording gracefully with SIGINT to allow buffer flush
+    # Stop recording gracefully - send SIGTERM (not SIGINT) to rec process
+    # This gives it time to properly flush audio buffers
+    recording_stopped=false
     if [[ -f /tmp/ptt-rec.pid ]]; then
-        pid=$(cat /tmp/ptt-rec.pid)
-        kill -INT $pid 2>/dev/null
-        # Wait for process to exit (max 3 seconds)
-        for i in {1..30}; do
-            kill -0 $pid 2>/dev/null || break
-            sleep 0.1
-        done
+        pid=$(cat /tmp/ptt-rec.pid 2>/dev/null)
+        if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+            # SIGTERM allows graceful shutdown
+            kill -TERM "$pid" 2>/dev/null
+
+            # Wait for buffer flush BEFORE checking if process exited
+            sleep $BUFFER_WAIT_TIME
+
+            # Now wait for process to exit
+            wait_time=0
+            for i in {1..30}; do
+                if ! kill -0 "$pid" 2>/dev/null; then
+                    recording_stopped=true
+                    break
+                fi
+                sleep 0.1
+                wait_time=$((wait_time + 1))
+                if [[ $wait_time -ge 30 ]]; then
+                    # Force kill if graceful shutdown fails
+                    kill -KILL "$pid" 2>/dev/null
+                    sleep 0.2
+                    break
+                fi
+            done
+        fi
         rm -f /tmp/ptt-rec.pid
     fi
-    pkill -INT -f "rec.*$ramf" 2>/dev/null
-    sleep 0.3
+
+    # Fallback: ensure no stray recording processes
+    pkill -TERM -f "rec.*$ramf" 2>/dev/null
+    sleep 0.5
+    pkill -KILL -f "rec.*$ramf" 2>/dev/null
 
     # Dismiss recording notification by replacing it
     notify-send -t 1 -h string:x-canonical-private-synchronous:ptt "Processing..."
 
-    # Check if we have audio
+    # Check if audio file exists and has content
     if [[ ! -f "$ramf" ]]; then
-        notify-send -t 2000 "PTT Error" "No audio recorded"
+        notify-send -t 2000 "PTT Error" "No audio file created"
         exit 1
     fi
 
-    # Transcribe via whisper-server
-    if curl -s --connect-timeout 1 "http://$WHOST:$WPORT/health" >/dev/null 2>&1; then
-        str=$(curl -s "http://$WHOST:$WPORT/inference" \
+    # Verify audio file size
+    audio_size=$(stat -c%s "$ramf" 2>/dev/null || echo "0")
+    if [[ $audio_size -lt $MIN_AUDIO_SIZE ]]; then
+        rm -f "$ramf"
+        notify-send -t 2000 -h string:x-canonical-private-synchronous:ptt "PTT" "(recording too short)"
+        exit 0
+    fi
+
+    # Transcribe via whisper-server with retry logic
+    str=""
+    transcribe_timeout=''${PTT_TRANSCRIBE_TIMEOUT:-30}
+
+    if curl -s --connect-timeout 2 --max-time 5 "http://$WHOST:$WPORT/health" >/dev/null 2>&1; then
+        str=$(curl -s --max-time $transcribe_timeout "http://$WHOST:$WPORT/inference" \
             -H "Content-Type: multipart/form-data" \
             -F file="@$ramf" \
             -F temperature="0.0" \
-            -F response_format="text")
+            -F response_format="text" 2>/dev/null)
+        if [[ -z "$str" || "$str" == "error"* ]]; then
+            str="$(transcribe -t $NTHR -nt -m $WMODEL -f $ramf 2>/dev/null)"
+        fi
     else
-        # Fallback to CLI if server not running
         str="$(transcribe -t $NTHR -nt -m $WMODEL -f $ramf 2>/dev/null)"
     fi
 
-    # Clean up audio file for next use
-    rm -f "$ramf"
+    # Keep audio file in /dev/shm for debugging (check /dev/shm/wfile)
+    # rm -f "$ramf"  # Commented out for debugging
+
+    # Check if transcription failed
+    if [[ -z "$str" ]]; then
+        notify-send -t 2000 "PTT Error" "Transcription failed"
+        exit 1
+    fi
 
     # Trim whitespace and remove line breaks
     str=$(echo "$str" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
@@ -242,15 +387,20 @@ let
 
     notify-send -t 1 -h string:x-canonical-private-synchronous:ptt "Sanitizing..."
 
-    # Check if llama-server is running
-    if ! curl -s --connect-timeout 1 "http://$LHOST:$LPORT/health" >/dev/null 2>&1; then
-        notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "PTT Error" "llama-server not running on $LHOST:$LPORT"
-        ydotool type --key-delay 0 -- "$str"
-        exit 1
+    # Check if llama-server is running with better timeout
+    if ! curl -s --connect-timeout 2 --max-time 5 "http://$LHOST:$LPORT/health" >/dev/null 2>&1; then
+        notify-send -t 3000 -h string:x-canonical-private-synchronous:ptt "PTT Warning" "LLM server unavailable, using raw transcription"
+        if ! ydotool type --key-delay 0 -- "$str" 2>/dev/null; then
+            echo -n "$str" | wl-copy 2>/dev/null || true
+            notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "Voice Input (copied)" "$str"
+        else
+            notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "Voice Input" "$str"
+        fi
+        exit 0
     fi
 
     # Use LLM server to clean up verbal stutters, filler words, repetitions
-    cleaned=$(curl -s "http://$LHOST:$LPORT/v1/chat/completions" \
+    cleaned=$(curl -s --max-time $LLM_TIMEOUT "http://$LHOST:$LPORT/v1/chat/completions" \
         -H "Content-Type: application/json" \
         -d "$(jq -n --arg text "$str" '{
             model: "qwen",
@@ -260,25 +410,30 @@ let
                 {role: "system", content: "You are a text cleaner. Remove filler words (uh, um, er, like, you know), stutters, repeated words, and false starts. Output ONLY the cleaned text. Never add explanations or extra content. /no_think"},
                 {role: "user", content: $text}
             ]
-        }')" \
-        | jq -r '.choices[0].message.content // empty' \
-        | perl -0777 -pe 's/<think>.*?<\/think>//gs' \
+        }')" 2>/dev/null \
+        | jq -r '.choices[0].message.content // empty' 2>/dev/null \
+        | perl -0777 -pe 's/<think>.*?<\/think>//gs' 2>/dev/null \
         | tr '\n' ' ' \
         | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/  */ /g')
 
-    # Fall back to original if LLM fails
+    # Fall back to original if LLM fails or returns empty
     if [[ -z "$cleaned" ]]; then
         cleaned="$str"
+        notify_type="Voice Input (raw)"
+    else
+        notify_type="Voice Input (Sanitized)"
     fi
 
-    # Strip leading/trailing whitespace (sed is more reliable than zsh glob)
+    # Strip leading/trailing whitespace
     cleaned=$(echo "$cleaned" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
-    # Type the text directly using wtype (more reliable on Wayland)
-    ydotool type --key-delay 0 -- "$cleaned"
-
-    # Show result notification for 4 seconds
-    notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "Voice Input (Sanitized)" "$cleaned"
+    # Type the text with error handling
+    if ! ydotool type --key-delay 0 -- "$cleaned" 2>/dev/null; then
+        echo -n "$cleaned" | wl-copy 2>/dev/null || true
+        notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "$notify_type (copied)" "$cleaned"
+    else
+        notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "$notify_type" "$cleaned"
+    fi
   '';
 
   # Push-to-talk: stop recording, transcribe, and complete (rewrite professionally)
@@ -286,48 +441,99 @@ let
     #!/usr/bin/env zsh
     export PATH="$HOME/.local/bin:$PATH"
     export YDOTOOL_SOCKET="/run/user/$(id -u)/.ydotool_socket"
+
+    # Source config with error handling
+    if [[ ! -f "$HOME/.local/bin/blahst.cfg" ]]; then
+        notify-send -t 3000 "PTT Error" "Configuration file not found"
+        exit 1
+    fi
     source $HOME/.local/bin/blahst.cfg
 
-    # Wait for audio buffer to capture final speech
-    sleep 1
+    # Configurable timeouts
+    BUFFER_WAIT_TIME=''${PTT_BUFFER_WAIT:-2.0}  # Increased from 1.2s to 2s for better buffer capture
+    MAX_PROCESS_WAIT=''${PTT_MAX_WAIT:-5}
+    MIN_AUDIO_SIZE=''${PTT_MIN_SIZE:-8192}
+    LLM_TIMEOUT=''${PTT_LLM_TIMEOUT:-15}
 
-    # Stop recording gracefully with SIGINT to allow buffer flush
+    # Stop recording gracefully - send SIGTERM (not SIGINT) to rec process
+    # This gives it time to properly flush audio buffers
+    recording_stopped=false
     if [[ -f /tmp/ptt-rec.pid ]]; then
-        pid=$(cat /tmp/ptt-rec.pid)
-        kill -INT $pid 2>/dev/null
-        # Wait for process to exit (max 3 seconds)
-        for i in {1..30}; do
-            kill -0 $pid 2>/dev/null || break
-            sleep 0.1
-        done
+        pid=$(cat /tmp/ptt-rec.pid 2>/dev/null)
+        if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+            # SIGTERM allows graceful shutdown
+            kill -TERM "$pid" 2>/dev/null
+
+            # Wait for buffer flush BEFORE checking if process exited
+            sleep $BUFFER_WAIT_TIME
+
+            # Now wait for process to exit
+            wait_time=0
+            for i in {1..30}; do
+                if ! kill -0 "$pid" 2>/dev/null; then
+                    recording_stopped=true
+                    break
+                fi
+                sleep 0.1
+                wait_time=$((wait_time + 1))
+                if [[ $wait_time -ge 30 ]]; then
+                    # Force kill if graceful shutdown fails
+                    kill -KILL "$pid" 2>/dev/null
+                    sleep 0.2
+                    break
+                fi
+            done
+        fi
         rm -f /tmp/ptt-rec.pid
     fi
-    pkill -INT -f "rec.*$ramf" 2>/dev/null
-    sleep 0.3
+
+    # Fallback: ensure no stray recording processes
+    pkill -TERM -f "rec.*$ramf" 2>/dev/null
+    sleep 0.5
+    pkill -KILL -f "rec.*$ramf" 2>/dev/null
 
     # Dismiss recording notification by replacing it
     notify-send -t 1 -h string:x-canonical-private-synchronous:ptt "Processing..."
 
-    # Check if we have audio
+    # Check if audio file exists and has content
     if [[ ! -f "$ramf" ]]; then
-        notify-send -t 2000 "PTT Error" "No audio recorded"
+        notify-send -t 2000 "PTT Error" "No audio file created"
         exit 1
     fi
 
-    # Transcribe via whisper-server
-    if curl -s --connect-timeout 1 "http://$WHOST:$WPORT/health" >/dev/null 2>&1; then
-        str=$(curl -s "http://$WHOST:$WPORT/inference" \
+    # Verify audio file size
+    audio_size=$(stat -c%s "$ramf" 2>/dev/null || echo "0")
+    if [[ $audio_size -lt $MIN_AUDIO_SIZE ]]; then
+        rm -f "$ramf"
+        notify-send -t 2000 -h string:x-canonical-private-synchronous:ptt "PTT" "(recording too short)"
+        exit 0
+    fi
+
+    # Transcribe via whisper-server with retry logic
+    str=""
+    transcribe_timeout=''${PTT_TRANSCRIBE_TIMEOUT:-30}
+
+    if curl -s --connect-timeout 2 --max-time 5 "http://$WHOST:$WPORT/health" >/dev/null 2>&1; then
+        str=$(curl -s --max-time $transcribe_timeout "http://$WHOST:$WPORT/inference" \
             -H "Content-Type: multipart/form-data" \
             -F file="@$ramf" \
             -F temperature="0.0" \
-            -F response_format="text")
+            -F response_format="text" 2>/dev/null)
+        if [[ -z "$str" || "$str" == "error"* ]]; then
+            str="$(transcribe -t $NTHR -nt -m $WMODEL -f $ramf 2>/dev/null)"
+        fi
     else
-        # Fallback to CLI if server not running
         str="$(transcribe -t $NTHR -nt -m $WMODEL -f $ramf 2>/dev/null)"
     fi
 
-    # Clean up audio file for next use
-    rm -f "$ramf"
+    # Keep audio file in /dev/shm for debugging (check /dev/shm/wfile)
+    # rm -f "$ramf"  # Commented out for debugging
+
+    # Check if transcription failed
+    if [[ -z "$str" ]]; then
+        notify-send -t 2000 "PTT Error" "Transcription failed"
+        exit 1
+    fi
 
     # Trim whitespace and remove line breaks
     str=$(echo "$str" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
@@ -342,15 +548,20 @@ let
 
     notify-send -t 1 -h string:x-canonical-private-synchronous:ptt "Rewriting..."
 
-    # Check if llama-server is running
-    if ! curl -s --connect-timeout 1 "http://$LHOST:$LPORT/health" >/dev/null 2>&1; then
-        notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "PTT Error" "llama-server not running on $LHOST:$LPORT"
-        ydotool type --key-delay 0 -- "$str"
-        exit 1
+    # Check if llama-server is running with better timeout
+    if ! curl -s --connect-timeout 2 --max-time 5 "http://$LHOST:$LPORT/health" >/dev/null 2>&1; then
+        notify-send -t 3000 -h string:x-canonical-private-synchronous:ptt "PTT Warning" "LLM server unavailable, using raw transcription"
+        if ! ydotool type --key-delay 0 -- "$str" 2>/dev/null; then
+            echo -n "$str" | wl-copy 2>/dev/null || true
+            notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "Voice Input (copied)" "$str"
+        else
+            notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "Voice Input" "$str"
+        fi
+        exit 0
     fi
 
     # Use LLM server to rewrite the text professionally
-    rewritten=$(curl -s "http://$LHOST:$LPORT/v1/chat/completions" \
+    rewritten=$(curl -s --max-time $LLM_TIMEOUT "http://$LHOST:$LPORT/v1/chat/completions" \
         -H "Content-Type: application/json" \
         -d "$(jq -n --arg text "$str" '{
             model: "qwen",
@@ -360,25 +571,30 @@ let
                 {role: "system", content: "You are a text editor. Rewrite the input to be clear, professional, and grammatically correct. Preserve the original meaning. Output ONLY the rewritten text. Never add explanations or extra content. /no_think"},
                 {role: "user", content: $text}
             ]
-        }')" \
-        | jq -r '.choices[0].message.content // empty' \
-        | perl -0777 -pe 's/<think>.*?<\/think>//gs' \
+        }')" 2>/dev/null \
+        | jq -r '.choices[0].message.content // empty' 2>/dev/null \
+        | perl -0777 -pe 's/<think>.*?<\/think>//gs' 2>/dev/null \
         | tr '\n' ' ' \
         | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/  */ /g')
 
-    # Fall back to original if LLM fails
+    # Fall back to original if LLM fails or returns empty
     if [[ -z "$rewritten" ]]; then
         rewritten="$str"
+        notify_type="Voice Input (raw)"
+    else
+        notify_type="Voice Input (Rewritten)"
     fi
 
-    # Strip leading/trailing whitespace (sed is more reliable than zsh glob)
+    # Strip leading/trailing whitespace
     rewritten=$(echo "$rewritten" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
-    # Type the text directly using wtype (more reliable on Wayland)
-    ydotool type --key-delay 0 -- "$rewritten"
-
-    # Show result notification for 4 seconds
-    notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "Voice Input (Rewritten)" "$rewritten"
+    # Type the text with error handling
+    if ! ydotool type --key-delay 0 -- "$rewritten" 2>/dev/null; then
+        echo -n "$rewritten" | wl-copy 2>/dev/null || true
+        notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "$notify_type (copied)" "$rewritten"
+    else
+        notify-send -t 4000 -h string:x-canonical-private-synchronous:ptt "$notify_type" "$rewritten"
+    fi
   '';
 
   # Legacy wsi script (silence detection mode)
@@ -555,6 +771,8 @@ in {
 
   # Required packages for PTT scripts
   home.packages = with pkgs; [
+    sox              # Provides 'rec' command for audio recording
+    wl-clipboard     # Provides 'wl-copy' for clipboard fallback
     llama-cpp
     jq
     curl
