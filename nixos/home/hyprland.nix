@@ -464,10 +464,9 @@ in {
         "$mainMod CTRL, E, exec, pypr expose"
         "$mainMod, Z, exec, pypr zoom"
 
-        # Speech-to-text: Super+T to start recording, Super+G to stop and transcribe
+        # Speech-to-text: Super+T toggles recording (press to start, press again to transcribe)
         # Super+S stops and sanitizes (removes stutters/filler words), Super+C stops and rewrites professionally
         "$mainMod, T, exec, /home/${username}/.local/bin/ptt-start"
-        "$mainMod, G, exec, /home/${username}/.local/bin/ptt-stop"
         "$mainMod, S, exec, /home/${username}/.local/bin/ptt-stop-sanitize"
         "$mainMod, C, exec, /home/${username}/.local/bin/ptt-complete"
 

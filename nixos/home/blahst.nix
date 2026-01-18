@@ -92,13 +92,18 @@ let
     blahst_depends() { return 0; }
   '';
 
-  # Push-to-talk: start recording
+  # Push-to-talk: start recording (toggle behavior)
   pttStartScript = ''
     #!/usr/bin/env zsh
     export PATH="$HOME/.local/bin:$PATH"
     source $HOME/.local/bin/blahst.cfg
 
-    # Clean up any previous recording
+    # Toggle: if already recording, stop and transcribe
+    if [[ -f /tmp/ptt-rec.pid ]] && kill -0 "$(cat /tmp/ptt-rec.pid)" 2>/dev/null; then
+        exec ptt-stop
+    fi
+
+    # Clean up any stale state
     pkill -f "rec.*$ramf" 2>/dev/null
     rm -f "$ramf" /tmp/ptt-rec.pid 2>/dev/null
 
@@ -107,7 +112,7 @@ let
     echo $! > /tmp/ptt-rec.pid
 
     # Persistent notification (0 = no timeout, stays until dismissed)
-    notify-send -t 0 -h string:x-canonical-private-synchronous:ptt "Recording..." "Press Super+G to stop and transcribe"
+    notify-send -t 0 -h string:x-canonical-private-synchronous:ptt "Recording..." "Press Super+T to stop and transcribe"
   '';
 
   # Push-to-talk: stop recording and transcribe
