@@ -114,8 +114,8 @@
 
   # Configure git extra settings
   programs.git.settings = {
-    # SSH credentials helper for submodules
-    credential.helper = "cache --timeout=3600";
+    # SSH credentials helper for submodules (24 hours = 86400 seconds)
+    credential.helper = "cache --timeout=86400";
 
     # For handling submodules better
     submodule = {

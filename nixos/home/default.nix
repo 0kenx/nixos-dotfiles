@@ -8,6 +8,7 @@
     ./dunst.nix
     ./waybar.nix
     ./git.nix
+    ./gpg.nix
     ./gtk.nix
     ./ssh.nix
     ./helix.nix
