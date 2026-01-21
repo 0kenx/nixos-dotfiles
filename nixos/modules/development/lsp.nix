@@ -10,6 +10,7 @@
     nodePackages_latest.yaml-language-server
     dockerfile-language-server
     nodePackages_latest.bash-language-server
+    shellcheck
     nodePackages_latest.graphql-language-service-cli
     vue-language-server
     lua-language-server
