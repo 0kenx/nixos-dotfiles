@@ -216,6 +216,11 @@
 
   # Configure Nemo
   dconf.settings = {
+    # Disable blueman connection/disconnection notifications
+    "org/blueman/plugins/connectionnotifier" = {
+      enabled = false;
+    };
+
     "org/nemo/preferences" = {
       show-hidden-files = true;
       show-location-entry = true;
