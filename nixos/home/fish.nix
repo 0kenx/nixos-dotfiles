@@ -529,7 +529,7 @@
 
       # Complex sloc function
       sloc = ''
-        set -l filter_exts "c|cpp|h|hpp|cmake|mk|bzl|py|ipynb|js|jsx|ts|css|htm|html|htmx|xhtml|go|java|hs|fut|sol|move|mo|rs|zig|sh|nix|tf|lua|yml|json|proto|gql|sql"
+        set -l filter_exts "c|cpp|h|hpp|cmake|mk|bzl|py|ipynb|js|jsx|ts|svelte|css|htm|html|htmx|xhtml|go|java|hs|fut|sol|move|mo|rs|zig|sh|nix|tf|lua|yml|json|proto|gql|sql"
         set -l add_exts ""
         set -l excl_exts ""
         set -l only_exts ""
@@ -552,7 +552,7 @@
           echo "  -s, --summary           Summary mode - only show totals by file type"
           echo "  -h, --help              Display this help message"
           echo ""
-          echo "Default extensions: c cpp h hpp cmake mk bzl py ipynb js jsx ts css htm html htmx xhtml go java hs fut sol move mo rs zig sh nix tf lua yml json proto gql sql"
+          echo "Default extensions: c cpp h hpp cmake mk bzl py ipynb js jsx ts svelte css htm html htmx xhtml go java hs fut sol move mo rs zig sh nix tf lua yml json proto gql sql"
           return 0
         end
 
