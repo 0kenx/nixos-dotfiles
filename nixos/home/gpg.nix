@@ -11,7 +11,7 @@
     enableSshSupport = false;
 
     # Use pinentry for password prompts
-    pinentryPackage = pkgs.pinentry-gnome3;
+    pinentry.package = pkgs.pinentry-gnome3;
   };
 
   # Install GPG
