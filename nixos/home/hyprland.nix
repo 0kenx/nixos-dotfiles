@@ -359,7 +359,7 @@ in {
         pseudotile = true;
         preserve_split = true;
         smart_split = true;
-        default_split_ratio = 1.2;
+        default_split_ratio = 1.1;
         split_bias = 0;
       };
 
