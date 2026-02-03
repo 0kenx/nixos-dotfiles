@@ -476,7 +476,7 @@ in {
         "$mainMod SHIFT, B, exec, uwsm app -- qutebrowser"
         "$mainMod, B, exec, uwsm app -- google-chrome-stable"
         "$mainMod, F, exec, uwsm app -- kitty yazi"
-        "$mainMod SHIFT, F, exec, uwsm app -- nemo"
+        "$mainMod SHIFT, E, exec, uwsm app -- nemo"
         #"$mainMod, S, exec, uwsm app -- spotify"
         #"$mainMod, Y, exec, uwsm app -- youtube-music"
         "$mainMod, D, exec, rofi -show drun"
@@ -831,6 +831,39 @@ EOF
         }
       ];
     };
+  };
+
+  # Override desktop entries for XWayland apps with broken mouse input at fractional scale
+  # force_zero_scaling + QT_SCALE_FACTOR causes mouse position mismatch in 3D viewports
+  xdg.desktopEntries."org.freecad.FreeCAD" = {
+    name = "FreeCAD";
+    genericName = "3D CAD Modeler";
+    comment = "Feature based Parametric Modeler";
+    exec = "env QT_SCALE_FACTOR=1 QT_AUTO_SCREEN_SCALE_FACTOR=0 FreeCAD %F";
+    icon = "org.freecad.FreeCAD";
+    terminal = false;
+    categories = ["Graphics" "Science" "Engineering"];
+    mimeType = ["application/x-extension-fcstd"];
+  };
+
+  xdg.desktopEntries.OrcaSlicer = {
+    name = "OrcaSlicer";
+    genericName = "3D Printing Slicer";
+    comment = "G-code generator for 3D printers";
+    exec = "env QT_SCALE_FACTOR=1 QT_AUTO_SCREEN_SCALE_FACTOR=0 orca-slicer %F";
+    icon = "OrcaSlicer";
+    terminal = false;
+    categories = ["Graphics" "Engineering"];
+  };
+
+  xdg.desktopEntries.BambuStudio = {
+    name = "Bambu Studio";
+    genericName = "3D Printing Slicer";
+    comment = "Slicer for Bambu Lab printers";
+    exec = "env QT_SCALE_FACTOR=1 QT_AUTO_SCREEN_SCALE_FACTOR=0 bambu-studio %F";
+    icon = "BambuStudio";
+    terminal = false;
+    categories = ["Graphics" "Engineering"];
   };
 
   # We're using exec-once to start hyprpaper and pyprland directly
