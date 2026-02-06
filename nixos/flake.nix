@@ -4,6 +4,7 @@
   inputs = {
       nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
       nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+      nixpkgs-main.url = "github:NixOS/nixpkgs/master";
       rust-overlay.url = "github:oxalica/rust-overlay";
       home-manager = {
         url = "github:nix-community/home-manager/release-25.11";
@@ -32,7 +33,7 @@
       # We assume that /etc/nixos/nixos-secrets exists
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, self, sops-nix, claude-desktop, aiterm, ... } @ inputs:
+  outputs = { nixpkgs, nixpkgs-unstable, nixpkgs-main, self, sops-nix, claude-desktop, aiterm, ... } @ inputs:
   let
     username = "dev";
     system = "x86_64-linux";
@@ -103,6 +104,11 @@
       config = commonNixpkgsConfig; # Apply the common config here too
     };
 
+    pkgsMain = import nixpkgs-main {
+      inherit system;
+      config = commonNixpkgsConfig;
+    };
+
     lib = pkgs.lib;
 
     # Function to generate a NixOS system for a specific host
@@ -141,6 +147,7 @@
         specialArgs = {
           host = hostname;
           pkgs-unstable = pkgsUnstable;
+          pkgs-main = pkgsMain;
           inherit self inputs username channel system;
           # Pass the pre-resolved configurations
           inherit resolvedHostDotfilesConfig hostDisplayConfig;

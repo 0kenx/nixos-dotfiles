@@ -1,11 +1,11 @@
-{ pkgs, pkgs-unstable, config, inputs, ... }:
+{ pkgs, pkgs-unstable, pkgs-main, config, inputs, ... }:
 
 {
   # AI-powered coding assistants and development tools
   # These tools are specifically designed for software development workflows
   environment.systemPackages = [
     pkgs.aider-chat             # AI pair programming tool with git integration
-    pkgs-unstable.claude-code   # Claude's official CLI for development
+    pkgs-main.claude-code-bin   # Claude's official CLI for development (from nixpkgs main)
     pkgs-unstable.antigravity   # Agentic development platform, evolving the IDE into the agent-first era
 
     # Claude Desktop temporarily disabled due to hash mismatch 0.12.29
