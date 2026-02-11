@@ -1,8 +1,7 @@
 { pkgs, pkgs-unstable, inputs, ... }:
 
 {
-  # Load kernel modules for container networking
-  boot.kernelModules = [ "iptable_nat" ];
+  # Container networking uses nf_tables (loaded automatically by nftables)
 
   # Enable Kasm
   # services.kasmweb = {

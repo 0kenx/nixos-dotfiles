@@ -22,7 +22,7 @@ in {
   # Provides REST API for model interaction and automatic model management
   services.ollama = {
     enable = true;
-    package = pkgs-unstable.ollama;
+    package = if hasNvidia then pkgs-unstable.ollama-cuda else pkgs-unstable.ollama;
 
     # Pre-load models for immediate availability
     # Models are downloaded on first service start
