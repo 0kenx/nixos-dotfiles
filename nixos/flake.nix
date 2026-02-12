@@ -85,6 +85,9 @@
             doCheck = false;
             doInstallCheck = false;
           });
+          whatthepatch = pyprev.whatthepatch.overrideAttrs (oldAttrs: {
+            doCheck = false;
+          });
         });
         # Disable Nix tests - crash with SIGABRT on kernel 6.17+
         nix = pkgs.nix.overrideAttrs (oldAttrs: {
