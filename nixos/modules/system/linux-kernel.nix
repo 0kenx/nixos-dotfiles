@@ -56,7 +56,9 @@
     "usbcore.autosuspend=-1"
     "video4linux"
     "acpi_rev_override=5"
-    "acpi_osi=Linux"                # Improve ACPI compatibility, fixes DPTF symbol errors
+    # acpi_osi=Linux removed: causes Lenovo BIOS to misreport I2C touchpad ACPI resources
+    # DPTF errors are handled by loading int3400/int3403 kernel modules instead
+    "i8042.nopnp=1"                 # Prevent PS/2 PnP from claiming I2C touchpad resources
     "intel_pstate=passive"          # Allow userspace CPU frequency control (fixes Core Ultra throttling)
 
     # Intel WiFi BE200 - Firmware stability workaround

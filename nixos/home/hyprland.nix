@@ -214,7 +214,8 @@ in {
         "hyprctl setcursor catppuccin-macchiato-sapphire-cursors 24"
         # Start hyprpaper with a small delay for monitors to initialize
         "sleep 1 && hyprpaper-setup && hyprpaper"
-        "waybar"
+        # Start waybar after monitor setup completes
+        "sleep 1.5 && waybar"
         "pypr"
         # Start automounter
         "udiskie --automount --notify --tray"
@@ -368,10 +369,15 @@ in {
         new_status = "master";
       };
 
-      # Gesture settings (Hyprland 0.51+ new syntax)
-      gesture = [
-        "3, horizontal, workspace"  # 3-finger horizontal swipe for workspace switching
-      ];
+      # Gesture settings
+      gestures = {
+        gesture = "3, horizontal, workspace";
+      };
+
+      # Ecosystem settings
+      ecosystem = {
+        no_update_news = true;
+      };
 
       # Misc settings
       misc = {
