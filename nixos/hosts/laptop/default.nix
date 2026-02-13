@@ -83,8 +83,7 @@
 
   # Additional laptop-specific packages
   environment.systemPackages = with pkgs; [
-    powertop
-    tlp
+    # powertop and tlp removed - auto-cpufreq handles CPU frequency management
     acpi
     light
     zoom-us

@@ -57,6 +57,7 @@
     "video4linux"
     "acpi_rev_override=5"
     "acpi_osi=Linux"                # Improve ACPI compatibility, fixes DPTF symbol errors
+    "intel_pstate=passive"          # Allow userspace CPU frequency control (fixes Core Ultra throttling)
 
     # Intel WiFi BE200 - Firmware stability workaround
     # The BE200 WiFi 7 card has known firmware crashes causing CPU soft lockups

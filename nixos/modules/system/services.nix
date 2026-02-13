@@ -23,8 +23,28 @@ in
   services.fwupd.enable = true;
 
   # Auto-cpufreq for automatic CPU frequency scaling (only on battery-powered devices)
-  # Using default settings - custom settings may conflict with hardware capabilities
-  services.auto-cpufreq.enable = isBattery;
+  # Custom settings to properly handle Intel Core Ultra hybrid architecture
+  services.auto-cpufreq = {
+    enable = isBattery;
+    settings = {
+      # When plugged in: prioritize performance
+      charger = {
+        governor = "performance";
+        scaling_min_freq = 400000;
+        scaling_max_freq = 4800000;
+        turbo = "auto";
+        energy_performance_preference = "performance";
+      };
+      # On battery: balanced approach to preserve battery life
+      battery = {
+        governor = "powersave";
+        scaling_min_freq = 400000;
+        scaling_max_freq = 3000000;
+        turbo = "auto";
+        energy_performance_preference = "balance_performance";
+      };
+    };
+  };
   # services.gnome.core-shell.enable = true;
   # services.udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
 

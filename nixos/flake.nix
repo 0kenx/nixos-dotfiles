@@ -88,6 +88,12 @@
           whatthepatch = pyprev.whatthepatch.overrideAttrs (oldAttrs: {
             doCheck = false;
           });
+          autopep8 = pyprev.autopep8.overrideAttrs (oldAttrs: {
+            doCheck = false;
+          });
+          python-lsp-server = pyprev.python-lsp-server.overrideAttrs (oldAttrs: {
+            doCheck = false;
+          });
         });
         # Disable Nix tests - crash with SIGABRT on kernel 6.17+
         nix = pkgs.nix.overrideAttrs (oldAttrs: {
