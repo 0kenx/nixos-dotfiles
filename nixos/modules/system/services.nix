@@ -2,6 +2,28 @@
 
 let
   isBattery = config.system.nixos-dotfiles.host.hardware.isBattery;
+
+  # Sets platform profile based on AC status and battery level:
+  #   AC plugged in  → performance
+  #   Battery ≥ 70%  → balanced
+  #   Battery < 70%  → low-power
+  platformProfileScript = pkgs.writeShellScript "set-platform-profile" ''
+    PROFILE_PATH="/sys/firmware/acpi/platform_profile"
+    [ -f "$PROFILE_PATH" ] || exit 0
+
+    AC_ONLINE=$(cat /sys/class/power_supply/AC*/online 2>/dev/null | head -1)
+
+    if [ "$AC_ONLINE" = "1" ]; then
+      echo "performance" > "$PROFILE_PATH"
+    else
+      BATTERY=$(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1)
+      if [ -n "$BATTERY" ] && [ "$BATTERY" -lt 70 ]; then
+        echo "low-power" > "$PROFILE_PATH"
+      else
+        echo "balanced" > "$PROFILE_PATH"
+      fi
+    fi
+  '';
 in
 {
   # Systemd services setup (auto-cpufreq only on battery-powered devices)
@@ -45,6 +67,31 @@ in
       };
     };
   };
+  # Platform profile: performance on AC, balanced on battery, low-power below 70%
+  systemd.services.platform-profile = lib.mkIf isBattery {
+    description = "Set CPU platform profile based on power state";
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${platformProfileScript}";
+    };
+  };
+
+  systemd.timers.platform-profile = lib.mkIf isBattery {
+    description = "Recheck CPU platform profile every minute";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "30s";
+      OnUnitActiveSec = "1min";
+      Unit = "platform-profile.service";
+    };
+  };
+
+  # Trigger immediately on AC plug/unplug
+  services.udev.extraRules = lib.mkIf isBattery ''
+    SUBSYSTEM=="power_supply", KERNEL=="AC*", RUN+="${pkgs.systemd}/bin/systemctl --no-block start platform-profile.service"
+  '';
+
   # services.gnome.core-shell.enable = true;
   # services.udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
 
