@@ -3,6 +3,8 @@
 {
   environment.systemPackages = with pkgs; [
     # LaTeX distribution
-    texlive.combined.scheme-medium
+    (texlive.combine {
+      inherit (texlive) scheme-medium enumitem titlesec;
+    })
   ];
 }
