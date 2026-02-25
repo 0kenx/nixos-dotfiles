@@ -77,6 +77,7 @@ in {
     [
       ./ai/coding.nix      # AI coding assistants (aider, claude-code, etc.)
       ./ai/chat.nix        # General AI chat clients (aichat, oterm, alpaca)
+      ./ai/browser.nix     # AI agent browser automation (agent-browser + Playwright)
       ./ai/multimedia.nix  # Image/video generation (ComfyUI with GPU auto-detection)
       ./ai/audio.nix       # Speech processing (BlahST, whisper.cpp, piper-tts)
     ]
